@@ -1,6 +1,5 @@
 # Cine-Progra-IV-TP-2026-Zunini-Matias
 1. Objetivo del sistema
-
 Desarrollar una aplicación web para la gestión integral de un establecimiento de cine. El sistema permitirá a los clientes consultar películas y funciones, seleccionar butacas, comprar entradas y productos del Candy Bar, recibir comprobantes con código QR y gestionar diferentes beneficios.
 
 Cliente anónimo. Puede:
