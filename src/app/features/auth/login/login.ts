@@ -1,9 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/auth';
 
 @Component({
-  imports: [],
   selector: 'app-login',
-  styleUrl: './login.scss',
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
+  styleUrl: './login.scss',
 })
-export class Login {}
+export class Login {
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  
+  email = '';
+  password = '';
+  error = '';
+  loading = false;
+
+  async login() {
+    this.error = '';
+    this.loading = true;
+
+    const { error } = await this.auth.login(this.email, this.password);
+
+    this.loading = false;
+
+    if (error) {
+      this.error = error.message;
+      return;
+    }
+
+    await this.router.navigate(['/home']);
+  }
+}

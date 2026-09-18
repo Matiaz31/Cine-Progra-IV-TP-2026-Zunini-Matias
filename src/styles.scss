@@ -1,1 +1,442 @@
-/* You can add global styles to this file, and also import other style files */
+/* =========================================================
+   CINE PROGRA IV — GLOBAL STYLES
+   Estética: Cyberpunk minimalista
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+/* =========================
+   VARIABLES
+   ========================= */
+
+:root {
+  /* Colores principales */
+  --color-bg: #0b0d12;
+  --color-bg-secondary: #11151d;
+  --color-surface: #171c26;
+  --color-surface-light: #1d2430;
+
+  /* Acentos */
+  --color-primary: #7667a8;
+  --color-primary-hover: #8979bd;
+  --color-secondary: #5b9da3;
+  --color-secondary-hover: #6db1b7;
+
+  /* Estados */
+  --color-success: #5f9b7b;
+  --color-warning: #b2965b;
+  --color-danger: #a8666f;
+
+  /* Texto */
+  --color-text: #e4e7ec;
+  --color-text-secondary: #a4aab5;
+  --color-text-muted: #737a87;
+
+  /* Bordes */
+  --color-border: #2a303b;
+  --color-border-light: #353c49;
+
+  /* Tipografía */
+  --font-display: 'Exo 2', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Espaciado */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Bordes */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* Sombras */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --shadow-glow-primary: 0 0 14px rgba(118, 103, 168, 0.18);
+  --shadow-glow-secondary: 0 0 14px rgba(91, 157, 163, 0.15);
+
+  /* Transiciones */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+}
+
+/* =========================
+   RESET
+   ========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+
+  background: var(--color-bg);
+  color: var(--color-text);
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+/* =========================
+   TIPOGRAFÍA
+   ========================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+h2 {
+  font-size: clamp(1.6rem, 4vw, 2.25rem);
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+p {
+  margin-top: 0;
+}
+
+/* =========================
+   LAYOUT
+   ========================= */
+
+.container {
+  width: min(1200px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: var(--space-2xl);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =========================
+   CARDS
+   ========================= */
+
+.card {
+  padding: var(--space-lg);
+
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal),
+    transform var(--transition-normal);
+}
+
+.card:hover {
+  border-color: var(--color-border-light);
+  box-shadow: var(--shadow-md);
+}
+
+/* =========================
+   BOTONES
+   ========================= */
+
+.btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-sm);
+
+  min-height: 42px;
+  padding: 0.65rem 1.2rem;
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.btn-secondary {
+  background: var(--color-secondary);
+  color: #ffffff;
+  border-color: var(--color-secondary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-secondary-hover);
+  box-shadow: var(--shadow-glow-secondary);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-border-light);
+}
+
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary-hover);
+}
+
+/* =========================
+   FORMULARIOS
+   ========================= */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.form-group label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.form-control {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+
+  outline: none;
+
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.form-control::placeholder {
+  color: var(--color-text-muted);
+}
+
+.form-control:hover {
+  border-color: var(--color-border-light);
+}
+
+.form-control:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+/* =========================
+   BADGES
+   ========================= */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0.3rem 0.65rem;
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-primary {
+  color: var(--color-primary-hover);
+  background: rgba(118, 103, 168, 0.12);
+  border-color: rgba(118, 103, 168, 0.3);
+}
+
+.badge-secondary {
+  color: var(--color-secondary-hover);
+  background: rgba(91, 157, 163, 0.12);
+  border-color: rgba(91, 157, 163, 0.3);
+}
+
+/* =========================
+   ALERTAS
+   ========================= */
+
+.alert {
+  padding: 0.8rem 1rem;
+
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+}
+
+.alert-success {
+  color: #a7d8bc;
+  background: rgba(95, 155, 123, 0.1);
+  border-color: rgba(95, 155, 123, 0.3);
+}
+
+.alert-warning {
+  color: #d9c58f;
+  background: rgba(178, 150, 91, 0.1);
+  border-color: rgba(178, 150, 91, 0.3);
+}
+
+.alert-danger {
+  color: #d8a0a7;
+  background: rgba(168, 102, 111, 0.1);
+  border-color: rgba(168, 102, 111, 0.3);
+}
+
+/* =========================
+   DIVISORES
+   ========================= */
+
+.divider {
+  width: 100%;
+  height: 1px;
+  margin-block: var(--space-lg);
+
+  background: var(--color-border);
+}
+
+/* =========================
+   SCROLLBAR
+   ========================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-light);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* =========================
+   SELECCIÓN DE TEXTO
+   ========================= */
+
+::selection {
+  background: rgba(118, 103, 168, 0.35);
+  color: #ffffff;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 768px) {
+  .container {
+    width: min(100% - 1.5rem, 1200px);
+  }
+
+  .section {
+    padding-block: var(--space-xl);
+  }
+
+  .card {
+    padding: var(--space-md);
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+
+  .container {
+    width: min(100% - 1rem, 1200px);
+  }
+}
