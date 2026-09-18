@@ -1,1 +1,32 @@
-<p>header works!</p>
+<header class="app-header">
+  <div class="header-container">
+
+    <a class="brand" routerLink="/home">
+      <span class="brand-mark">◆</span>
+      <span>Cine Progra IV</span>
+    </a>
+
+    <nav class="main-nav">
+      <a routerLink="/home" routerLinkActive="active">
+        Películas
+      </a>
+
+      <a routerLink="/home">
+        Próximamente
+      </a>
+
+      <a routerLink="/home">
+        Mis entradas
+      </a>
+
+      <a routerLink="/home">
+        Mi perfil
+      </a>
+
+      <button type="button" (click)="logout()">
+        Cerrar sesión
+      </button>
+    </nav>
+
+  </div>
+</header>

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
+import { Header } from '../../shared/header/header';
 
 @Component({
-  imports: [],
   selector: 'app-home',
-  styleUrl: './home.scss',
+  imports: [Header],
   templateUrl: './home.html',
+  styleUrl: './home.scss',
 })
 export class Home {}
