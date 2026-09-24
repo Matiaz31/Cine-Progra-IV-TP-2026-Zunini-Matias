@@ -1,0 +1,32 @@
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-lg);
+}
+
+.movie-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  background: var(--color-bg-secondary);
+}
+
+.movie-info {
+  padding: var(--space-lg);
+}
+
+.movie-info h3 {
+  margin-bottom: 0.75rem;
+}
+
+.movie-info p {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
