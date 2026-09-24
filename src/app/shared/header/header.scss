@@ -40,24 +40,15 @@
   gap: 1.4rem;
 }
 
-.main-nav a,
-.main-nav button {
+.main-nav a {
   padding: 0.35rem 0;
-
-  background: none;
-  border: none;
-
   color: var(--color-text-secondary);
   text-decoration: none;
-
   font-family: var(--font-display);
   font-size: 0.9rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-
-  transition:
-    color var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: color var(--transition-fast);
 }
 
 .main-nav a:hover,
@@ -81,4 +72,30 @@
     flex-wrap: wrap;
     gap: 0.8rem 1.2rem;
   }
+}
+
+.logout-button {
+  min-height: auto;
+  padding: 0.35rem 0.8rem;
+
+  background: var(--color-danger);
+  color: #ffffff;
+
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.logout-button:hover {
+  background: #bd747e;
+  border-color: #bd747e;
+  transform: translateY(-1px);
 }
