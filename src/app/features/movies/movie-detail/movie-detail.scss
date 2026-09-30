@@ -1,0 +1,40 @@
+.movie-detail {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-xl);
+  padding: var(--space-lg);
+}
+
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  background: var(--color-bg-secondary);
+}
+
+.movie-poster-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.movie-info h1 {
+  margin-bottom: 1rem;
+}
+
+.movie-info p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .movie-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .movie-poster {
+    max-width: 280px;
+  }
+}

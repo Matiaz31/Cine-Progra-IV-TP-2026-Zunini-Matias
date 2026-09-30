@@ -4,6 +4,7 @@ import { Register } from './features/auth/register/register';
 import { Home } from './features/home/home';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
+import { MovieDetail } from './features/movies/movie-detail/movie-detail';
 
 export const routes: Routes = [
   {
@@ -41,5 +42,10 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'login',
     pathMatch: 'full',
+  },
+  {
+    path: 'pelicula/:id',
+    component: MovieDetail,
+    canActivate: [authGuard],
   },
 ];

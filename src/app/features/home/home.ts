@@ -1,6 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { Header } from '../../shared/header/header';
-import { MovieService, Movie } from '../movies/movie';
+import { Movie } from '../movies/movie';
+import { MovieService } from '../movies/movie.service';
+import { Router } from '@angular/router';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -10,19 +13,21 @@ import { MovieService, Movie } from '../movies/movie';
 })
 export class Home {
   private movieService = inject(MovieService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   movies: Movie[] = [];
   loading = true;
   error = '';
 
   async ngOnInit() {
-    console.log('HOME: iniciando consulta');
-
     const movies = await this.movieService.getMovies();
-
-    console.log('HOME: películas recibidas', movies);
-
     this.movies = movies;
     this.loading = false;
-}
+    this.cdr.detectChanges();
+  }
+
+  verPelicula(id: string) {
+    this.router.navigate(['/pelicula', id]);
+  }
 }

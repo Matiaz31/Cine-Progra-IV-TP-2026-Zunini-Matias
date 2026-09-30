@@ -1,0 +1,62 @@
+<main class="container section">
+  @if (loading) {
+    <p>Cargando película...</p>
+  }
+  @if (!loading && error) {
+    <div class="card">
+      <p>{{ error }}</p>
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="volver()"
+      >
+        Volver
+      </button>
+    </div>
+  }
+  @if (!loading && movie) {
+    <article class="card movie-detail">
+      @if (movie.poster_url) {
+        <img
+          [src]="movie.poster_url"
+          [alt]="movie.title"
+          class="movie-poster"
+        />
+      } @else {
+        <div class="movie-poster movie-poster-placeholder">
+          <span>Sin póster</span>
+        </div>
+      }
+
+      <div class="movie-info">
+        <h1>{{ movie.title }}</h1>
+        @if (movie.synopsis) {
+          <p>{{ movie.synopsis }}</p>
+        }
+        <p>
+          <strong>Duración:</strong>
+          {{ movie.duration_minutes }} minutos
+        </p>
+        @if (movie.age_rating) {
+          <p>
+            <strong>Edad:</strong>
+            {{ movie.age_rating }}+
+          </p>
+        }
+        @if (movie.release_date) {
+          <p>
+            <strong>Estreno:</strong>
+            {{ movie.release_date }}
+          </p>
+        }
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="volver()"
+        >
+          Volver a películas
+        </button>
+      </div>
+    </article>
+  }
+</main>
