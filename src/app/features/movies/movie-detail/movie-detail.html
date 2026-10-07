@@ -74,6 +74,10 @@
 
       <h2>Funciones</h2>
 
+      <p class="screening-instruction">
+        Seleccioná una función para continuar con la elección de tus butacas.
+      </p>
+
       @if (screenings.length === 0) {
         <p>No hay funciones disponibles para esta película.</p>
       }
@@ -82,9 +86,23 @@
         <div class="movies-grid">
 
           @for (screening of screenings; track screening.id) {
-            <article class="card">
 
-              <h3>Función</h3>
+            <article
+              class="card screening-card"
+              role="button"
+              tabindex="0"
+              (click)="seleccionarFuncion(screening.id)"
+              (keydown.enter)="seleccionarFuncion(screening.id)"
+              (keydown.space)="seleccionarFuncion(screening.id)"
+            >
+
+              <div class="screening-header">
+                <h3>Función</h3>
+
+                <span class="screening-action">
+                  Elegir función →
+                </span>
+              </div>
 
               <p>
                 <strong>Fecha y hora:</strong>
@@ -106,7 +124,12 @@
                 ${{ screening.price }}
               </p>
 
+              <div class="screening-cta">
+                Seleccioná esta función para elegir tus butacas
+              </div>
+
             </article>
+
           }
 
         </div>

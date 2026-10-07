@@ -1,0 +1,166 @@
+<div class="purchase-page">
+
+  <div class="purchase-container">
+
+    <header class="purchase-header">
+      <h1>Resumen de compra</h1>
+      <p>Revisá los datos antes de confirmar tu compra.</p>
+    </header>
+
+    @if (loading) {
+
+      <div class="state-message">
+        <p>Cargando resumen...</p>
+      </div>
+
+    } @else if (error) {
+
+      <div class="state-message error-message">
+        <p>{{ error }}</p>
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="volver()"
+        >
+          Volver
+        </button>
+      </div>
+
+    } @else {
+
+      <section class="movie-card">
+
+        <div class="movie-info">
+
+          <span class="section-label">
+            PELÍCULA
+          </span>
+
+          <h2>{{ movieTitle }}</h2>
+
+          <div class="screening-info">
+
+            <div class="info-item">
+              <span>Función</span>
+              <strong>
+                {{ formatDate(startTime) }}
+              </strong>
+            </div>
+
+            <div class="info-item">
+              <span>Formato</span>
+              <strong>
+                {{ format }}
+              </strong>
+            </div>
+
+            <div class="info-item">
+              <span>Idioma</span>
+              <strong>
+                {{ language }}
+              </strong>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="seats-section">
+
+        <div class="section-heading">
+          <h2>Butacas seleccionadas</h2>
+
+          <span class="seat-count">
+            {{ selectedSeats.length }}
+            {{ selectedSeats.length === 1 ? 'entrada' : 'entradas' }}
+          </span>
+        </div>
+
+        <div class="seat-list">
+
+          @for (seat of selectedSeats; track seat.id) {
+
+            <div
+              class="seat-item"
+              [class.seat-item-vip]="seat.seat_type === 'vip'"
+              [class.seat-item-accessible]="seat.seat_type === 'accessible'"
+            >
+
+              <div class="seat-main">
+
+                <div class="seat-number">
+                  {{ seat.row_label }}{{ seat.seat_number }}
+                </div>
+
+                <div class="seat-details">
+
+                  <strong>
+                    {{ getSeatTypeLabel(seat) }}
+                  </strong>
+
+                  <span>
+                    Butaca seleccionada
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div class="seat-price">
+                ${{ getSeatPrice(seat) }}
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      </section>
+
+      <section class="purchase-total">
+
+        <div class="total-info">
+
+          <span>Total</span>
+
+          <strong>
+            ${{ getTotal() }}
+          </strong>
+
+        </div>
+
+        <p>
+          El precio incluye las butacas seleccionadas.
+        </p>
+
+      </section>
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="volver()"
+        >
+          Volver
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="confirmarCompra()"
+        >
+          Confirmar compra
+        </button>
+
+      </div>
+
+    }
+
+  </div>
+
+</div>

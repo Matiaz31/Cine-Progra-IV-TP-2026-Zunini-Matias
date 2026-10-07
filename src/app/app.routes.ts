@@ -6,6 +6,7 @@ import { MovieDetail } from './features/movies/movie-detail/movie-detail';
 import { SeatSelection } from './features/seats/seat-selection/seat-selection';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
+import { PurchaseSummary } from './features/purchase/purchase-summary/purchase-summary';
 
 export const routes: Routes = [
   {
@@ -28,6 +29,10 @@ export const routes: Routes = [
   {
     path: 'seleccion-butacas/:id',
     component: SeatSelection,
+  },
+  {
+    path: 'resumen-compra',
+    component: PurchaseSummary,
   },
   {
     path: 'admin',

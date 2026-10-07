@@ -1,1 +1,327 @@
-<p>seat-selection works!</p>
+<div class="seat-page">
+
+  <div class="seat-container">
+
+    <button
+      type="button"
+      class="btn btn-outline back-button"
+      (click)="volver()"
+    >
+      ← Volver
+    </button>
+
+    <div class="seat-header">
+      <h1>Seleccioná tus butacas</h1>
+
+      <p>
+        Elegí las butacas que querés para esta función.
+      </p>
+    </div>
+
+    @if (loading) {
+
+      <div class="seat-message">
+        <p>Cargando butacas...</p>
+      </div>
+
+    }
+
+    @if (error) {
+
+      <div class="alert alert-danger">
+        {{ error }}
+      </div>
+
+    }
+
+    @if (!loading && !error) {
+
+      <div class="cinema-layout">
+
+        <div class="entrance-label">
+          ENTRADA
+        </div>
+
+        <div class="screen">
+          <span>PANTALLA</span>
+        </div>
+
+        <div class="seat-map-wrapper">
+
+            <div class="seat-map">
+                @for (row of rows; track row) {
+
+                <div
+                    class="seat-row"
+                    [class.accessible-row]="isSpecialRow(row)"
+                    [class.vip-row]="isVipRow(row)"
+                >
+
+                    <span class="row-label">
+                    {{ row }}
+                    </span>
+
+                    <div class="seat-blocks">
+
+                    <div class="seat-block left-block">
+
+                        @for (
+                        seat of getBlockSeats(
+                            row,
+                            1,
+                            isSpecialRow(row) ? 2 : 4
+                        );
+                        track seat.id
+                        ) {
+
+                        <button
+                            type="button"
+                            class="seat"
+                            [class.seat-normal]="seat.seat_type === 'normal'"
+                            [class.seat-vip]="seat.seat_type === 'vip'"
+                            [class.seat-accessible]="seat.seat_type === 'accessible'"
+                            [class.selected]="isSelected(seat)"
+                            [class.occupied]="isOccupied(seat)"
+                            [disabled]="isOccupied(seat)"
+                            [title]="
+                            seat.row_label +
+                            seat.seat_number +
+                            ' · ' +
+                            getSeatTypeLabel(seat) +
+                            ' · $' +
+                            getSeatPrice(seat) +
+                            (isOccupied(seat)
+                                ? ' · Ocupada'
+                                : ' · Disponible')
+                            "
+                            (click)="toggleSeat(seat)"
+                            [attr.aria-label]="
+                            'Butaca ' +
+                            seat.row_label +
+                            seat.seat_number +
+                            ', ' +
+                            getSeatTypeLabel(seat)
+                            "
+                        >
+                            {{ seat.seat_number }}
+                        </button>
+
+                        }
+
+                    </div>
+
+                    <!-- BLOQUE CENTRAL -->
+
+                    <div class="seat-block center-block">
+
+                        @for (
+                        seat of getBlockSeats(
+                            row,
+                            isSpecialRow(row) ? 3 : 5,
+                            isSpecialRow(row) ? 12 : 24
+                        );
+                        track seat.id
+                        ) {
+
+                        <button
+                            type="button"
+                            class="seat"
+                            [class.seat-normal]="seat.seat_type === 'normal'"
+                            [class.seat-vip]="seat.seat_type === 'vip'"
+                            [class.seat-accessible]="seat.seat_type === 'accessible'"
+                            [class.selected]="isSelected(seat)"
+                            [class.occupied]="isOccupied(seat)"
+                            [disabled]="isOccupied(seat)"
+                            [title]="
+                            seat.row_label +
+                            seat.seat_number +
+                            ' · ' +
+                            getSeatTypeLabel(seat) +
+                            ' · $' +
+                            getSeatPrice(seat) +
+                            (isOccupied(seat)
+                                ? ' · Ocupada'
+                                : ' · Disponible')
+                            "
+                            (click)="toggleSeat(seat)"
+                            [attr.aria-label]="
+                            'Butaca ' +
+                            seat.row_label +
+                            seat.seat_number +
+                            ', ' +
+                            getSeatTypeLabel(seat)
+                            "
+                        >
+                            {{ seat.seat_number }}
+                        </button>
+
+                        }
+
+                    </div>
+
+                    <!-- BLOQUE DERECHO -->
+
+                    <div class="seat-block right-block">
+                        @for (
+                        seat of getBlockSeats(
+                            row,
+                            isSpecialRow(row) ? 13 : 25,
+                            isSpecialRow(row) ? 14 : 28
+                        );
+                        track seat.id
+                        ) {
+
+                        <button
+                            type="button"
+                            class="seat"
+                            [class.seat-normal]="seat.seat_type === 'normal'"
+                            [class.seat-vip]="seat.seat_type === 'vip'"
+                            [class.seat-accessible]="seat.seat_type === 'accessible'"
+                            [class.selected]="isSelected(seat)"
+                            [class.occupied]="isOccupied(seat)"
+                            [disabled]="isOccupied(seat)"
+                            [title]="
+                            seat.row_label +
+                            seat.seat_number +
+                            ' · ' +
+                            getSeatTypeLabel(seat) +
+                            ' · $' +
+                            getSeatPrice(seat) +
+                            (isOccupied(seat)
+                                ? ' · Ocupada'
+                                : ' · Disponible')
+                            "
+                            (click)="toggleSeat(seat)"
+                            [attr.aria-label]="
+                            'Butaca ' +
+                            seat.row_label +
+                            seat.seat_number +
+                            ', ' +
+                            getSeatTypeLabel(seat)
+                            "
+                        >
+                            {{ seat.seat_number }}
+                        </button>
+                    }
+                    </div>
+                    </div>
+                </div>
+            }
+            </div>
+        </div>
+
+        <div class="exit-label">
+          SALIDA
+        </div>
+
+      </div>
+
+      <div class="seat-legend">
+
+        <div class="legend-item">
+          <span class="legend-seat available"></span>
+          <span>Normal</span>
+        </div>
+
+        <div class="legend-item">
+          <span class="legend-seat vip"></span>
+          <span>VIP</span>
+        </div>
+
+        <div class="legend-item">
+          <span class="legend-seat accessible"></span>
+          <span>Accesible</span>
+        </div>
+
+        <div class="legend-item">
+          <span class="legend-seat selected"></span>
+          <span>Seleccionada</span>
+        </div>
+
+        <div class="legend-item">
+          <span class="legend-seat occupied"></span>
+          <span>Ocupada</span>
+        </div>
+
+      </div>
+
+      <div class="seat-summary">
+
+        <div>
+          <span class="summary-label">
+            Butacas seleccionadas
+          </span>
+
+          <strong>
+            {{ selectedSeats.length }}
+          </strong>
+        </div>
+
+        @if (getSelectedNormalCount() > 0) {
+
+          <div>
+            <span class="summary-label">
+              Normales
+            </span>
+
+            <strong>
+              {{ getSelectedNormalCount() }}
+            </strong>
+          </div>
+
+        }
+
+        @if (getSelectedAccessibleCount() > 0) {
+
+          <div>
+            <span class="summary-label">
+              Accesibles
+            </span>
+
+            <strong>
+              {{ getSelectedAccessibleCount() }}
+            </strong>
+          </div>
+
+        }
+
+        @if (getSelectedVipCount() > 0) {
+
+          <div>
+            <span class="summary-label">
+              VIP
+            </span>
+
+            <strong>
+              {{ getSelectedVipCount() }}
+            </strong>
+          </div>
+
+        }
+
+        <div>
+          <span class="summary-label">
+            Total
+          </span>
+
+          <strong>
+            ${{ getTotal() }}
+          </strong>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="selectedSeats.length === 0"
+          (click)="continuar()"
+        >
+          Continuar
+        </button>
+
+      </div>
+
+    }
+
+  </div>
+
+</div>

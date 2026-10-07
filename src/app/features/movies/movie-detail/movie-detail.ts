@@ -52,4 +52,8 @@ export class MovieDetail {
   volver() {
     this.router.navigate(['/home']);
   }
+
+  seleccionarFuncion(screeningId: string) {
+    this.router.navigate(['/seleccion-butacas', screeningId]);
+  }
 }
