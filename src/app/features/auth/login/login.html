@@ -1,11 +1,13 @@
 <div class="auth-page">
   <div class="auth-card card">
+
     <div class="auth-header">
       <h1>Ingresar</h1>
       <p>Ingresá a tu cuenta de Cine Progra IV</p>
     </div>
 
     <form (ngSubmit)="login()">
+
       <div class="form-group">
         <label for="email">Email</label>
 
@@ -47,6 +49,7 @@
       >
         {{ loading ? 'Ingresando...' : 'Ingresar' }}
       </button>
+
     </form>
 
     <div class="auth-divider">
@@ -54,30 +57,52 @@
     </div>
 
     <div class="oauth-buttons">
+
       <button
-        class="btn oauth-btn"
+        class="oauth-btn oauth-google"
         type="button"
         (click)="loginWithGoogle()"
         [disabled]="loading || oauthLoading"
       >
-        {{
-          oauthLoading === 'google'
-            ? 'Conectando...'
-            : 'Continuar con Google'
-        }}
+        <span class="oauth-icon google-icon">G</span>
+
+        <span class="oauth-text">
+          {{
+            oauthLoading === 'google'
+              ? 'Conectando...'
+              : 'Continuar con Google'
+          }}
+        </span>
       </button>
 
       <button
-        class="btn oauth-btn"
+        class="oauth-btn oauth-github"
         type="button"
         (click)="loginWithGitHub()"
         [disabled]="loading || oauthLoading"
       >
-        {{
-          oauthLoading === 'github'
-            ? 'Conectando...'
-            : 'Continuar con GitHub'
-        }}
+        <span class="oauth-icon github-icon">GH</span>
+
+        <span class="oauth-text">
+          {{
+            oauthLoading === 'github'
+              ? 'Conectando...'
+              : 'Continuar con GitHub'
+          }}
+        </span>
+      </button>
+
+    </div>
+
+    <div class="guest-access">
+      <span>¿Solo querés mirar la cartelera?</span>
+
+      <button
+        type="button"
+        class="guest-btn"
+        (click)="continueAsGuest()"
+      >
+        Continuar como invitado
       </button>
     </div>
 
@@ -87,5 +112,6 @@
         <a routerLink="/register">Registrate</a>
       </p>
     </div>
+
   </div>
 </div>

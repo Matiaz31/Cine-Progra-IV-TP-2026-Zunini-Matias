@@ -19,6 +19,10 @@ export class Login {
   loading = false;
   oauthLoading = '';
 
+  continueAsGuest() {
+    this.router.navigate(['/home']);
+  }
+
   async login() {
     this.error = '';
     this.loading = true;

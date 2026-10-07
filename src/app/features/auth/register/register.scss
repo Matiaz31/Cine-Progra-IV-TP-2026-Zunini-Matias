@@ -1,0 +1,86 @@
+.auth-page {
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: var(--space-xl);
+}
+
+.auth-card {
+  width: 520px;
+  max-width: 100%;
+}
+
+/* =========================
+   ENCABEZADO
+   ========================= */
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.auth-header h1 {
+  margin-bottom: var(--space-sm);
+}
+
+.auth-header p {
+  margin-bottom: 0;
+  color: var(--color-text-secondary);
+}
+
+/* =========================
+   FORMULARIO
+   ========================= */
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+/* =========================
+   BOTÓN
+   ========================= */
+
+.auth-submit {
+  width: 100%;
+  margin-top: var(--space-sm);
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+
+.auth-footer {
+  margin-top: var(--space-xl);
+
+  text-align: center;
+
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.auth-footer p {
+  margin-bottom: 0;
+}
+
+.login-link {
+  color: var(--color-secondary);
+
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: color var(--transition-fast);
+}
+
+.login-link:hover {
+  color: var(--color-secondary-hover);
+}
