@@ -6,7 +6,7 @@ Comisión: 141
 Materia: Programación IV
 Docente: Ricardo Gastón Plazas
 Fecha de entrega: 13/10/2026. 
-Repositorio: (https://github.com/Matiaz31Cine-Progra-IV-TP-2026-Zunini-Matias)
+Repositorio: (https://github.com/Matiaz31/Cine-Progra-IV-TP-2026-Zunini-Matias.git)
 Aplicación: 
 
 1. Objetivo del sistema

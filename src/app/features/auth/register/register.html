@@ -6,6 +6,7 @@
     </div>
 
     <form (ngSubmit)="register()">
+
       <div class="form-group">
         <label for="firstName">Nombre</label>
 
@@ -43,6 +44,56 @@
           type="date"
           name="birthDate"
           [(ngModel)]="birthDate"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="bloodType">Tipo de sangre</label>
+
+        <select
+          id="bloodType"
+          class="form-control"
+          name="bloodType"
+          [(ngModel)]="bloodType"
+          required
+        >
+          <option value="">Seleccioná tu tipo de sangre</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="eyeColor">Color de ojos</label>
+
+        <input
+          id="eyeColor"
+          class="form-control"
+          type="text"
+          name="eyeColor"
+          [(ngModel)]="eyeColor"
+          placeholder="Ej: marrón, azul, verde"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="vacationDays">Días de vacaciones por año</label>
+
+        <input
+          id="vacationDays"
+          class="form-control"
+          type="number"
+          name="vacationDays"
+          [(ngModel)]="vacationDays"
+          min="0"
           required
         />
       </div>

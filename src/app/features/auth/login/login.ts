@@ -12,11 +12,12 @@ import { AuthService } from '../../../core/auth';
 export class Login {
   private auth = inject(AuthService);
   private router = inject(Router);
-  
+
   email = '';
   password = '';
   error = '';
   loading = false;
+  oauthLoading = '';
 
   async login() {
     this.error = '';
@@ -32,5 +33,29 @@ export class Login {
     }
 
     await this.router.navigate(['/home']);
+  }
+
+  async loginWithGoogle() {
+    this.error = '';
+    this.oauthLoading = 'google';
+
+    const { error } = await this.auth.loginWithGoogle();
+
+    if (error) {
+      this.error = error.message;
+      this.oauthLoading = '';
+    }
+  }
+
+  async loginWithGitHub() {
+    this.error = '';
+    this.oauthLoading = 'github';
+
+    const { error } = await this.auth.loginWithGitHub();
+
+    if (error) {
+      this.error = error.message;
+      this.oauthLoading = '';
+    }
   }
 }

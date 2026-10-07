@@ -2,15 +2,17 @@ import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
 import { Home } from './features/home/home';
+import { MovieDetail } from './features/movies/movie-detail/movie-detail';
+import { SeatSelection } from './features/seats/seat-selection/seat-selection';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
-import { MovieDetail } from './features/movies/movie-detail/movie-detail';
 
 export const routes: Routes = [
   {
     path: 'login',
     component: Login,
   },
+
   {
     path: 'register',
     component: Register,
@@ -18,7 +20,14 @@ export const routes: Routes = [
   {
     path: 'home',
     component: Home,
-    canActivate: [authGuard],
+  },
+  {
+    path: 'pelicula/:id',
+    component: MovieDetail,
+  },
+  {
+    path: 'seleccion-butacas/:id',
+    component: SeatSelection,
   },
   {
     path: 'admin',
@@ -40,12 +49,11 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'home',
     pathMatch: 'full',
   },
   {
-    path: 'pelicula/:id',
-    component: MovieDetail,
-    canActivate: [authGuard],
+    path: '**',
+    redirectTo: 'home',
   },
 ];

@@ -18,6 +18,10 @@ export class Register {
   lastName = '';
   birthDate = '';
 
+  bloodType = '';
+  eyeColor = '';
+  vacationDays = 0;
+
   error = '';
   message = '';
   loading = false;
@@ -33,6 +37,9 @@ export class Register {
       this.firstName,
       this.lastName,
       this.birthDate,
+      this.bloodType,
+      this.eyeColor,
+      this.vacationDays,
     );
 
     this.loading = false;

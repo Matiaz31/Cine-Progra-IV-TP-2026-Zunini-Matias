@@ -43,11 +43,43 @@
       <button
         class="btn btn-primary auth-submit"
         type="submit"
-        [disabled]="loading"
+        [disabled]="loading || oauthLoading"
       >
         {{ loading ? 'Ingresando...' : 'Ingresar' }}
       </button>
     </form>
+
+    <div class="auth-divider">
+      <span>o continuar con</span>
+    </div>
+
+    <div class="oauth-buttons">
+      <button
+        class="btn oauth-btn"
+        type="button"
+        (click)="loginWithGoogle()"
+        [disabled]="loading || oauthLoading"
+      >
+        {{
+          oauthLoading === 'google'
+            ? 'Conectando...'
+            : 'Continuar con Google'
+        }}
+      </button>
+
+      <button
+        class="btn oauth-btn"
+        type="button"
+        (click)="loginWithGitHub()"
+        [disabled]="loading || oauthLoading"
+      >
+        {{
+          oauthLoading === 'github'
+            ? 'Conectando...'
+            : 'Continuar con GitHub'
+        }}
+      </button>
+    </div>
 
     <div class="auth-footer">
       <p>

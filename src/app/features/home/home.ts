@@ -7,7 +7,6 @@ import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-home',
-  imports: [Header],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
