@@ -277,9 +277,24 @@ export class SeatSelection implements OnInit {
     const modifier =
       Number(seat.price_modifier ?? 0);
 
-    return Math.round(
-      this.screeningPrice * (1 + modifier)
-    );
+    const price =
+      Math.round(
+        this.screeningPrice * (1 + modifier)
+      );
+
+    return price;
+  }
+
+  getSeatPriceLabel(seatType: string): string {
+    let price = this.screeningPrice;
+
+    if (seatType === 'vip') {
+      price = Math.round(
+        this.screeningPrice * 1.20
+      );
+    }
+
+    return price.toLocaleString('es-AR');
   }
 
   getTotal(): number {

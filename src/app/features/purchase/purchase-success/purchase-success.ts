@@ -1,22 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
 
-interface PurchaseData {
-  orderId: string;
-  ticketId: string;
-  qrCode: string;
-  movieTitle: string;
-  screeningDate: string;
-  screeningTime: string;
-  seats: {
-    id: string;
-    row_label: string;
-    seat_number: number;
-    seat_type: string;
-    price: number;
-  }[];
-  total: number;
-}
+import {
+  ActivatedRoute,
+  Router,
+} from '@angular/router';
+
+import {
+  PurchaseData,
+  PurchaseTicketService,
+} from '../../../services/purchase-ticket.service';
 
 @Component({
   selector: 'app-purchase-success',
@@ -25,39 +22,119 @@ interface PurchaseData {
   styleUrl: './purchase-success.scss',
 })
 export class PurchaseSuccess implements OnInit {
+  private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private purchaseTicketService = inject(
+    PurchaseTicketService
+  );
+
   purchase: PurchaseData | null = null;
 
-  constructor(private router: Router) {}
+  loading = true;
+  error = '';
 
-  ngOnInit() {
-    const navigation = this.router.getCurrentNavigation();
+  async ngOnInit() {
+
+    const ticketId =
+      this.route.snapshot.queryParamMap.get('ticket');
+
+    console.log(
+      'TICKET DE LA URL:',
+      ticketId
+    );
+
+    if (ticketId) {
+      await this.loadTicket(ticketId);
+      return;
+    }
+
+    const navigation =
+      this.router.getCurrentNavigation();
 
     this.purchase =
       navigation?.extras.state?.['purchase'] ?? null;
 
-    // Si la página se recarga, Angular pierde el state.
-    // Recuperamos los datos desde sessionStorage.
     if (!this.purchase) {
+
       const savedPurchase =
-        sessionStorage.getItem('purchase-success');
+        sessionStorage.getItem(
+          'purchase-success'
+        );
 
       if (savedPurchase) {
-        this.purchase = JSON.parse(savedPurchase);
+        this.purchase =
+          JSON.parse(savedPurchase);
       }
+    }
+
+    this.loading = false;
+
+    this.cdr.detectChanges();
+  }
+
+  async loadTicket(ticketId: string) {
+    this.loading = true;
+    this.error = '';
+
+    try {
+      console.log('CARGANDO TICKET:', ticketId);
+
+      this.purchase =
+        await this.purchaseTicketService.getTicket(ticketId);
+
+      console.log('TICKET CARGADO:', this.purchase);
+
+    } catch (error: any) {
+
+      console.error(
+        'ERROR CARGANDO ENTRADA:',
+        error
+      );
+
+      this.error =
+        error?.message ??
+        'No se pudo cargar la entrada.';
+
+    } finally {
+
+      this.loading = false;
+
+      console.log(
+        'LOADING FINAL:',
+        this.loading
+      );
+
+      this.cdr.detectChanges();
     }
   }
 
   volverAlInicio() {
-    sessionStorage.removeItem('purchase-success');
+
+    sessionStorage.removeItem(
+      'purchase-success'
+    );
+
     this.router.navigate(['/home']);
   }
 
-  getSeatLabel(seat: PurchaseData['seats'][number]) {
+  volverAEntradas() {
+
+    this.router.navigate([
+      '/mis-entradas',
+    ]);
+  }
+
+  getSeatLabel(
+    seat: PurchaseData['seats'][number]
+  ) {
     return `${seat.row_label}${seat.seat_number}`;
   }
 
   getSeatTypeLabel(type: string) {
+
     switch (type) {
+
       case 'normal':
         return 'Normal';
 
@@ -73,20 +150,30 @@ export class PurchaseSuccess implements OnInit {
   }
 
   formatDate(date: string) {
-    if (!date) return '';
 
-    return new Date(date).toLocaleDateString('es-AR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
+    if (!date) {
+      return '';
+    }
+
+    return new Date(date).toLocaleDateString(
+      'es-AR',
+      {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }
+    );
   }
 
   formatPrice(price: number) {
-    return price.toLocaleString('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      maximumFractionDigits: 0,
-    });
+
+    return price.toLocaleString(
+      'es-AR',
+      {
+        style: 'currency',
+        currency: 'ARS',
+        maximumFractionDigits: 0,
+      }
+    );
   }
 }

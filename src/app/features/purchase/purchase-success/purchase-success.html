@@ -2,57 +2,121 @@
 
   <div class="success-card">
 
-    <div class="success-icon">
-      ✓
-    </div>
+    @if (loading) {
 
-    <h1>¡Compra realizada!</h1>
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
 
-    <p class="success-description">
-      Tu compra fue registrada correctamente.
-    </p>
+        <p>
+          Cargando entrada...
+        </p>
+      </div>
 
-    @if (purchase) {
+    } @else if (error) {
+
+      <div class="no-purchase">
+
+        <div class="success-icon error-icon">
+          !
+        </div>
+
+        <h1>No se pudo cargar la entrada</h1>
+
+        <p class="success-description">
+          {{ error }}
+        </p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="volverAEntradas()"
+        >
+          Volver a mis entradas
+        </button>
+
+      </div>
+
+    } @else if (purchase) {
+
+      <div class="success-icon">
+        ✓
+      </div>
+
+      <h1>¡Compra realizada!</h1>
+
+      <p class="success-description">
+        Tu compra fue registrada correctamente.
+      </p>
 
       <div class="purchase-content">
 
         <section class="movie-section">
-          <h2>{{ purchase.movieTitle }}</h2>
+
+          <h2>
+            {{ purchase.movieTitle }}
+          </h2>
 
           <div class="screening-info">
 
             <div class="info-item">
-              <span class="label">Fecha</span>
+
+              <span class="label">
+                Fecha
+              </span>
+
               <span class="value">
                 {{ formatDate(purchase.screeningDate) }}
               </span>
+
             </div>
 
             <div class="info-item">
-              <span class="label">Horario</span>
+
+              <span class="label">
+                Horario
+              </span>
+
               <span class="value">
                 {{ purchase.screeningTime }}
               </span>
+
             </div>
 
           </div>
+
         </section>
 
 
         <section class="ticket-section">
 
-          <h2>Tu entrada</h2>
+          <h2>
+            Tu entrada
+          </h2>
 
           <div class="ticket-data">
 
             <div class="data-row">
-              <span>N.º de orden</span>
-              <strong>{{ purchase.orderId }}</strong>
+
+              <span>
+                N.º de orden
+              </span>
+
+              <strong>
+                {{ purchase.orderId }}
+              </strong>
+
             </div>
 
             <div class="data-row">
-              <span>N.º de ticket</span>
-              <strong>{{ purchase.ticketId }}</strong>
+
+              <span>
+                N.º de ticket
+              </span>
+
+              <strong>
+                {{ purchase.ticketId }}
+              </strong>
+
             </div>
 
           </div>
@@ -60,11 +124,16 @@
 
           <div class="seats-section">
 
-            <h3>Butacas</h3>
+            <h3>
+              Butacas
+            </h3>
 
             <div class="seat-list">
 
-              @for (seat of purchase.seats; track seat.id) {
+              @for (
+                seat of purchase.seats;
+                track seat.id
+              ) {
 
                 <div class="seat-item">
 
@@ -91,7 +160,9 @@
 
           <div class="total">
 
-            <span>Total</span>
+            <span>
+              Total
+            </span>
 
             <strong>
               {{ formatPrice(purchase.total) }}
@@ -104,12 +175,16 @@
 
         <section class="qr-section">
 
-          <h2>Presentá este código al ingresar</h2>
+          <h2>
+            Presentá este código al ingresar
+          </h2>
 
           <div class="qr-container">
 
             <div class="qr-placeholder">
-              <span>QR</span>
+              <span>
+                QR
+              </span>
             </div>
 
           </div>
@@ -120,15 +195,15 @@
 
         </section>
 
-
-        <button
-          type="button"
-          class="primary-button"
-          (click)="volverAlInicio()"
-        >
-          Volver al inicio
-        </button>
-
+        <div class="actions">
+          <button
+            type="button"
+            class="primary-button"
+            (click)="volverAlInicio()"
+          >
+            Volver al inicio
+          </button>
+        </div>
       </div>
 
     } @else {

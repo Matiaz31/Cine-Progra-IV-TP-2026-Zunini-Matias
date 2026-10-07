@@ -73,7 +73,7 @@
 
         @for (entry of entries; track entry.ticket_id) {
 
-          <article class="ticket-card">
+          <article class="ticket-card" (click)="verEntrada(entry.ticket_id)" tabindex="0" (keydown.enter)="verEntrada(entry.ticket_id)" >
 
             <div class="ticket-main">
 

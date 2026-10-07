@@ -220,17 +220,23 @@
 
         <div class="legend-item">
           <span class="legend-seat available"></span>
-          <span>Normal</span>
+          <span>
+            Normal · ${{ getSeatPriceLabel('normal') }}
+          </span>
         </div>
 
         <div class="legend-item">
           <span class="legend-seat vip"></span>
-          <span>VIP</span>
+          <span>
+            VIP · ${{ getSeatPriceLabel('vip') }}
+          </span>
         </div>
 
         <div class="legend-item">
           <span class="legend-seat accessible"></span>
-          <span>Accesible</span>
+          <span>
+            Accesible · ${{ getSeatPriceLabel('accessible') }}
+          </span>
         </div>
 
         <div class="legend-item">

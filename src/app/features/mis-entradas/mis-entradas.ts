@@ -7,30 +7,6 @@ import {
 import { Router } from '@angular/router';
 import { supabase } from '../../core/supabase';
 
-interface Entry {
-  order_id: string;
-  order_total: number;
-  order_status: string;
-  order_created_at: string;
-
-  ticket_id: string;
-  screening_id: string;
-  qr_code: string;
-  ticket_status: string;
-
-  row_label: string;
-  seat_number: number;
-  seat_type: string;
-  seat_price: number;
-
-  start_time: string;
-  format: string;
-  language: string;
-
-  movie_id: string;
-  movie_title: string;
-}
-
 interface TicketGroup {
   ticket_id: string;
   order_id: string;
@@ -286,6 +262,17 @@ export class MisEntradas implements OnInit {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  verEntrada(ticketId: string) {
+    this.router.navigate(
+      ['/compra-exitosa'],
+      {
+        queryParams: {
+          ticket: ticketId,
+        },
+      }
+    );
   }
 
   formatPrice(price: number) {
