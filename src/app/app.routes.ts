@@ -8,6 +8,7 @@ import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 import { PurchaseSummary } from './features/purchase/purchase-summary/purchase-summary';
 import { PurchaseSuccess } from './features/purchase/purchase-success/purchase-success';
+import { MisEntradas } from './features/mis-entradas/mis-entradas';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,11 @@ export const routes: Routes = [
       authGuard,
       roleGuard(['employee']),
     ],
+  },
+  { 
+    path: 'mis-entradas', 
+    component: MisEntradas, 
+    canActivate: [authGuard], 
   },
   {
     path: '',

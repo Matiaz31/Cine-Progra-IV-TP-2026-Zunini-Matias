@@ -1,0 +1,210 @@
+<div class="mis-entradas-page">
+
+  <main class="mis-entradas-container">
+
+    <div class="page-header">
+      <div>
+        <span class="page-kicker">MI CUENTA</span>
+        <h1>Mis entradas</h1>
+        <p>
+          Consultá tus entradas y los datos de tus funciones.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="volverAlInicio()"
+      >
+        ← Volver
+      </button>
+    </div>
+
+    @if (loading) {
+      <section class="state-card">
+        <div class="loading-spinner"></div>
+        <p>Cargando tus entradas...</p>
+      </section>
+    }
+
+    @if (error) {
+      <section class="state-card error-card">
+        <span class="state-icon">!</span>
+        <h2>No se pudieron cargar tus entradas</h2>
+        <p>{{ error }}</p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="loadEntries()"
+        >
+          Reintentar
+        </button>
+      </section>
+    }
+
+    @if (!loading && !error && entries.length === 0) {
+      <section class="state-card empty-card">
+        <span class="state-icon">🎟</span>
+        <h2>Todavía no tenés entradas</h2>
+        <p>
+          Cuando realices una compra, tus entradas aparecerán
+          en esta sección.
+        </p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="volverAlInicio()"
+        >
+          Ver películas
+        </button>
+      </section>
+    }
+
+    @if (!loading && !error && entries.length > 0) {
+
+      <div class="entries-count">
+        {{ entries.length }}
+        {{ entries.length === 1 ? 'entrada' : 'entradas' }}
+      </div>
+
+      <section class="entries-list">
+
+        @for (entry of entries; track entry.ticket_id) {
+
+          <article class="ticket-card">
+
+            <div class="ticket-main">
+
+              <div class="ticket-header">
+
+                <div>
+                  <span class="ticket-label">ENTRADA</span>
+
+                  <h2>
+                    {{ entry.movie_title }}
+                  </h2>
+                </div>
+
+                <span
+                  class="ticket-status"
+                  [class.valid]="entry.ticket_status === 'valid'"
+                  [class.used]="entry.ticket_status === 'used'"
+                  [class.cancelled]="entry.ticket_status === 'cancelled'"
+                >
+                  {{ getTicketStatusLabel(entry.ticket_status) }}
+                </span>
+
+              </div>
+
+              <div class="screening-info">
+
+                <div class="info-item">
+                  <span class="info-label">Fecha</span>
+                  <strong>
+                    {{ formatDate(entry.start_time) }}
+                  </strong>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Hora</span>
+                  <strong>
+                    {{ formatTime(entry.start_time) }}
+                  </strong>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Formato</span>
+                  <strong>
+                    {{ entry.format }}
+                  </strong>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Idioma</span>
+                  <strong>
+                    {{ entry.language }}
+                  </strong>
+                </div>
+
+              </div>
+
+              <div class="seats-section">
+
+                <span class="info-label">
+                  Butacas
+                </span>
+
+                <div class="seat-list">
+
+                  @for (
+                    seat of entry.seats;
+                    track seat.row_label + seat.seat_number
+                  ) {
+
+                    <div class="seat-item">
+
+                      <span class="seat-number">
+                        {{ getSeatLabel(seat) }}
+                      </span>
+
+                      <span
+                        class="seat-type"
+                        [class.vip]="seat.seat_type === 'vip'"
+                        [class.accessible]="seat.seat_type === 'accessible'"
+                      >
+                        {{ getSeatTypeLabel(seat.seat_type) }}
+                      </span>
+
+                      <span class="seat-price">
+                        {{ formatPrice(seat.price) }}
+                      </span>
+
+                    </div>
+
+                  }
+
+                </div>
+
+              </div>
+
+              <div class="ticket-footer">
+
+                <div>
+                  <span class="info-label">
+                    Código QR
+                  </span>
+
+                  <span class="qr-code">
+                    {{ entry.qr_code }}
+                  </span>
+                </div>
+
+                <div class="total">
+
+                  <span class="info-label">
+                    Total
+                  </span>
+
+                  <strong>
+                    {{ formatPrice(entry.order_total) }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        }
+
+      </section>
+
+    }
+
+  </main>
+
+</div>
