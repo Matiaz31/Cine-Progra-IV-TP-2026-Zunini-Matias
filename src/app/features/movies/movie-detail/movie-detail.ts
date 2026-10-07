@@ -2,6 +2,8 @@ import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MovieService } from '../movie.service';
 import { Movie } from '../movie';
+import { ScreeningService } from '../screening.service';
+import { Screening } from '../screening';
 
 @Component({
   selector: 'app-movie-detail',
@@ -13,9 +15,12 @@ export class MovieDetail {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private movieService = inject(MovieService);
+  private screeningService = inject(ScreeningService);
   private cdr = inject(ChangeDetectorRef);
 
   movie: Movie | null = null;
+  screenings: Screening[] = [];
+
   loading = true;
   error = '';
 
@@ -30,11 +35,14 @@ export class MovieDetail {
     }
 
     const movie = await this.movieService.getMovieById(movieId);
+    const screenings =
+      await this.screeningService.getScreeningsByMovieId(movieId);
 
     if (!movie) {
       this.error = 'No se encontró la película.';
     } else {
       this.movie = movie;
+      this.screenings = screenings;
     }
 
     this.loading = false;

@@ -1,10 +1,13 @@
 <main class="container section">
+
   @if (loading) {
     <p>Cargando película...</p>
   }
+
   @if (!loading && error) {
     <div class="card">
       <p>{{ error }}</p>
+
       <button
         type="button"
         class="btn btn-outline"
@@ -14,8 +17,10 @@
       </button>
     </div>
   }
+
   @if (!loading && movie) {
     <article class="card movie-detail">
+
       @if (movie.poster_url) {
         <img
           [src]="movie.poster_url"
@@ -30,25 +35,30 @@
 
       <div class="movie-info">
         <h1>{{ movie.title }}</h1>
+
         @if (movie.synopsis) {
           <p>{{ movie.synopsis }}</p>
         }
+
         <p>
           <strong>Duración:</strong>
           {{ movie.duration_minutes }} minutos
         </p>
+
         @if (movie.age_rating) {
           <p>
             <strong>Edad:</strong>
             {{ movie.age_rating }}+
           </p>
         }
+
         @if (movie.release_date) {
           <p>
             <strong>Estreno:</strong>
             {{ movie.release_date }}
           </p>
         }
+
         <button
           type="button"
           class="btn btn-outline"
@@ -57,6 +67,52 @@
           Volver a películas
         </button>
       </div>
+
     </article>
+
+    <section class="section">
+
+      <h2>Funciones</h2>
+
+      @if (screenings.length === 0) {
+        <p>No hay funciones disponibles para esta película.</p>
+      }
+
+      @if (screenings.length > 0) {
+        <div class="movies-grid">
+
+          @for (screening of screenings; track screening.id) {
+            <article class="card">
+
+              <h3>Función</h3>
+
+              <p>
+                <strong>Fecha y hora:</strong>
+                {{ screening.start_time }}
+              </p>
+
+              <p>
+                <strong>Formato:</strong>
+                {{ screening.format }}
+              </p>
+
+              <p>
+                <strong>Idioma:</strong>
+                {{ screening.language }}
+              </p>
+
+              <p>
+                <strong>Precio:</strong>
+                ${{ screening.price }}
+              </p>
+
+            </article>
+          }
+
+        </div>
+      }
+
+    </section>
   }
+
 </main>
