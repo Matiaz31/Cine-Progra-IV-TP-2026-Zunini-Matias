@@ -1,0 +1,322 @@
+.success-page {
+  min-height: 100vh;
+  padding: var(--space-2xl) var(--space-lg);
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+.success-card {
+  width: 100%;
+  max-width: 760px;
+
+  padding: var(--space-2xl);
+
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-md);
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+
+  margin: 0 auto var(--space-md);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: rgba(95, 155, 123, 0.15);
+  border: 2px solid var(--color-success);
+
+  color: var(--color-success);
+
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0;
+
+  text-align: center;
+
+  font-family: var(--font-display);
+  font-size: 2rem;
+}
+
+.success-description {
+  margin: var(--space-sm) 0 var(--space-xl);
+
+  text-align: center;
+
+  color: var(--color-text-secondary);
+}
+
+.purchase-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+section {
+  padding: var(--space-lg);
+
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+h2 {
+  margin: 0 0 var(--space-md);
+
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+h3 {
+  margin: 0 0 var(--space-md);
+
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+
+/* FUNCIÓN */
+
+.screening-info {
+  display: flex;
+  gap: var(--space-xl);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.label {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.value {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+
+/* DATOS DEL TICKET */
+
+.ticket-data {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+
+  margin-bottom: var(--space-lg);
+}
+
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+
+  padding-bottom: var(--space-sm);
+
+  border-bottom: 1px solid var(--color-border);
+
+  color: var(--color-text-secondary);
+
+  strong {
+    color: var(--color-text);
+
+    font-size: 0.85rem;
+    word-break: break-all;
+    text-align: right;
+  }
+}
+
+
+/* BUTACAS */
+
+.seat-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.seat-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: center;
+  gap: var(--space-md);
+
+  padding: 0.75rem 1rem;
+
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.seat-name {
+  font-weight: 700;
+}
+
+.seat-type {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.seat-price {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+
+/* TOTAL */
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+
+  border-top: 1px solid var(--color-border);
+
+  span {
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+  }
+
+  strong {
+    color: var(--color-success);
+    font-size: 1.5rem;
+    font-family: var(--font-display);
+  }
+}
+
+
+/* QR */
+
+.qr-section {
+  text-align: center;
+}
+
+.qr-container {
+  display: flex;
+  justify-content: center;
+
+  margin: var(--space-lg) 0 var(--space-md);
+}
+
+.qr-placeholder {
+  width: 160px;
+  height: 160px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: white;
+  border-radius: var(--radius-md);
+
+  color: #111;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.qr-code {
+  margin: 0;
+
+  color: var(--color-text-secondary);
+
+  font-family: monospace;
+  font-size: 0.85rem;
+
+  word-break: break-all;
+}
+
+
+/* BOTÓN */
+
+.primary-button {
+  width: 100%;
+
+  padding: 0.85rem 1.5rem;
+
+  border: none;
+  border-radius: var(--radius-md);
+
+  background: var(--color-primary);
+  color: var(--color-text);
+
+  font-family: var(--font-body);
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background var(--transition-fast),
+              transform var(--transition-fast);
+
+  &:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-1px);
+  }
+}
+
+
+/* SIN COMPRA */
+
+.no-purchase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+
+  text-align: center;
+
+  color: var(--color-text-secondary);
+}
+
+
+@media (max-width: 600px) {
+
+  .success-page {
+    padding: var(--space-lg) var(--space-sm);
+  }
+
+  .success-card {
+    padding: var(--space-lg);
+  }
+
+  .screening-info {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .seat-item {
+    grid-template-columns: 1fr auto;
+  }
+
+  .seat-type {
+    grid-column: 1;
+  }
+
+  .seat-price {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
+}

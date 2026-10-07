@@ -7,6 +7,7 @@ import { SeatSelection } from './features/seats/seat-selection/seat-selection';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 import { PurchaseSummary } from './features/purchase/purchase-summary/purchase-summary';
+import { PurchaseSuccess } from './features/purchase/purchase-success/purchase-success';
 
 export const routes: Routes = [
   {
@@ -33,6 +34,10 @@ export const routes: Routes = [
   {
     path: 'resumen-compra',
     component: PurchaseSummary,
+  },
+  { 
+    path: 'compra-exitosa', 
+    component: PurchaseSuccess,
   },
   {
     path: 'admin',

@@ -1,0 +1,156 @@
+<div class="success-page">
+
+  <div class="success-card">
+
+    <div class="success-icon">
+      ✓
+    </div>
+
+    <h1>¡Compra realizada!</h1>
+
+    <p class="success-description">
+      Tu compra fue registrada correctamente.
+    </p>
+
+    @if (purchase) {
+
+      <div class="purchase-content">
+
+        <section class="movie-section">
+          <h2>{{ purchase.movieTitle }}</h2>
+
+          <div class="screening-info">
+
+            <div class="info-item">
+              <span class="label">Fecha</span>
+              <span class="value">
+                {{ formatDate(purchase.screeningDate) }}
+              </span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Horario</span>
+              <span class="value">
+                {{ purchase.screeningTime }}
+              </span>
+            </div>
+
+          </div>
+        </section>
+
+
+        <section class="ticket-section">
+
+          <h2>Tu entrada</h2>
+
+          <div class="ticket-data">
+
+            <div class="data-row">
+              <span>N.º de orden</span>
+              <strong>{{ purchase.orderId }}</strong>
+            </div>
+
+            <div class="data-row">
+              <span>N.º de ticket</span>
+              <strong>{{ purchase.ticketId }}</strong>
+            </div>
+
+          </div>
+
+
+          <div class="seats-section">
+
+            <h3>Butacas</h3>
+
+            <div class="seat-list">
+
+              @for (seat of purchase.seats; track seat.id) {
+
+                <div class="seat-item">
+
+                  <div class="seat-name">
+                    {{ getSeatLabel(seat) }}
+                  </div>
+
+                  <div class="seat-type">
+                    {{ getSeatTypeLabel(seat.seat_type) }}
+                  </div>
+
+                  <div class="seat-price">
+                    {{ formatPrice(seat.price) }}
+                  </div>
+
+                </div>
+
+              }
+
+            </div>
+
+          </div>
+
+
+          <div class="total">
+
+            <span>Total</span>
+
+            <strong>
+              {{ formatPrice(purchase.total) }}
+            </strong>
+
+          </div>
+
+        </section>
+
+
+        <section class="qr-section">
+
+          <h2>Presentá este código al ingresar</h2>
+
+          <div class="qr-container">
+
+            <div class="qr-placeholder">
+              <span>QR</span>
+            </div>
+
+          </div>
+
+          <p class="qr-code">
+            {{ purchase.qrCode }}
+          </p>
+
+        </section>
+
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="volverAlInicio()"
+        >
+          Volver al inicio
+        </button>
+
+      </div>
+
+    } @else {
+
+      <div class="no-purchase">
+
+        <p>
+          No se encontró la información de la compra.
+        </p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="volverAlInicio()"
+        >
+          Volver al inicio
+        </button>
+
+      </div>
+
+    }
+
+  </div>
+
+</div>

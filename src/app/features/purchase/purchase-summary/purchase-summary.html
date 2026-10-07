@@ -140,6 +140,12 @@
       </section>
 
       <div class="actions">
+        @if (success) {
+        <div class="success-message">
+            <strong>{{ success }}</strong>
+            <span>Volviendo al inicio...</span>
+        </div>
+        }
 
         <button
           type="button"
@@ -152,9 +158,10 @@
         <button
           type="button"
           class="primary-button"
+          [disabled]="purchasing"
           (click)="confirmarCompra()"
-        >
-          Confirmar compra
+          >
+          {{ purchasing ? 'Procesando...' : 'Confirmar compra' }}
         </button>
 
       </div>
