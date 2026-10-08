@@ -1,15 +1,37 @@
 <header class="app-header">
   <div class="header-container">
 
-    <a class="brand" routerLink="/home">
-      <span class="brand-mark">◆</span>
-      <span>Cine Progra IV</span>
-    </a>
+    @if (role() === 'customer') {
+      <a class="brand" routerLink="/home">
+        <span class="brand-mark">◆</span>
+        <span>Cine Progra IV</span>
+      </a>
+    }
+
+    @if (role() === 'employee') {
+      <a class="brand" routerLink="/empleado">
+        <span class="brand-mark">◆</span>
+        <span>Cine Progra IV</span>
+      </a>
+    }
+
+    @if (role() === 'admin') {
+      <a class="brand" routerLink="/admin">
+        <span class="brand-mark">◆</span>
+        <span>Cine Progra IV</span>
+      </a>
+    }
+
+    @if (!role()) {
+      <a class="brand" routerLink="/home">
+        <span class="brand-mark">◆</span>
+        <span>Cine Progra IV</span>
+      </a>
+    }
 
     <nav class="main-nav">
 
-      <!-- CLIENTE -->
-      @if (role === 'customer') {
+      @if (role() === 'customer') {
 
         <a
           routerLink="/home"
@@ -30,15 +52,7 @@
         </a>
       }
 
-      <!-- EMPLEADO -->
-      @if (role === 'employee') {
-
-        <a
-          routerLink="/home"
-          routerLinkActive="active"
-        >
-          Películas
-        </a>
+      @if (role() === 'employee') {
 
         <a
           routerLink="/empleado"
@@ -48,15 +62,7 @@
         </a>
       }
 
-      <!-- ADMIN -->
-      @if (role === 'admin') {
-
-        <a
-          routerLink="/home"
-          routerLinkActive="active"
-        >
-          Películas
-        </a>
+      @if (role() === 'admin') {
 
         <a
           routerLink="/admin"
@@ -66,7 +72,7 @@
         </a>
       }
 
-      @if (role) {
+      @if (role()) {
         <button
           type="button"
           class="logout-button"

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   Router,
   RouterLink,
@@ -18,25 +18,39 @@ export class Header {
   private auth = inject(AuthService);
   private router = inject(Router);
 
-  role: string | null = null;
+  role = signal<string | null>(null);
 
   constructor() {
     this.cargarRol();
   }
 
   private async cargarRol() {
-    const { data } = await this.auth.getUser();
+    try {
+      const { data, error } = await this.auth.getUser();
 
-    if (!data.user) {
-      this.role = null;
-      return;
+      if (error || !data.user) {
+        this.role.set(null);
+        return;
+      }
+
+      const role = await this.auth.getRole(data.user.id);
+
+      console.log('HEADER - usuario:', data.user.email);
+      console.log('HEADER - rol:', role);
+
+      this.role.set(role);
+
+    } catch (error) {
+      console.error('HEADER - error cargando rol:', error);
+      this.role.set(null);
     }
-
-    this.role = await this.auth.getRole(data.user.id);
   }
 
   async logout() {
     await this.auth.logout();
+
+    this.role.set(null);
+
     await this.router.navigate(['/login']);
   }
 }

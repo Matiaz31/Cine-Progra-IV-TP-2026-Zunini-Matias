@@ -13,6 +13,7 @@ import { Admin } from './features/admin/admin';
 
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
+import { homeGuard } from './guards/home-guard';
 
 export const routes: Routes = [
   {
@@ -28,6 +29,7 @@ export const routes: Routes = [
   {
     path: 'home',
     component: Home,
+    canActivate: [homeGuard],
   },
 
   {

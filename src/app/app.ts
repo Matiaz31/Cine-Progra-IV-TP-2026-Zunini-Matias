@@ -10,23 +10,32 @@ import { filter } from 'rxjs/operators';
   styleUrl: './app.scss',
 })
 export class App {
+
   private router = inject(Router);
 
   protected readonly title = signal('cine-progra-iv');
 
-  mostrarHeader = false;
+  mostrarHeader = signal(false);
 
   constructor() {
+
+    // Estado inicial
+    this.actualizarHeader(this.router.url);
+
+    // Actualizar cuando cambia la ruta
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd)
       )
       .subscribe((event) => {
-        const url = event.urlAfterRedirects;
-
-        this.mostrarHeader =
-          url !== '/login' &&
-          url !== '/register';
+        this.actualizarHeader(event.urlAfterRedirects);
       });
+  }
+
+  private actualizarHeader(url: string) {
+    this.mostrarHeader.set(
+      url !== '/login' &&
+      url !== '/register'
+    );
   }
 }
