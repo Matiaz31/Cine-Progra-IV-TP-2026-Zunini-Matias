@@ -9,6 +9,7 @@ import { PurchaseSummary } from './features/purchase/purchase-summary/purchase-s
 import { PurchaseSuccess } from './features/purchase/purchase-success/purchase-success';
 import { MisEntradas } from './features/mis-entradas/mis-entradas';
 import { CandyBar } from './features/candy-bar/candy-bar/candy-bar';
+import { Admin } from './features/admin/admin';
 
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
@@ -62,19 +63,12 @@ export const routes: Routes = [
 
   {
     path: 'admin',
+    component: Admin,
     canActivate: [
       authGuard,
       roleGuard(['admin']),
     ],
     children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/admin/admin').then(
-            m => m.Admin
-          ),
-      },
-
       {
         path: 'peliculas',
         loadComponent: () =>

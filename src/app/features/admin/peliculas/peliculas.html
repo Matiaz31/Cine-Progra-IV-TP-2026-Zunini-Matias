@@ -1,14 +1,88 @@
 <section class="admin-module">
 
   <div class="module-header">
+
     <div>
       <h2>Películas</h2>
       <p>Administración de películas del cine.</p>
     </div>
+
+    <button type="button" class="primary-button">
+      Nueva película
+    </button>
+
   </div>
 
-  <div class="module-content">
-    <p>Acá vamos a administrar las películas.</p>
-  </div>
+  @if (loading) {
+
+    <div class="message">
+      Cargando películas...
+    </div>
+
+  } @else if (error) {
+
+    <div class="message error">
+      {{ error }}
+    </div>
+
+  } @else if (movies.length === 0) {
+
+    <div class="message">
+      No hay películas cargadas.
+    </div>
+
+  } @else {
+
+    <div class="movies-list">
+
+      @for (movie of movies; track movie.id) {
+
+        <article class="movie-card">
+
+          <div class="movie-info">
+
+            <h3>{{ movie.title }}</h3>
+
+            <p>
+              {{ movie.synopsis || 'Sin sinopsis.' }}
+            </p>
+
+            <div class="movie-data">
+
+              <span>
+                {{ movie.duration_minutes }} min
+              </span>
+
+              <span>
+                Edad: {{ movie.age_rating ?? 'N/A' }}
+              </span>
+
+              <span>
+                {{ movie.is_active ? 'Activa' : 'Inactiva' }}
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="movie-actions">
+
+            <button type="button">
+              Editar
+            </button>
+
+            <button type="button">
+              {{ movie.is_active ? 'Desactivar' : 'Activar' }}
+            </button>
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
+
+  }
 
 </section>
