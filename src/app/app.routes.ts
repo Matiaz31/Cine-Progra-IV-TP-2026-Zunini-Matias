@@ -1,15 +1,17 @@
 import { Routes } from '@angular/router';
+
 import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
 import { Home } from './features/home/home';
 import { MovieDetail } from './features/movies/movie-detail/movie-detail';
 import { SeatSelection } from './features/seats/seat-selection/seat-selection';
-import { authGuard } from './guards/auth-guard';
-import { roleGuard } from './guards/role-guard';
 import { PurchaseSummary } from './features/purchase/purchase-summary/purchase-summary';
 import { PurchaseSuccess } from './features/purchase/purchase-success/purchase-success';
 import { MisEntradas } from './features/mis-entradas/mis-entradas';
 import { CandyBar } from './features/candy-bar/candy-bar/candy-bar';
+
+import { authGuard } from './guards/auth-guard';
+import { roleGuard } from './guards/role-guard';
 
 export const routes: Routes = [
   {
@@ -21,58 +23,106 @@ export const routes: Routes = [
     path: 'register',
     component: Register,
   },
+
   {
     path: 'home',
     component: Home,
   },
+
   {
     path: 'pelicula/:id',
     component: MovieDetail,
   },
+
   {
     path: 'seleccion-butacas/:id',
     component: SeatSelection,
   },
+
+  {
+    path: 'candy-bar',
+    component: CandyBar,
+  },
+
   {
     path: 'resumen-compra',
     component: PurchaseSummary,
   },
-  { 
-    path: 'compra-exitosa', 
+
+  {
+    path: 'compra-exitosa',
     component: PurchaseSuccess,
   },
-  { 
-    path: 'candy-bar', 
-    component: CandyBar 
-  },
+
+  /*
+   * =========================
+   * ADMINISTRACIÓN
+   * =========================
+   */
+
   {
     path: 'admin',
-    loadComponent: () =>
-      import('./features/admin/admin').then(m => m.Admin),
     canActivate: [
       authGuard,
       roleGuard(['admin']),
     ],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/admin/admin').then(
+            m => m.Admin
+          ),
+      },
+
+      {
+        path: 'peliculas',
+        loadComponent: () =>
+          import('./features/admin/peliculas/peliculas').then(
+            m => m.Peliculas
+          ),
+      },
+
+      {
+        path: 'generos',
+        loadComponent: () =>
+          import('./features/admin/generos/generos').then(
+            m => m.Generos
+          ),
+      },
+    ],
   },
+
+  /*
+   * =========================
+   * EMPLEADO
+   * =========================
+   */
+
   {
     path: 'empleado',
     loadComponent: () =>
-      import('./features/empleado/empleado').then(m => m.Empleado),
+      import('./features/empleado/empleado').then(
+        m => m.Empleado
+      ),
     canActivate: [
       authGuard,
       roleGuard(['employee']),
     ],
   },
-  { 
-    path: 'mis-entradas', 
-    component: MisEntradas, 
-    canActivate: [authGuard], 
+
+  {
+    path: 'mis-entradas',
+    component: MisEntradas,
+    canActivate: [authGuard],
   },
+
   {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',
   },
+
   {
     path: '**',
     redirectTo: 'home',

@@ -1,0 +1,27 @@
+.admin-module {
+  margin-top: var(--space-xl);
+}
+
+.module-header {
+  margin-bottom: var(--space-lg);
+}
+
+.module-header h2 {
+  margin-bottom: var(--space-sm);
+}
+
+.module-header p {
+  margin-bottom: 0;
+  color: var(--color-text-secondary);
+}
+
+.module-content {
+  padding: var(--space-lg);
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  color: var(--color-text-secondary);
+}
