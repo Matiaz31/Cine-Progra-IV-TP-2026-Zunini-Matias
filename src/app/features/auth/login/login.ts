@@ -27,12 +27,41 @@ export class Login {
     this.error = '';
     this.loading = true;
 
-    const { error } = await this.auth.login(this.email, this.password);
+    const { data, error } = await this.auth.login(
+      this.email,
+      this.password
+    );
+
+    if (error) {
+      this.loading = false;
+      this.error = error.message;
+      return;
+    }
+
+    const userId = data.user?.id;
+
+    if (!userId) {
+      this.loading = false;
+      this.error = 'No se pudo obtener el usuario autenticado.';
+      return;
+    }
+
+    const role = await this.auth.getRole(userId);
 
     this.loading = false;
 
-    if (error) {
-      this.error = error.message;
+    if (!role) {
+      this.error = 'No se pudo obtener el rol del usuario.';
+      return;
+    }
+
+    if (role === 'admin') {
+      await this.router.navigate(['/admin']);
+      return;
+    }
+
+    if (role === 'employee') {
+      await this.router.navigate(['/empleado']);
       return;
     }
 

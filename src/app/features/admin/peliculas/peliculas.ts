@@ -1,4 +1,9 @@
-import { Component, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+} from '@angular/core';
+
 import { AdminMovieService } from './admin-movie.service';
 import { Movie } from '../../movies/movie';
 
@@ -11,6 +16,7 @@ import { Movie } from '../../movies/movie';
 export class Peliculas {
 
   private movieService = inject(AdminMovieService);
+  private changeDetector = inject(ChangeDetectorRef);
 
   movies: Movie[] = [];
   loading = true;
@@ -24,8 +30,23 @@ export class Peliculas {
     this.loading = true;
     this.error = '';
 
-    this.movies = await this.movieService.getMovies();
+    try {
+      const movies = await this.movieService.getMovies();
 
-    this.loading = false;
+      this.movies = movies;
+
+      console.log('PELÍCULAS EN COMPONENTE:', this.movies);
+
+    } catch (error) {
+      console.error('ERROR EN COMPONENTE PELÍCULAS:', error);
+
+      this.error = 'No se pudieron cargar las películas.';
+      this.movies = [];
+
+    } finally {
+      this.loading = false;
+
+      this.changeDetector.detectChanges();
+    }
   }
 }

@@ -58,6 +58,21 @@ export class AuthService {
     });
   }
 
+  async getRole(userId: string) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error al obtener el rol:', error);
+      return null;
+    }
+
+    return data?.role ?? null;
+  }
+
   async logout() {
     return await supabase.auth.signOut();
   }

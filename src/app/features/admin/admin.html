@@ -10,234 +10,238 @@
     <button
       type="button"
       class="back-button"
-      (click)="navegar('/home')"
-    >
-      Volver al inicio
+      (click)="navegar('/admin')"
+      >
+      Volver al panel
     </button>
 
   </header>
 
   <main class="admin-content">
 
-    <!-- PELÍCULAS -->
-    <section class="admin-section">
+    @if (esInicio) {
 
-      <div class="section-title">
-        <span class="section-icon">🎬</span>
+      <!-- PELÍCULAS -->
+      <section class="admin-section">
 
-        <div>
-          <h2>Películas</h2>
-          <p>Administrá las películas disponibles en el cine.</p>
+        <div class="section-title">
+          <span class="section-icon">🎬</span>
+
+          <div>
+            <h2>Películas</h2>
+            <p>Administrá las películas disponibles en el cine.</p>
+          </div>
         </div>
-      </div>
 
-      <div class="admin-grid">
+        <div class="admin-grid">
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/peliculas')"
-        >
-          <span class="card-icon">🎬</span>
-          <strong>Películas</strong>
-          <span>Crear, editar y administrar películas.</span>
-        </button>
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/peliculas')"
+          >
+            <span class="card-icon">🎬</span>
+            <strong>Películas</strong>
+            <span>Crear, editar y administrar películas.</span>
+          </button>
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/generos')"
-        >
-          <span class="card-icon">🎭</span>
-          <strong>Géneros</strong>
-          <span>Administrar géneros cinematográficos.</span>
-        </button>
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/generos')"
+          >
+            <span class="card-icon">🎭</span>
+            <strong>Géneros</strong>
+            <span>Administrar géneros cinematográficos.</span>
+          </button>
 
-      </div>
-
-    </section>
-
-    <!-- SALAS Y FUNCIONES -->
-    <section class="admin-section">
-
-      <div class="section-title">
-        <span class="section-icon">🏢</span>
-
-        <div>
-          <h2>Salas y funciones</h2>
-          <p>Configurá las salas, butacas y horarios.</p>
         </div>
-      </div>
 
-      <div class="admin-grid">
+      </section>
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/salas')"
-        >
-          <span class="card-icon">🏢</span>
-          <strong>Salas</strong>
-          <span>Administrar las salas del cine.</span>
-        </button>
+      <!-- SALAS Y FUNCIONES -->
+      <section class="admin-section">
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/butacas')"
-        >
-          <span class="card-icon">💺</span>
-          <strong>Butacas</strong>
-          <span>Configurar las butacas de cada sala.</span>
-        </button>
+        <div class="section-title">
+          <span class="section-icon">🏢</span>
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/funciones')"
-        >
-          <span class="card-icon">🕐</span>
-          <strong>Funciones</strong>
-          <span>Crear y administrar funciones.</span>
-        </button>
-
-      </div>
-
-    </section>
-
-    <!-- CANDY BAR -->
-    <section class="admin-section">
-
-      <div class="section-title">
-        <span class="section-icon">🍿</span>
-
-        <div>
-          <h2>Candy Bar</h2>
-          <p>Administrá productos, categorías y combos.</p>
+          <div>
+            <h2>Salas y funciones</h2>
+            <p>Configurá las salas, butacas y horarios.</p>
+          </div>
         </div>
-      </div>
 
-      <div class="admin-grid">
+        <div class="admin-grid">
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/productos')"
-        >
-          <span class="card-icon">🥤</span>
-          <strong>Productos</strong>
-          <span>Administrar productos y stock.</span>
-        </button>
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/salas')"
+          >
+            <span class="card-icon">🏢</span>
+            <strong>Salas</strong>
+            <span>Administrar las salas del cine.</span>
+          </button>
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/categorias')"
-        >
-          <span class="card-icon">🏷️</span>
-          <strong>Categorías</strong>
-          <span>Administrar categorías de productos.</span>
-        </button>
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/butacas')"
+          >
+            <span class="card-icon">💺</span>
+            <strong>Butacas</strong>
+            <span>Configurar las butacas de cada sala.</span>
+          </button>
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/combos')"
-        >
-          <span class="card-icon">🎁</span>
-          <strong>Combos</strong>
-          <span>Crear y administrar combos.</span>
-        </button>
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/funciones')"
+          >
+            <span class="card-icon">🕐</span>
+            <strong>Funciones</strong>
+            <span>Crear y administrar funciones.</span>
+          </button>
 
-      </div>
-
-    </section>
-
-    <!-- BENEFICIOS -->
-    <section class="admin-section">
-
-      <div class="section-title">
-        <span class="section-icon">🎟️</span>
-
-        <div>
-          <h2>Beneficios y promociones</h2>
-          <p>Configurá descuentos, puntos y recompensas.</p>
         </div>
-      </div>
 
-      <div class="admin-grid">
+      </section>
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/cupones')"
-        >
-          <span class="card-icon">🏷️</span>
-          <strong>Cupones y descuentos</strong>
-          <span>Administrar promociones y cupones.</span>
-        </button>
+      <!-- CANDY BAR -->
+      <section class="admin-section">
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/recompensas')"
-        >
-          <span class="card-icon">🎁</span>
-          <strong>Recompensas</strong>
-          <span>Administrar beneficios del sistema de puntos.</span>
-        </button>
+        <div class="section-title">
+          <span class="section-icon">🍿</span>
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/preventa')"
-        >
-          <span class="card-icon">💰</span>
-          <strong>Preventa</strong>
-          <span>Configurar valores y condiciones de preventa.</span>
-        </button>
-
-      </div>
-
-    </section>
-
-    <!-- INFORMACIÓN DEL SISTEMA -->
-    <section class="admin-section">
-
-      <div class="section-title">
-        <span class="section-icon">📊</span>
-
-        <div>
-          <h2>Información del sistema</h2>
-          <p>Consultá estadísticas y actividad.</p>
+          <div>
+            <h2>Candy Bar</h2>
+            <p>Administrá productos, categorías y combos.</p>
+          </div>
         </div>
-      </div>
 
-      <div class="admin-grid">
+        <div class="admin-grid">
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/reportes')"
-        >
-          <span class="card-icon">📊</span>
-          <strong>Reportes</strong>
-          <span>Consultá estadísticas y reportes del cine.</span>
-        </button>
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/productos')"
+          >
+            <span class="card-icon">🥤</span>
+            <strong>Productos</strong>
+            <span>Administrar productos y stock.</span>
+          </button>
 
-        <button
-          type="button"
-          class="admin-card"
-          (click)="navegar('/admin/logs')"
-        >
-          <span class="card-icon">📋</span>
-          <strong>Logs de actividad</strong>
-          <span>Consultá las acciones realizadas en el sistema.</span>
-        </button>
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/categorias')"
+          >
+            <span class="card-icon">🏷️</span>
+            <strong>Categorías</strong>
+            <span>Administrar categorías de productos.</span>
+          </button>
 
-      </div>
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/combos')"
+          >
+            <span class="card-icon">🎁</span>
+            <strong>Combos</strong>
+            <span>Crear y administrar combos.</span>
+          </button>
 
-    </section>
+        </div>
+
+      </section>
+
+      <!-- BENEFICIOS -->
+      <section class="admin-section">
+
+        <div class="section-title">
+          <span class="section-icon">🎟️</span>
+
+          <div>
+            <h2>Beneficios y promociones</h2>
+            <p>Configurá descuentos, puntos y recompensas.</p>
+          </div>
+        </div>
+
+        <div class="admin-grid">
+
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/cupones')"
+          >
+            <span class="card-icon">🏷️</span>
+            <strong>Cupones y descuentos</strong>
+            <span>Administrar promociones y cupones.</span>
+          </button>
+
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/recompensas')"
+          >
+            <span class="card-icon">🎁</span>
+            <strong>Recompensas</strong>
+            <span>Administrar beneficios del sistema de puntos.</span>
+          </button>
+
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/preventa')"
+          >
+            <span class="card-icon">💰</span>
+            <strong>Preventa</strong>
+            <span>Configurar valores y condiciones de preventa.</span>
+          </button>
+
+        </div>
+
+      </section>
+
+      <!-- INFORMACIÓN DEL SISTEMA -->
+      <section class="admin-section">
+
+        <div class="section-title">
+          <span class="section-icon">📊</span>
+
+          <div>
+            <h2>Información del sistema</h2>
+            <p>Consultá estadísticas y actividad.</p>
+          </div>
+        </div>
+
+        <div class="admin-grid">
+
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/reportes')"
+          >
+            <span class="card-icon">📊</span>
+            <strong>Reportes</strong>
+            <span>Consultá estadísticas y reportes del cine.</span>
+          </button>
+
+          <button
+            type="button"
+            class="admin-card"
+            (click)="navegar('/admin/logs')"
+          >
+            <span class="card-icon">📋</span>
+            <strong>Logs de actividad</strong>
+            <span>Consultá las acciones realizadas en el sistema.</span>
+          </button>
+
+        </div>
+
+      </section>
+
+    }
 
     <!-- RUTAS HIJAS DEL ADMIN -->
     <router-outlet></router-outlet>

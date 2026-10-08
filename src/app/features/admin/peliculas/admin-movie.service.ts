@@ -10,21 +10,15 @@ export class AdminMovieService {
   async getMovies(): Promise<Movie[]> {
     const { data, error } = await supabase
       .from('movies')
-      .select(`
-        *,
-        movie_genres (
-          genres (
-            id,
-            name
-          )
-        )
-      `)
+      .select('*')
       .order('release_date', { ascending: false });
 
     if (error) {
-      console.error('Error al obtener películas:', error);
-      return [];
+      console.error('ERROR SUPABASE - obtener películas:', error);
+      throw error;
     }
+
+    console.log('PELÍCULAS ADMIN:', data);
 
     return data ?? [];
   }
