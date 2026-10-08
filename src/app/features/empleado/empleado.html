@@ -2,25 +2,75 @@
 
   <div class="empleado-card">
 
-    <h1>Control de acceso</h1>
+    <div class="empleado-header">
+      <h1>Control de acceso</h1>
 
-    <p>
-      Ingresá o escaneá el código QR del ticket.
-    </p>
+      <p>
+        Escaneá el código QR del ticket o ingresalo manualmente.
+      </p>
+    </div>
 
-    <input
-      type="text"
-      [(ngModel)]="qrCode"
-      placeholder="Código QR"
-      [disabled]="loading"
-    />
+    <div class="scanner-section">
+
+      @if (scannerActivo) {
+        <div class="scanner-container">
+
+          <video
+            #video
+            class="scanner-video"
+            autoplay
+            muted
+            playsinline
+          ></video>
+
+          <div class="scanner-frame"></div>
+
+        </div>
+
+        <button
+          type="button"
+          class="scanner-stop"
+          (click)="detenerScanner()"
+        >
+          Detener cámara
+        </button>
+      }
+
+      @if (!scannerActivo) {
+        <button
+          type="button"
+          class="scanner-start"
+          (click)="iniciarScanner()"
+          [disabled]="loading"
+        >
+          📷 Escanear QR con cámara
+        </button>
+      }
+
+    </div>
+
+    <div class="qr-section">
+
+      <label for="qrCode">
+        Código QR
+      </label>
+
+      <input
+        id="qrCode"
+        type="text"
+        [(ngModel)]="qrCode"
+        placeholder="Ingresá el código manualmente"
+        [disabled]="loading"
+      />
+
+    </div>
 
     <div class="empleado-actions">
 
       <button
         type="button"
         (click)="validarEntrada()"
-        [disabled]="loading"
+        [disabled]="loading || !qrCode.trim()"
       >
         Validar entrada
       </button>
@@ -28,7 +78,7 @@
       <button
         type="button"
         (click)="retirarCandyBar()"
-        [disabled]="loading"
+        [disabled]="loading || !qrCode.trim()"
       >
         Retirar Candy Bar
       </button>
