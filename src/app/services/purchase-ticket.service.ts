@@ -9,6 +9,25 @@ export interface PurchaseSeat {
   price: number;
 }
 
+export interface PurchaseCandyBarProduct {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface PurchaseCandyBarCombo {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface PurchaseCandyBar {
+  products: PurchaseCandyBarProduct[];
+  combos: PurchaseCandyBarCombo[];
+}
+
 export interface PurchaseData {
   orderId: string;
   ticketId: string;
@@ -18,6 +37,7 @@ export interface PurchaseData {
   screeningTime: string;
   seats: PurchaseSeat[];
   total: number;
+  candyBar: PurchaseCandyBar;
 }
 
 @Injectable({
@@ -26,6 +46,7 @@ export interface PurchaseData {
 export class PurchaseTicketService {
 
   async getTicket(ticketId: string): Promise<PurchaseData> {
+
     const {
       data: { user },
       error: userError,
@@ -41,7 +62,10 @@ export class PurchaseTicketService {
       );
     }
 
-    const { data: ticket, error } = await supabase
+    const {
+      data: ticket,
+      error,
+    } = await supabase
       .from('tickets')
       .select(`
         id,
@@ -52,11 +76,26 @@ export class PurchaseTicketService {
         orders (
           id,
           user_id,
-          total
+          total,
+
+          order_items (
+            id,
+            item_type,
+            product_id,
+            quantity,
+            unit_price,
+            subtotal,
+
+            products (
+              id,
+              name
+            )
+          )
         ),
 
         screenings (
           start_time,
+
           movies (
             title
           )
@@ -82,7 +121,9 @@ export class PurchaseTicketService {
     }
 
     if (!ticket) {
-      throw new Error('No se encontró la entrada.');
+      throw new Error(
+        'No se encontró la entrada.'
+      );
     }
 
     const order = Array.isArray(ticket.orders)
@@ -90,7 +131,9 @@ export class PurchaseTicketService {
       : ticket.orders;
 
     if (!order) {
-      throw new Error('No se encontró la compra asociada.');
+      throw new Error(
+        'No se encontró la compra asociada.'
+      );
     }
 
     if (order.user_id !== user.id) {
@@ -107,6 +150,10 @@ export class PurchaseTicketService {
       ? screening.movies[0]
       : screening?.movies;
 
+    // ========================================
+    // BUTACAS
+    // ========================================
+
     const seats = (ticket.ticket_seats ?? []).map(
       (ticketSeat: any) => {
 
@@ -115,31 +162,112 @@ export class PurchaseTicketService {
           : ticketSeat.seats;
 
         return {
-          id: seat?.id ?? ticketSeat.seat_id,
-          row_label: seat?.row_label ?? '',
-          seat_number: seat?.seat_number ?? 0,
-          seat_type: seat?.seat_type ?? 'normal',
-          price: Number(ticketSeat.price ?? 0),
+          id:
+            seat?.id ?? ticketSeat.seat_id,
+
+          row_label:
+            seat?.row_label ?? '',
+
+          seat_number:
+            seat?.seat_number ?? 0,
+
+          seat_type:
+            seat?.seat_type ?? 'normal',
+
+          price:
+            Number(ticketSeat.price ?? 0),
         };
       }
     );
 
+    // ========================================
+    // CANDY BAR
+    // ========================================
+
+    const orderItems = order.order_items ?? [];
+
+    const products: PurchaseCandyBarProduct[] = [];
+    const combos: PurchaseCandyBarCombo[] = [];
+
+    for (const item of orderItems) {
+
+      if (item.item_type === 'product') {
+
+        const product = Array.isArray(item.products)
+          ? item.products[0]
+          : item.products;
+
+        products.push({
+          id:
+            item.product_id,
+
+          name:
+            product?.name ?? 'Producto',
+
+          price:
+            Number(item.unit_price ?? 0),
+
+          quantity:
+            Number(item.quantity ?? 0),
+        });
+      }
+
+      if (item.item_type === 'combo') {
+
+        combos.push({
+          id:
+            item.id,
+
+          name:
+            'Combo Cine',
+
+          price:
+            Number(item.unit_price ?? 0),
+
+          quantity:
+            Number(item.quantity ?? 0),
+        });
+      }
+    }
+
     return {
-      orderId: order.id,
-      ticketId: ticket.id,
-      qrCode: ticket.qr_code,
-      movieTitle: movie?.title ?? 'Película',
-      screeningDate: screening?.start_time ?? '',
-      screeningTime: screening?.start_time
-        ? new Date(
-            screening.start_time
-          ).toLocaleTimeString('es-AR', {
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : '',
+      orderId:
+        order.id,
+
+      ticketId:
+        ticket.id,
+
+      qrCode:
+        ticket.qr_code,
+
+      movieTitle:
+        movie?.title ?? 'Película',
+
+      screeningDate:
+        screening?.start_time ?? '',
+
+      screeningTime:
+        screening?.start_time
+          ? new Date(
+              screening.start_time
+            ).toLocaleTimeString(
+              'es-AR',
+              {
+                hour: '2-digit',
+                minute: '2-digit',
+              }
+            )
+          : '',
+
       seats,
-      total: Number(order.total ?? 0),
+
+      total:
+        Number(order.total ?? 0),
+
+      candyBar: {
+        products,
+        combos,
+      },
     };
   }
 }

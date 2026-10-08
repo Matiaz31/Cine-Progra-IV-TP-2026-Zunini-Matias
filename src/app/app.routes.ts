@@ -9,6 +9,7 @@ import { roleGuard } from './guards/role-guard';
 import { PurchaseSummary } from './features/purchase/purchase-summary/purchase-summary';
 import { PurchaseSuccess } from './features/purchase/purchase-success/purchase-success';
 import { MisEntradas } from './features/mis-entradas/mis-entradas';
+import { CandyBar } from './features/candy-bar/candy-bar/candy-bar';
 
 export const routes: Routes = [
   {
@@ -39,6 +40,10 @@ export const routes: Routes = [
   { 
     path: 'compra-exitosa', 
     component: PurchaseSuccess,
+  },
+  { 
+    path: 'candy-bar', 
+    component: CandyBar 
   },
   {
     path: 'admin',

@@ -1,1 +1,328 @@
-<p>candy-bar works!</p>
+<div class="candy-page">
+
+  <main class="candy-container">
+
+    <!-- ENCABEZADO -->
+
+    <button
+      type="button"
+      class="back-button"
+      (click)="volver()"
+    >
+      ← Volver
+    </button>
+
+    <header class="candy-header">
+      <span class="page-kicker">CANDY BAR</span>
+
+      <h1>¿Algo para acompañar la película?</h1>
+
+      <p>
+        Elegí tus productos o aprovechá nuestros combos.
+      </p>
+    </header>
+
+    <!-- CARGANDO -->
+
+    @if (loading) {
+
+      <section class="state-card">
+        <div class="loading-spinner"></div>
+        <p>Cargando productos...</p>
+      </section>
+
+    }
+
+    <!-- ERROR -->
+
+    @if (error) {
+
+      <section class="state-card error-card">
+
+        <span class="state-icon">!</span>
+
+        <h2>No se pudo cargar el Candy Bar</h2>
+
+        <p>{{ error }}</p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="loadCandyBar()"
+        >
+          Reintentar
+        </button>
+
+      </section>
+
+    }
+
+    @if (!loading && !error) {
+
+      <!-- COMBOS -->
+
+      @if (combos.length > 0) {
+
+        <section class="candy-section">
+
+          <div class="section-heading">
+            <span class="section-kicker">DESTACADOS</span>
+
+            <h2>Combos</h2>
+
+            <p>
+              Todo lo que necesitás para disfrutar la función.
+            </p>
+          </div>
+
+          <div class="candy-grid">
+
+            @for (combo of combos; track combo.id) {
+
+              <article class="candy-card combo-card">
+
+                <div class="product-image combo-image">
+
+                  @if (combo.image_url) {
+
+                    <img
+                      [src]="combo.image_url"
+                      [alt]="combo.name"
+                    />
+
+                  } @else {
+
+                    <span>🍿🥤</span>
+
+                  }
+
+                </div>
+
+                <div class="product-content">
+
+                  <span class="product-type">
+                    COMBO
+                  </span>
+
+                  <h3>{{ combo.name }}</h3>
+
+                  @if (combo.description) {
+                    <p class="product-description">
+                      {{ combo.description }}
+                    </p>
+                  }
+
+                  <div class="product-bottom">
+
+                    <strong class="product-price">
+                      {{ formatPrice(combo.price) }}
+                    </strong>
+
+                    <div class="quantity-control">
+
+                      <button
+                        type="button"
+                        (click)="decrementarCombo(combo)"
+                        [disabled]="getComboQuantity(combo.id) === 0"
+                        aria-label="Disminuir cantidad"
+                      >
+                        −
+                      </button>
+
+                      <span>
+                        {{ getComboQuantity(combo.id) }}
+                      </span>
+
+                      <button
+                        type="button"
+                        (click)="incrementarCombo(combo)"
+                        aria-label="Aumentar cantidad"
+                      >
+                        +
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </article>
+
+            }
+
+          </div>
+
+        </section>
+
+      }
+
+      <!-- PRODUCTOS -->
+
+      @if (products.length > 0) {
+
+        <section class="candy-section">
+
+          <div class="section-heading">
+            <span class="section-kicker">INDIVIDUALES</span>
+
+            <h2>Productos</h2>
+
+            <p>
+              Elegí lo que quieras agregar a tu compra.
+            </p>
+          </div>
+
+          <div class="candy-grid">
+
+            @for (product of products; track product.id) {
+
+              <article class="candy-card">
+
+                <div class="product-image">
+
+                  @if (product.image_url) {
+
+                    <img
+                      [src]="product.image_url"
+                      [alt]="product.name"
+                    />
+
+                  } @else {
+
+                    <span>
+                      {{
+                        product.category === 'Bebidas'
+                          ? '🥤'
+                          : product.category === 'Dulces'
+                            ? '🍫'
+                            : '🍿'
+                      }}
+                    </span>
+
+                  }
+
+                </div>
+
+                <div class="product-content">
+
+                  @if (product.category) {
+
+                    <span class="product-type">
+                      {{ product.category }}
+                    </span>
+
+                  }
+
+                  <h3>{{ product.name }}</h3>
+
+                  @if (product.description) {
+
+                    <p class="product-description">
+                      {{ product.description }}
+                    </p>
+
+                  }
+
+                  <div class="product-bottom">
+
+                    <strong class="product-price">
+                      {{ formatPrice(product.price) }}
+                    </strong>
+
+                    <div class="quantity-control">
+
+                      <button
+                        type="button"
+                        (click)="decrementarProducto(product)"
+                        [disabled]="getProductQuantity(product.id) === 0"
+                        aria-label="Disminuir cantidad"
+                      >
+                        −
+                      </button>
+
+                      <span>
+                        {{ getProductQuantity(product.id) }}
+                      </span>
+
+                      <button
+                        type="button"
+                        (click)="incrementarProducto(product)"
+                        [disabled]="getProductQuantity(product.id) >= product.stock"
+                        aria-label="Aumentar cantidad"
+                      >
+                        +
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </article>
+
+            }
+
+          </div>
+
+        </section>
+
+      }
+
+      <!-- RESUMEN -->
+
+      <section class="candy-summary">
+
+        <div class="summary-info">
+
+          <span class="summary-label">
+            Productos seleccionados
+          </span>
+
+          <strong>
+            {{ getSelectedItemsCount() }}
+          </strong>
+
+        </div>
+
+        <div class="summary-info">
+
+          <span class="summary-label">
+            Total Candy Bar
+          </span>
+
+          <strong>
+            {{ formatPrice(getCandyBarTotal()) }}
+          </strong>
+
+        </div>
+
+        <div class="summary-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="continuarSinCandyBar()"
+          >
+            Continuar sin Candy Bar
+          </button>
+
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="getSelectedItemsCount() === 0"
+            (click)="continuar()"
+          >
+            Continuar
+          </button>
+
+        </div>
+
+      </section>
+
+    }
+
+  </main>
+
+</div>

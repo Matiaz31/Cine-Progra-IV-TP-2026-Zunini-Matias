@@ -329,5 +329,42 @@
     }
 
   </div>
+  @if (mostrarCandyBar) {
+    <div class="candy-bar-overlay">
 
+      <div class="candy-bar-modal">
+
+        <span class="candy-bar-icon">🍿</span>
+
+        <h2>¿Querés agregar algo más?</h2>
+
+        <p>
+          Podés sumar pochoclos, bebidas, chocolates o combos
+          del Candy Bar a tu compra.
+        </p>
+
+        <div class="candy-bar-actions">
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="irAlCandyBar()"
+          >
+            Ir al Candy Bar
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline"
+            (click)="continuarSinCandyBar()"
+          >
+            Continuar sin Candy Bar
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  }
 </div>

@@ -48,7 +48,12 @@
         Tu compra fue registrada correctamente.
       </p>
 
+
       <div class="purchase-content">
+
+        <!-- =========================
+             PELÍCULA / FUNCIÓN
+             ========================= -->
 
         <section class="movie-section">
 
@@ -86,6 +91,10 @@
 
         </section>
 
+
+        <!-- =========================
+             ENTRADA
+             ========================= -->
 
         <section class="ticket-section">
 
@@ -157,12 +166,110 @@
 
           </div>
 
+        </section>
 
-          <div class="total">
 
-            <span>
-              Total
-            </span>
+        <!-- =========================
+             CANDY BAR
+             ========================= -->
+
+        @if (
+          purchase.candyBar &&
+          (
+            purchase.candyBar.products.length > 0 ||
+            purchase.candyBar.combos.length > 0
+          )
+        ) {
+
+          <section class="candy-bar-section">
+
+            <h2>
+              🍿 Candy Bar
+            </h2>
+
+            <div class="candy-bar-list">
+
+              @for (
+                combo of purchase.candyBar.combos;
+                track combo.id
+              ) {
+
+                <div class="candy-bar-item">
+
+                  <div class="candy-bar-info">
+
+                    <strong>
+                      {{ combo.name }}
+                    </strong>
+
+                    <span>
+                      Cantidad: {{ combo.quantity }}
+                    </span>
+
+                  </div>
+
+                  <strong class="candy-bar-price">
+                    {{ formatPrice(combo.price * combo.quantity) }}
+                  </strong>
+
+                </div>
+
+              }
+
+
+              @for (
+                product of purchase.candyBar.products;
+                track product.id
+              ) {
+
+                <div class="candy-bar-item">
+
+                  <div class="candy-bar-info">
+
+                    <strong>
+                      {{ product.name }}
+                    </strong>
+
+                    <span>
+                      Cantidad: {{ product.quantity }}
+                    </span>
+
+                  </div>
+
+                  <strong class="candy-bar-price">
+                    {{ formatPrice(product.price * product.quantity) }}
+                  </strong>
+
+                </div>
+
+              }
+
+            </div>
+
+          </section>
+
+        }
+
+
+        <!-- =========================
+             PRECIO FINAL
+             ========================= -->
+
+        <section class="final-total-section">
+
+          <div class="final-total-row">
+
+            <div class="final-total-label">
+
+              <span>
+                Precio final
+              </span>
+
+              <small>
+                Entradas + Candy Bar
+              </small>
+
+            </div>
 
             <strong>
               {{ formatPrice(purchase.total) }}
@@ -172,6 +279,10 @@
 
         </section>
 
+
+        <!-- =========================
+             QR
+             ========================= -->
 
         <section class="qr-section">
 
@@ -195,7 +306,13 @@
 
         </section>
 
+
+        <!-- =========================
+             BOTÓN
+             ========================= -->
+
         <div class="actions">
+
           <button
             type="button"
             class="primary-button"
@@ -203,7 +320,9 @@
           >
             Volver al inicio
           </button>
+
         </div>
+
       </div>
 
     } @else {

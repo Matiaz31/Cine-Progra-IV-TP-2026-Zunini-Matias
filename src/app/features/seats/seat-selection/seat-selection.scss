@@ -359,3 +359,105 @@
     margin-left: 0;
   }
 }
+
+/* =========================
+   MODAL CANDY BAR
+   ========================= */
+
+.candy-bar-overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: var(--space-lg);
+
+  background: rgba(11, 13, 18, 0.78);
+  backdrop-filter: blur(4px);
+}
+
+.candy-bar-modal {
+  width: min(100%, 460px);
+
+  padding: var(--space-2xl);
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-md);
+
+  text-align: center;
+
+  animation: candyBarModalIn 180ms ease-out;
+}
+
+.candy-bar-icon {
+  display: block;
+
+  margin-bottom: var(--space-md);
+
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.candy-bar-modal h2 {
+  margin: 0 0 var(--space-md);
+
+  color: var(--color-text);
+
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+}
+
+.candy-bar-modal p {
+  margin: 0 auto var(--space-xl);
+
+  max-width: 380px;
+
+  color: var(--color-text-secondary);
+
+  line-height: 1.6;
+}
+
+.candy-bar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.candy-bar-actions .btn {
+  width: 100%;
+  min-height: 46px;
+}
+
+@keyframes candyBarModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .candy-bar-overlay {
+    padding: var(--space-md);
+  }
+
+  .candy-bar-modal {
+    padding: var(--space-xl);
+  }
+
+  .candy-bar-modal h2 {
+    font-size: 1.4rem;
+  }
+}

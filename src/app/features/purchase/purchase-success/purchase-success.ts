@@ -22,9 +22,11 @@ import {
   styleUrl: './purchase-success.scss',
 })
 export class PurchaseSuccess implements OnInit {
+
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+
   private purchaseTicketService = inject(
     PurchaseTicketService
   );
@@ -63,8 +65,22 @@ export class PurchaseSuccess implements OnInit {
         );
 
       if (savedPurchase) {
-        this.purchase =
-          JSON.parse(savedPurchase);
+
+        try {
+
+          this.purchase =
+            JSON.parse(savedPurchase);
+
+        } catch (error) {
+
+          console.error(
+            'ERROR LEYENDO purchase-success:',
+            error
+          );
+
+          this.error =
+            'No se pudo recuperar la información de la compra.';
+        }
       }
     }
 
@@ -74,16 +90,26 @@ export class PurchaseSuccess implements OnInit {
   }
 
   async loadTicket(ticketId: string) {
+
     this.loading = true;
     this.error = '';
 
     try {
-      console.log('CARGANDO TICKET:', ticketId);
+
+      console.log(
+        'CARGANDO TICKET:',
+        ticketId
+      );
 
       this.purchase =
-        await this.purchaseTicketService.getTicket(ticketId);
+        await this.purchaseTicketService.getTicket(
+          ticketId
+        );
 
-      console.log('TICKET CARGADO:', this.purchase);
+      console.log(
+        'TICKET CARGADO:',
+        this.purchase
+      );
 
     } catch (error: any) {
 
@@ -115,7 +141,9 @@ export class PurchaseSuccess implements OnInit {
       'purchase-success'
     );
 
-    this.router.navigate(['/home']);
+    this.router.navigate([
+      '/home',
+    ]);
   }
 
   volverAEntradas() {
@@ -128,6 +156,7 @@ export class PurchaseSuccess implements OnInit {
   getSeatLabel(
     seat: PurchaseData['seats'][number]
   ) {
+
     return `${seat.row_label}${seat.seat_number}`;
   }
 
@@ -155,7 +184,9 @@ export class PurchaseSuccess implements OnInit {
       return '';
     }
 
-    return new Date(date).toLocaleDateString(
+    return new Date(
+      date
+    ).toLocaleDateString(
       'es-AR',
       {
         day: '2-digit',

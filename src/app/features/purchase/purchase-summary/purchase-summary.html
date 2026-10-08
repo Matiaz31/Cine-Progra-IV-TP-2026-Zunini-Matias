@@ -29,6 +29,10 @@
 
     } @else {
 
+      <!-- =========================
+           PELÍCULA
+           ========================= -->
+
       <section class="movie-card">
 
         <div class="movie-info">
@@ -43,6 +47,7 @@
 
             <div class="info-item">
               <span>Función</span>
+
               <strong>
                 {{ formatDate(startTime) }}
               </strong>
@@ -50,6 +55,7 @@
 
             <div class="info-item">
               <span>Formato</span>
+
               <strong>
                 {{ format }}
               </strong>
@@ -57,6 +63,7 @@
 
             <div class="info-item">
               <span>Idioma</span>
+
               <strong>
                 {{ language }}
               </strong>
@@ -68,25 +75,48 @@
 
       </section>
 
+
+      <!-- =========================
+           BUTACAS
+           ========================= -->
+
       <section class="seats-section">
 
         <div class="section-heading">
-          <h2>Butacas seleccionadas</h2>
+
+          <h2>
+            Butacas seleccionadas
+          </h2>
 
           <span class="seat-count">
+
             {{ selectedSeats.length }}
-            {{ selectedSeats.length === 1 ? 'entrada' : 'entradas' }}
+
+            {{ selectedSeats.length === 1
+              ? 'entrada'
+              : 'entradas'
+            }}
+
           </span>
+
         </div>
+
 
         <div class="seat-list">
 
-          @for (seat of selectedSeats; track seat.id) {
+          @for (
+            seat of selectedSeats;
+            track seat.id
+          ) {
 
             <div
               class="seat-item"
-              [class.seat-item-vip]="seat.seat_type === 'vip'"
-              [class.seat-item-accessible]="seat.seat_type === 'accessible'"
+              [class.seat-item-vip]="
+                seat.seat_type === 'vip'
+              "
+              [class.seat-item-accessible]="
+                seat.seat_type === 'accessible'
+              "
             >
 
               <div class="seat-main">
@@ -110,7 +140,7 @@
               </div>
 
               <div class="seat-price">
-                ${{ getSeatPrice(seat) }}
+                {{ formatPrice(getSeatPrice(seat)) }}
               </div>
 
             </div>
@@ -121,31 +151,226 @@
 
       </section>
 
+
+      <!-- =========================
+           CANDY BAR
+           ========================= -->
+
+      @if (
+        candyBar.products.length > 0 ||
+        candyBar.combos.length > 0
+      ) {
+
+        <section class="candy-bar-section">
+
+          <div class="section-heading">
+
+            <h2>
+              🍿 Candy Bar
+            </h2>
+
+            <span class="seat-count">
+              {{ getCandyBarItemsCount() }}
+              {{ getCandyBarItemsCount() === 1
+                ? 'producto'
+                : 'productos'
+              }}
+            </span>
+
+          </div>
+
+
+          <div class="candy-bar-list">
+
+            <!-- COMBOS -->
+
+            @for (
+              combo of candyBar.combos;
+              track combo.id
+            ) {
+
+              <div class="candy-bar-item">
+
+                <div class="candy-bar-main">
+
+                  <div class="candy-bar-icon">
+                    🍿
+                  </div>
+
+                  <div class="candy-bar-details">
+
+                    <strong>
+                      {{ combo.name }}
+                    </strong>
+
+                    <span>
+                      Cantidad: {{ combo.quantity }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+                <div class="candy-bar-price">
+
+                  {{
+                    formatPrice(
+                      combo.price * combo.quantity
+                    )
+                  }}
+
+                </div>
+
+              </div>
+
+            }
+
+
+            <!-- PRODUCTOS -->
+
+            @for (
+              product of candyBar.products;
+              track product.id
+            ) {
+
+              <div class="candy-bar-item">
+
+                <div class="candy-bar-main">
+
+                  <div class="candy-bar-icon">
+                    🍫
+                  </div>
+
+                  <div class="candy-bar-details">
+
+                    <strong>
+                      {{ product.name }}
+                    </strong>
+
+                    <span>
+                      Cantidad: {{ product.quantity }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+                <div class="candy-bar-price">
+
+                  {{
+                    formatPrice(
+                      product.price * product.quantity
+                    )
+                  }}
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+
+          <div class="candy-bar-subtotal">
+
+            <span>
+              Subtotal Candy Bar
+            </span>
+
+            <strong>
+              {{ formatPrice(getCandyBarTotal()) }}
+            </strong>
+
+          </div>
+
+        </section>
+
+      }
+
+
+      <!-- =========================
+           TOTAL
+           ========================= -->
+
       <section class="purchase-total">
+
+        <div class="total-breakdown">
+
+          <div class="total-row">
+
+            <span>
+              Entradas
+            </span>
+
+            <strong>
+              {{ formatPrice(getTicketsTotal()) }}
+            </strong>
+
+          </div>
+
+
+          @if (getCandyBarTotal() > 0) {
+
+            <div class="total-row">
+
+              <span>
+                Candy Bar
+              </span>
+
+              <strong>
+                {{ formatPrice(getCandyBarTotal()) }}
+              </strong>
+
+            </div>
+
+          }
+
+        </div>
+
 
         <div class="total-info">
 
-          <span>Total</span>
+          <span>
+            Total
+          </span>
 
           <strong>
-            ${{ getTotal() }}
+            {{ formatPrice(getTotal()) }}
           </strong>
 
         </div>
 
         <p>
-          El precio incluye las butacas seleccionadas.
+          El precio incluye las entradas
+          y los productos seleccionados.
         </p>
 
       </section>
 
+
+      <!-- =========================
+           ACCIONES
+           ========================= -->
+
       <div class="actions">
+
         @if (success) {
-        <div class="success-message">
-            <strong>{{ success }}</strong>
-            <span>Volviendo al inicio...</span>
-        </div>
+
+          <div class="success-message">
+
+            <strong>
+              {{ success }}
+            </strong>
+
+            <span>
+              Volviendo al inicio...
+            </span>
+
+          </div>
+
         }
+
 
         <button
           type="button"
@@ -155,13 +380,18 @@
           Volver
         </button>
 
+
         <button
           type="button"
           class="primary-button"
           [disabled]="purchasing"
           (click)="confirmarCompra()"
-          >
-          {{ purchasing ? 'Procesando...' : 'Confirmar compra' }}
+        >
+          {{
+            purchasing
+              ? 'Procesando...'
+              : 'Confirmar compra'
+          }}
         </button>
 
       </div>

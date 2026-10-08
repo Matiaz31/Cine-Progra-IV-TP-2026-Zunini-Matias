@@ -323,23 +323,38 @@ export class SeatSelection implements OnInit {
     ).length;
   }
 
+  mostrarCandyBar = false;
+
   continuar() {
     if (this.selectedSeats.length === 0) {
       return;
     }
 
+    this.mostrarCandyBar = true;
+    this.cdr.detectChanges();
+  }
+
+  irAlCandyBar() {
+    this.guardarSeleccion();
+    this.router.navigate(['/candy-bar']);
+  }
+
+  continuarSinCandyBar() {
+    this.guardarSeleccion();
+    this.router.navigate(['/resumen-compra']);
+  }
+
+  private guardarSeleccion() {
     const seatIds = this.selectedSeats.map(
       (seat) => seat.id
     );
 
-    this.router.navigate(
-      ['/resumen-compra'],
-      {
-        queryParams: {
-          screeningId: this.screeningId,
-          seats: seatIds.join(','),
-        },
-      }
+    sessionStorage.setItem(
+      'purchase-selection',
+      JSON.stringify({
+        screeningId: this.screeningId,
+        seatIds,
+      })
     );
   }
 
