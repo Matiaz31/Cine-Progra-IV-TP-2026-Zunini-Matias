@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+
 import { supabase } from '../../../core/supabase';
+
 import { Movie } from '../../movies/movie';
 
 @Injectable({
@@ -7,21 +9,40 @@ import { Movie } from '../../movies/movie';
 })
 export class AdminMovieService {
 
+  /* =========================
+     OBTENER PELÍCULAS
+     ========================= */
+
   async getMovies(): Promise<Movie[]> {
+
     const { data, error } = await supabase
       .from('movies')
       .select('*')
-      .order('release_date', { ascending: false });
+      .order('release_date', {
+        ascending: false,
+      });
 
     if (error) {
-      console.error('ERROR SUPABASE - obtener películas:', error);
+
+      console.error(
+        'ERROR SUPABASE - obtener películas:',
+        error
+      );
+
       throw error;
     }
 
-    console.log('PELÍCULAS ADMIN:', data);
+    console.log(
+      'PELÍCULAS ADMIN:',
+      data
+    );
 
     return data ?? [];
   }
+
+  /* =========================
+     CREAR PELÍCULA
+     ========================= */
 
   async createMovie(movie: {
     title: string;
@@ -41,12 +62,21 @@ export class AdminMovieService {
       .single();
 
     if (error) {
-      console.error('Error al crear película:', error);
+
+      console.error(
+        'Error al crear película:',
+        error
+      );
+
       return null;
     }
 
     return data;
   }
+
+  /* =========================
+     ACTUALIZAR PELÍCULA
+     ========================= */
 
   async updateMovie(
     id: string,
@@ -71,21 +101,66 @@ export class AdminMovieService {
       .single();
 
     if (error) {
-      console.error('Error al actualizar película:', error);
+
+      console.error(
+        'Error al actualizar película:',
+        error
+      );
+
       return null;
     }
 
     return data;
   }
 
-  async deleteMovie(id: string): Promise<boolean> {
+  /* =========================
+     DESACTIVAR PELÍCULA
+     ========================= */
+
+  async deleteMovie(
+    id: string
+  ): Promise<boolean> {
+
     const { error } = await supabase
       .from('movies')
-      .update({ is_active: false })
+      .update({
+        is_active: false,
+      })
       .eq('id', id);
 
     if (error) {
-      console.error('Error al desactivar película:', error);
+
+      console.error(
+        'Error al desactivar película:',
+        error
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /* =========================
+     ELIMINAR DEFINITIVAMENTE
+     ========================= */
+
+  async permanentlyDeleteMovie(
+    id: string
+  ): Promise<boolean> {
+
+    const { error } = await supabase
+      .from('movies')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+
+      console.error(
+        'Error al eliminar película:',
+        error
+      );
+
       return false;
     }
 

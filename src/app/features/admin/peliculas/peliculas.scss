@@ -1,11 +1,20 @@
+/* =========================
+   MÓDULO
+   ========================= */
+
 .admin-module {
   margin-top: var(--space-xl);
 }
+
+/* =========================
+   ENCABEZADO
+   ========================= */
 
 .module-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: var(--space-lg);
 
   margin-bottom: var(--space-lg);
@@ -17,24 +26,91 @@
 
 .module-header p {
   margin-bottom: 0;
+
   color: var(--color-text-secondary);
 }
 
-.primary-button {
-  padding: 10px 18px;
+/* =========================
+   BOTONES
+   ========================= */
 
+.primary-button,
+.secondary-button,
+.movie-actions button {
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 16px;
+
+  border-radius: var(--radius-md);
+
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+/* =========================
+   BOTÓN PRINCIPAL
+   ========================= */
+
+.primary-button {
   background: var(--color-primary);
   color: var(--color-text);
 
-  border: none;
-  border-radius: var(--radius-md);
+  border: 1px solid var(--color-primary);
 
-  cursor: pointer;
+  box-shadow: var(--shadow-sm);
 }
 
-.primary-button:hover {
+.primary-button:hover:not(:disabled) {
   background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+
+  transform: translateY(-1px);
+
+  box-shadow: var(--shadow-md);
 }
+
+.primary-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* =========================
+   BOTÓN SECUNDARIO
+   ========================= */
+
+.secondary-button {
+  background: var(--color-surface-light);
+  color: var(--color-text-secondary);
+
+  border: 1px solid var(--color-border);
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: var(--color-surface);
+
+  color: var(--color-text);
+
+  border-color: var(--color-primary);
+
+  transform: translateY(-1px);
+}
+
+/* =========================
+   MENSAJES
+   ========================= */
 
 .message {
   padding: var(--space-lg);
@@ -51,9 +127,167 @@
   color: var(--color-danger);
 }
 
+/* =========================
+   FORMULARIO
+   ========================= */
+
+.movie-form {
+  margin-top: var(--space-lg);
+
+  padding: var(--space-lg);
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: var(--space-lg);
+
+  margin-bottom: var(--space-xl);
+}
+
+.form-header h3 {
+  margin-bottom: var(--space-sm);
+}
+
+.form-header p {
+  margin-bottom: 0;
+
+  color: var(--color-text-secondary);
+}
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: var(--space-lg);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: var(--space-sm);
+}
+
+.form-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  color: var(--color-text);
+
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  width: 100%;
+
+  padding: 11px 12px;
+
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  font-family: inherit;
+  font-size: 0.9rem;
+
+  outline: none;
+
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.form-field select {
+  cursor: pointer;
+}
+
+.form-field textarea {
+  resize: vertical;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  border-color: var(--color-primary);
+
+  box-shadow:
+    0 0 0 2px
+    rgba(118, 103, 168, 0.15);
+}
+
+/* =========================
+   CHECKBOX
+   ========================= */
+
+.checkbox-field {
+  justify-content: center;
+}
+
+.checkbox-field label {
+  display: flex;
+  align-items: center;
+
+  gap: var(--space-sm);
+
+  cursor: pointer;
+}
+
+.checkbox-field input {
+  width: auto;
+}
+
+/* =========================
+   ACCIONES DEL FORMULARIO
+   ========================= */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: var(--space-sm);
+
+  margin-top: var(--space-xl);
+}
+
+/* =========================
+   ERROR
+   ========================= */
+
+.form-error {
+  margin-top: var(--space-lg);
+
+  padding: var(--space-md);
+
+  color: var(--color-danger);
+
+  background: rgba(168, 102, 111, 0.1);
+
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+}
+
+/* =========================
+   LISTA DE PELÍCULAS
+   ========================= */
+
 .movies-list {
   display: flex;
   flex-direction: column;
+
   gap: var(--space-md);
 }
 
@@ -61,6 +295,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: var(--space-lg);
 
   padding: var(--space-lg);
@@ -81,44 +316,97 @@
 
 .movie-info p {
   margin-bottom: var(--space-md);
+
   color: var(--color-text-secondary);
 }
 
 .movie-data {
   display: flex;
   flex-wrap: wrap;
+
   gap: var(--space-md);
 
   color: var(--color-text-muted);
+
   font-size: 0.85rem;
 }
 
+/* =========================
+   ACCIONES DE PELÍCULA
+   ========================= */
+
 .movie-actions {
   display: flex;
+  align-items: center;
+
   gap: var(--space-sm);
 }
 
 .movie-actions button {
-  padding: 8px 14px;
+  background: transparent;
 
-  background: var(--color-surface-light);
-  color: var(--color-text);
+  color: var(--color-text-secondary);
 
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-
-  cursor: pointer;
 }
 
 .movie-actions button:hover {
+  background: var(--color-surface-light);
+
+  color: var(--color-text);
+
   border-color: var(--color-primary);
+
+  transform: translateY(-1px);
 }
 
+/* =========================
+   DESHABILITADOS
+   ========================= */
+
+.primary-button:disabled,
+.secondary-button:disabled,
+.movie-actions button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
 @media (max-width: 700px) {
+
   .module-header,
   .movie-card {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field.full-width {
+    grid-column: auto;
+  }
+
+  .form-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
   }
 
   .movie-actions {
@@ -128,4 +416,22 @@
   .movie-actions button {
     flex: 1;
   }
+}
+
+/* =========================
+   BOTÓN ELIMINAR
+   ========================= */
+
+.movie-actions .delete-button {
+  color: var(--color-danger);
+
+  border-color: rgba(168, 102, 111, 0.45);
+}
+
+.movie-actions .delete-button:hover {
+  color: var(--color-text);
+
+  background: rgba(168, 102, 111, 0.15);
+
+  border-color: var(--color-danger);
 }

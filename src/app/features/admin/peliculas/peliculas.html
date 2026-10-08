@@ -10,85 +10,326 @@
     <button
       type="button"
       class="primary-button"
+      (click)="abrirFormulario()"
     >
       Nueva película
     </button>
 
   </div>
 
-  @if (loading) {
+  @if (mostrarFormulario) {
 
-    <div class="message">
-      Cargando películas...
-    </div>
+    <div class="movie-form">
 
-  } @else if (error) {
+      <div class="form-header">
 
-    <div class="message error">
-      {{ error }}
-    </div>
+        <div>
+          <h3>Nueva película</h3>
+          <p>Completá los datos de la película.</p>
+        </div>
 
-  } @else if (movies.length === 0) {
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="cerrarFormulario()"
+        >
+          Cancelar
+        </button>
 
-    <div class="message">
-      No hay películas cargadas.
-    </div>
+      </div>
 
-  } @else {
+      <form (ngSubmit)="guardarPelicula()">
 
-    <div class="movies-list">
+        <div class="form-grid">
 
-      @for (movie of movies; track movie.id) {
+          <!-- TÍTULO -->
 
-        <article class="movie-card">
+          <div class="form-field">
 
-          <div class="movie-info">
+            <label for="title">
+              Título
+            </label>
 
-            <h3>{{ movie.title }}</h3>
+            <input
+              id="title"
+              type="text"
+              name="title"
+              [(ngModel)]="nuevaPelicula.title"
+              required
+            />
 
-            <p>
-              {{ movie.synopsis || 'Sin sinopsis.' }}
-            </p>
+          </div>
 
-            <div class="movie-data">
+          <!-- DURACIÓN -->
 
-              <span>
-                {{ movie.duration_minutes }} min
-              </span>
+          <div class="form-field">
 
-              <span>
-                Edad: {{ movie.age_rating ?? 'N/A' }}
-              </span>
+            <label for="duration">
+              Duración (minutos)
+            </label>
 
-              <span>
-                {{ movie.is_active ? 'Activa' : 'Inactiva' }}
-              </span>
+            <input
+              id="duration"
+              type="number"
+              name="duration"
+              min="1"
+              [(ngModel)]="nuevaPelicula.duration_minutes"
+              required
+            />
+
+          </div>
+
+          <!-- FECHA DE ESTRENO -->
+
+          <div class="form-field">
+
+            <label for="release-date">
+              Fecha de estreno
+            </label>
+
+            <input
+              id="release-date"
+              type="date"
+              name="releaseDate"
+              [(ngModel)]="nuevaPelicula.release_date"
+            />
+
+          </div>
+
+          <!-- CLASIFICACIÓN -->
+
+          <div class="form-field">
+
+            <label for="age-rating">
+              Clasificación por edad
+            </label>
+
+            <select
+              id="age-rating"
+              name="ageRating"
+              [(ngModel)]="nuevaPelicula.age_rating"
+            >
+
+              <option [ngValue]="null">
+                Sin clasificación
+              </option>
+
+              <option [ngValue]="13">
+                ATP +13
+              </option>
+
+              <option [ngValue]="18">
+                +18
+              </option>
+
+            </select>
+
+          </div>
+
+          <!-- PÓSTER -->
+
+          <div class="form-field full-width">
+
+            <label for="poster">
+              URL del póster
+            </label>
+
+            <input
+              id="poster"
+              type="url"
+              name="poster"
+              [(ngModel)]="nuevaPelicula.poster_url"
+              placeholder="https://..."
+            />
+
+          </div>
+
+          <!-- SINOPSIS -->
+
+          <div class="form-field full-width">
+
+            <label for="synopsis">
+              Sinopsis
+            </label>
+
+            <textarea
+              id="synopsis"
+              name="synopsis"
+              rows="4"
+              [(ngModel)]="nuevaPelicula.synopsis"
+            ></textarea>
+
+          </div>
+
+          <!-- PREVENTA -->
+
+          <div class="form-field checkbox-field">
+
+            <label>
+
+              <input
+                type="checkbox"
+                name="preSale"
+                [(ngModel)]="nuevaPelicula.pre_sale_enabled"
+              />
+
+              Habilitar preventa
+
+            </label>
+
+          </div>
+
+          <!-- PRECIO PREVENTA -->
+
+          @if (nuevaPelicula.pre_sale_enabled) {
+
+            <div class="form-field">
+
+              <label for="pre-sale-price">
+                Precio de preventa
+              </label>
+
+              <input
+                id="pre-sale-price"
+                type="number"
+                name="preSalePrice"
+                min="0"
+                step="0.01"
+                [(ngModel)]="nuevaPelicula.pre_sale_price"
+              />
 
             </div>
 
+          }
+
+        </div>
+
+        @if (error) {
+
+          <div class="form-error">
+            {{ error }}
           </div>
 
-          <div class="movie-actions">
+        }
 
-            <button
-              type="button"
-            >
-              Editar
-            </button>
+        <div class="form-actions">
 
-            <button
-              type="button"
-            >
-              {{ movie.is_active ? 'Desactivar' : 'Activar' }}
-            </button>
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="cerrarFormulario()"
+          >
+            Cancelar
+          </button>
 
-          </div>
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="guardando"
+          >
+            {{ guardando ? 'Guardando...' : 'Crear película' }}
+          </button>
 
-        </article>
+        </div>
 
-      }
+      </form>
 
     </div>
+
+  }
+
+  @if (!mostrarFormulario) {
+
+    @if (loading) {
+
+      <div class="message">
+        Cargando películas...
+      </div>
+
+    } @else if (error) {
+
+      <div class="message error">
+        {{ error }}
+      </div>
+
+    } @else if (movies.length === 0) {
+
+      <div class="message">
+        No hay películas cargadas.
+      </div>
+
+    } @else {
+
+      <div class="movies-list">
+
+        @for (movie of movies; track movie.id) {
+
+          <article class="movie-card">
+
+            <div class="movie-info">
+
+              <h3>
+                {{ movie.title }}
+              </h3>
+
+              <p>
+                {{ movie.synopsis || 'Sin sinopsis.' }}
+              </p>
+
+              <div class="movie-data">
+
+                <span>
+                  {{ movie.duration_minutes }} min
+                </span>
+
+                <span>
+                  Edad:
+                  {{ movie.age_rating ?? 'Sin clasificación' }}
+                </span>
+
+                <span>
+                  {{ movie.is_active ? 'Activa' : 'Inactiva' }}
+                </span>
+
+              </div>
+
+            </div>
+
+            <div class="movie-actions">
+
+            <button
+                type="button"
+                class="edit-button"
+                (click)="editarPelicula(movie)"
+            >
+                Editar
+            </button>
+
+            <button
+                type="button"
+                [class.activate-button]="!movie.is_active"
+                [class.deactivate-button]="movie.is_active"
+                (click)="cambiarEstado(movie)"
+            >
+                {{ movie.is_active ? 'Desactivar' : 'Activar' }}
+            </button>
+
+            <button
+                type="button"
+                class="delete-button"
+                (click)="eliminarPelicula(movie)"
+            >
+                Eliminar
+            </button>
+
+            </div>
+          </article>
+
+        }
+
+      </div>
+
+    }
 
   }
 
