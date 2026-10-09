@@ -38,7 +38,7 @@
 
     <nav class="main-nav">
 
-      @if (hasSession()) {
+      @if (role () === 'customer') {
         <a routerLink="/perfil" routerLinkActive="active">
           Ir a Perfil
         </a>

@@ -2,116 +2,136 @@
   <div class="module-header">
     <div>
       <h2>Géneros</h2>
-      <p>Administración de los géneros cinematográficos.</p>
+      <p>Administración de géneros cinematográficos.</p>
     </div>
 
-```
-<button
-  type="button"
-  class="primary-button"
-  (click)="abrirFormulario()"
->
-  Nuevo género
-</button>
-```
-
-  </div>
-
-@if (success) { <div class="message success">{{ success }}</div>
-}
-
-@if (error && !mostrarFormulario) { <div class="message error">{{ error }}</div>
-}
-
-@if (mostrarFormulario) { <div class="genre-form"> <div class="form-header"> <div> <h3>{{ editando ? 'Editar género' : 'Nuevo género' }}</h3> <p>Ingresá el nombre del género.</p> </div>
-
-```
     <button
       type="button"
-      class="secondary-button"
-      (click)="cerrarFormulario()"
+      class="primary-button"
+      (click)="abrirFormulario()"
+      [disabled]="saving"
     >
-      Cancelar
+      Nuevo género
     </button>
   </div>
 
-  <form (ngSubmit)="guardarGenero()">
-    <div class="form-field">
-      <label for="genre-name">Nombre</label>
-      <input
-        id="genre-name"
-        type="text"
-        name="genreName"
-        [(ngModel)]="nombreGenero"
-        maxlength="80"
-        placeholder="Ej. Suspenso"
-        required
-      />
+  @if (success) {
+    <div class="message success">
+      {{ success }}
     </div>
+  }
 
-    @if (error) {
-      <div class="message error">{{ error }}</div>
-    }
-
-    <div class="form-actions">
-      <button
-        type="button"
-        class="secondary-button"
-        (click)="cerrarFormulario()"
-      >
-        Cancelar
-      </button>
-
-      <button
-        type="submit"
-        class="primary-button"
-        [disabled]="saving"
-      >
-        {{
-          saving
-            ? 'Guardando...'
-            : editando
-              ? 'Guardar cambios'
-              : 'Crear género'
-        }}
-      </button>
+  @if (error && !mostrarFormulario) {
+    <div class="message error">
+      {{ error }}
     </div>
-  </form>
-</div>
-```
+  }
 
-}
+  @if (mostrarFormulario) {
+    <div class="genre-form">
+      <div class="form-header">
+        <div>
+          <h3>{{ editando ? 'Editar género' : 'Nuevo género' }}</h3>
+          <p>Ingresá el nombre del género.</p>
+        </div>
 
-@if (!mostrarFormulario) {
-@if (loading) { <div class="message">Cargando géneros...</div>
-} @else if (genres.length === 0) { <div class="message">No hay géneros cargados.</div>
-} @else { <div class="genres-list">
-@for (genre of genres; track genre.id) { <article class="genre-card"> <div class="genre-info"> <h3>{{ genre.name }}</h3> </div>
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="cerrarFormulario()"
+          [disabled]="saving"
+        >
+          Cancelar
+        </button>
+      </div>
 
-```
-        <div class="genre-actions">
+      <form (ngSubmit)="guardarGenero()">
+        <div class="form-field">
+          <label for="nombreGenero">Nombre</label>
+
+          <input
+            id="nombreGenero"
+            type="text"
+            name="nombreGenero"
+            [(ngModel)]="nombreGenero"
+            maxlength="80"
+            placeholder="Ej. Suspenso"
+            [disabled]="saving"
+            required
+          />
+        </div>
+
+        @if (error) {
+          <div class="message error">
+            {{ error }}
+          </div>
+        }
+
+        <div class="form-actions">
           <button
             type="button"
-            class="edit-button"
-            (click)="editarGenero(genre)"
+            class="secondary-button"
+            (click)="cerrarFormulario()"
+            [disabled]="saving"
           >
-            Editar
+            Cancelar
           </button>
 
           <button
-            type="button"
-            class="delete-button"
-            (click)="eliminarGenero(genre)"
+            type="submit"
+            class="primary-button"
+            [disabled]="saving"
           >
-            Eliminar
+            @if (saving) {
+              Guardando...
+            } @else {
+              {{ editando ? 'Guardar cambios' : 'Crear género' }}
+            }
           </button>
         </div>
-      </article>
+      </form>
+    </div>
+  }
+
+  @if (!mostrarFormulario) {
+    @if (loading) {
+      <div class="module-content">
+        <p>Cargando géneros...</p>
+      </div>
+    } @else if (genres.length === 0) {
+      <div class="module-content">
+        <p>No hay géneros cargados.</p>
+      </div>
+    } @else {
+      <div class="genres-list">
+        @for (genre of genres; track genre.id) {
+          <article class="genre-card">
+            <div class="genre-info">
+              <h3>{{ genre.name }}</h3>
+            </div>
+
+            <div class="genre-actions">
+              <button
+                type="button"
+                class="edit-button"
+                (click)="editarGenero(genre)"
+                [disabled]="saving"
+              >
+                Editar
+              </button>
+
+              <button
+                type="button"
+                class="delete-button"
+                (click)="eliminarGenero(genre)"
+                [disabled]="saving"
+              >
+                Eliminar
+              </button>
+            </div>
+          </article>
+        }
+      </div>
     }
-  </div>
-}
-```
-
-}
-
+  }
 </section>

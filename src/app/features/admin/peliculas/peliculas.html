@@ -1,7 +1,5 @@
 <section class="admin-module">
-
   <div class="module-header">
-
     <div>
       <h2>Películas</h2>
       <p>Administración de películas del cine.</p>
@@ -18,32 +16,29 @@
   </div>
 
   @if (mostrarFormulario) {
-
-    <div class="movie-form">
-
-      <div class="form-header">
-
-        <div>
-          <h3>Nueva película</h3>
-          <p>Completá los datos de la película.</p>
-        </div>
-
-        <button
-          type="button"
-          class="secondary-button"
-          (click)="cerrarFormulario()"
-        >
-          Cancelar
-        </button>
-
+  <div class="movie-form">
+    <div class="form-header">
+      <div>
+        <h3>{{ editando ? 'Editar película' : 'Nueva película' }}</h3>
+        <p>
+          {{ editando
+            ? 'Modificá los datos de la película.'
+            : 'Completá los datos de la película.' }}
+        </p>
       </div>
 
-      <form (ngSubmit)="guardarPelicula()">
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="guardando"
+        (click)="cerrarFormulario()"
+      >
+        Cancelar
+      </button>
+    </div>
 
+    <form (ngSubmit)="guardarPelicula()">
         <div class="form-grid">
-
-          <!-- TÍTULO -->
-
           <div class="form-field">
 
             <label for="title">
@@ -60,10 +55,7 @@
 
           </div>
 
-          <!-- DURACIÓN -->
-
           <div class="form-field">
-
             <label for="duration">
               Duración (minutos)
             </label>
@@ -78,9 +70,6 @@
             />
 
           </div>
-
-          <!-- FECHA DE ESTRENO -->
-
           <div class="form-field">
 
             <label for="release-date">
@@ -95,8 +84,6 @@
             />
 
           </div>
-
-          <!-- CLASIFICACIÓN -->
 
           <div class="form-field">
 
@@ -126,8 +113,6 @@
 
           </div>
 
-          <!-- PÓSTER -->
-
           <div class="form-field full-width">
 
             <label for="poster">
@@ -144,10 +129,7 @@
 
           </div>
 
-          <!-- SINOPSIS -->
-
           <div class="form-field full-width">
-
             <label for="synopsis">
               Sinopsis
             </label>
@@ -161,12 +143,8 @@
 
           </div>
 
-          <!-- PREVENTA -->
-
           <div class="form-field checkbox-field">
-
             <label>
-
               <input
                 type="checkbox"
                 name="preSale"
@@ -179,12 +157,8 @@
 
           </div>
 
-          <!-- PRECIO PREVENTA -->
-
           @if (nuevaPelicula.pre_sale_enabled) {
-
             <div class="form-field">
-
               <label for="pre-sale-price">
                 Precio de preventa
               </label>
@@ -205,7 +179,6 @@
         </div>
 
         @if (error) {
-
           <div class="form-error">
             {{ error }}
           </div>
@@ -213,7 +186,6 @@
         }
 
         <div class="form-actions">
-
           <button
             type="button"
             class="secondary-button"
@@ -227,7 +199,9 @@
             class="primary-button"
             [disabled]="guardando"
           >
-            {{ guardando ? 'Guardando...' : 'Crear película' }}
+            {{ guardando
+              ? 'Guardando...'
+              : (editando ? 'Guardar cambios' : 'Crear película') }}
           </button>
 
         </div>
@@ -239,35 +213,26 @@
   }
 
   @if (!mostrarFormulario) {
-
     @if (loading) {
-
       <div class="message">
         Cargando películas...
       </div>
 
     } @else if (error) {
-
       <div class="message error">
         {{ error }}
       </div>
 
     } @else if (movies.length === 0) {
-
       <div class="message">
         No hay películas cargadas.
       </div>
 
     } @else {
-
       <div class="movies-list">
-
         @for (movie of movies; track movie.id) {
-
           <article class="movie-card">
-
             <div class="movie-info">
-
               <h3>
                 {{ movie.title }}
               </h3>
@@ -298,39 +263,35 @@
             <div class="movie-actions">
 
             <button
-                type="button"
-                class="edit-button"
-                (click)="editarPelicula(movie)"
+              type="button"
+              class="edit-button"
+              (click)="editarPelicula(movie)"
             >
-                Editar
+              Editar
             </button>
 
             <button
-                type="button"
-                [class.activate-button]="!movie.is_active"
-                [class.deactivate-button]="movie.is_active"
-                (click)="cambiarEstado(movie)"
+              type="button"
+              [class.activate-button]="!movie.is_active"
+              [class.deactivate-button]="movie.is_active"
+              (click)="cambiarEstado(movie)"
             >
-                {{ movie.is_active ? 'Desactivar' : 'Activar' }}
+              {{ movie.is_active ? 'Desactivar' : 'Activar' }}
             </button>
 
             <button
-                type="button"
-                class="delete-button"
-                (click)="eliminarPelicula(movie)"
+              type="button"
+              class="delete-button"
+              (click)="eliminarPelicula(movie)"
             >
-                Eliminar
+              Eliminar
             </button>
 
             </div>
           </article>
 
         }
-
       </div>
-
     }
-
   }
-
 </section>

@@ -16,7 +16,6 @@ import { Movie } from '../../movies/movie';
   styleUrl: './peliculas.scss',
 })
 export class Peliculas {
-
   private movieService = inject(AdminMovieService);
   private changeDetector = inject(ChangeDetectorRef);
 
@@ -27,7 +26,6 @@ export class Peliculas {
 
   mostrarFormulario = false;
   guardando = false;
-
   editando = false;
   peliculaEditandoId: string | null = null;
 
@@ -47,59 +45,35 @@ export class Peliculas {
   }
 
   async cargarPeliculas() {
-
     this.loading = true;
     this.error = '';
 
     try {
-
-      const movies =
-        await this.movieService.getMovies();
-
-      this.movies = movies;
-
+      this.movies = await this.movieService.getMovies();
     } catch (error) {
-
-      console.error(
-        'ERROR EN COMPONENTE PELÍCULAS:',
-        error
-      );
-
-      this.error =
-        'No se pudieron cargar las películas.';
-
+      console.error('ERROR AL CARGAR PELÍCULAS:', error);
+      this.error = 'No se pudieron cargar las películas.';
       this.movies = [];
-
     } finally {
-
       this.loading = false;
-
       this.changeDetector.detectChanges();
     }
   }
 
-  /* =========================
-     ABRIR NUEVA PELÍCULA
-     ========================= */
-
   abrirFormulario() {
+    if (this.guardando) return;
 
     this.editando = false;
     this.peliculaEditandoId = null;
-
     this.limpiarFormulario();
-
     this.error = '';
     this.mostrarFormulario = true;
 
     this.changeDetector.detectChanges();
   }
 
-  /* =========================
-     EDITAR PELÍCULA
-     ========================= */
-
   editarPelicula(movie: Movie) {
+    if (this.guardando) return;
 
     this.editando = true;
     this.peliculaEditandoId = movie.id;
@@ -107,18 +81,12 @@ export class Peliculas {
     this.nuevaPelicula = {
       title: movie.title,
       synopsis: movie.synopsis ?? '',
-      duration_minutes:
-        movie.duration_minutes,
-      poster_url:
-        movie.poster_url ?? '',
-      release_date:
-        movie.release_date ?? '',
-      age_rating:
-        movie.age_rating ?? null,
-      pre_sale_enabled:
-        movie.pre_sale_enabled,
-      pre_sale_price:
-        movie.pre_sale_price ?? null,
+      duration_minutes: movie.duration_minutes,
+      poster_url: movie.poster_url ?? '',
+      release_date: movie.release_date ?? '',
+      age_rating: movie.age_rating ?? null,
+      pre_sale_enabled: movie.pre_sale_enabled,
+      pre_sale_price: movie.pre_sale_price ?? null,
     };
 
     this.error = '';
@@ -127,30 +95,19 @@ export class Peliculas {
     this.changeDetector.detectChanges();
   }
 
-  /* =========================
-     CERRAR FORMULARIO
-     ========================= */
-
   cerrarFormulario() {
+    if (this.guardando) return;
 
     this.mostrarFormulario = false;
     this.editando = false;
     this.peliculaEditandoId = null;
-    this.guardando = false;
-
     this.limpiarFormulario();
-
     this.error = '';
 
     this.changeDetector.detectChanges();
   }
 
-  /* =========================
-     LIMPIAR FORMULARIO
-     ========================= */
-
   private limpiarFormulario() {
-
     this.nuevaPelicula = {
       title: '',
       synopsis: '',
@@ -163,200 +120,142 @@ export class Peliculas {
     };
   }
 
-  /* =========================
-     GUARDAR
-     ========================= */
-
   async guardarPelicula() {
-
-    if (this.guardando) {
-      return;
-    }
+    if (this.guardando) return;
 
     this.error = '';
 
-    if (
-      !this.nuevaPelicula.title.trim() ||
-      this.nuevaPelicula.duration_minutes <= 0
-    ) {
+    const titulo = this.nuevaPelicula.title.trim();
+    const duracion = Number(this.nuevaPelicula.duration_minutes);
+    const precioPreventa = this.nuevaPelicula.pre_sale_price;
 
-      this.error =
-        'El título y la duración son obligatorios.';
-
+    if (!titulo) {
+      this.error = 'El título es obligatorio.';
       this.changeDetector.detectChanges();
+      return;
+    }
 
+    if (!Number.isFinite(duracion) || duracion <= 0) {
+      this.error = 'La duración debe ser mayor que cero.';
+      this.changeDetector.detectChanges();
+      return;
+    }
+
+    if (
+      this.nuevaPelicula.pre_sale_enabled &&
+      (
+        precioPreventa === null ||
+        !Number.isFinite(Number(precioPreventa)) ||
+        Number(precioPreventa) < 0
+      )
+    ) {
+      this.error = 'Ingresá un precio de preventa válido.';
+      this.changeDetector.detectChanges();
+      return;
+    }
+
+    if (this.editando && !this.peliculaEditandoId) {
+      this.error = 'No se pudo identificar la película que querés editar.';
+      this.changeDetector.detectChanges();
       return;
     }
 
     this.guardando = true;
+    this.changeDetector.detectChanges();
+
+    const datosPelicula = {
+      title: titulo,
+      synopsis: this.nuevaPelicula.synopsis.trim() || null,
+      duration_minutes: duracion,
+      poster_url: this.nuevaPelicula.poster_url.trim() || null,
+      release_date: this.nuevaPelicula.release_date || null,
+      age_rating: this.nuevaPelicula.age_rating,
+      pre_sale_enabled: this.nuevaPelicula.pre_sale_enabled,
+      pre_sale_price: this.nuevaPelicula.pre_sale_enabled
+        ? Number(precioPreventa)
+        : null,
+    };
 
     try {
+      let pelicula: Movie;
 
-      /* =========================
-         EDITAR
-         ========================= */
-
-      if (
-        this.editando &&
-        this.peliculaEditandoId
-      ) {
-
-        const pelicula =
-          await this.movieService.updateMovie(
-            this.peliculaEditandoId,
-            {
-              title:
-                this.nuevaPelicula.title.trim(),
-
-              synopsis:
-                this.nuevaPelicula.synopsis.trim()
-                  || null,
-
-              duration_minutes:
-                this.nuevaPelicula.duration_minutes,
-
-              poster_url:
-                this.nuevaPelicula.poster_url.trim()
-                  || null,
-
-              release_date:
-                this.nuevaPelicula.release_date
-                  || null,
-
-              age_rating:
-                this.nuevaPelicula.age_rating,
-
-              pre_sale_enabled:
-                this.nuevaPelicula.pre_sale_enabled,
-
-              pre_sale_price:
-                this.nuevaPelicula.pre_sale_price,
-            }
-          );
-
-        if (!pelicula) {
-
-          this.error =
-            'No se pudo actualizar la película.';
-
-          return;
-        }
-
+      if (this.editando && this.peliculaEditandoId) {
+        pelicula = await this.movieService.updateMovie(
+          this.peliculaEditandoId,
+          datosPelicula
+        );
+      } else {
+        pelicula = await this.movieService.createMovie(datosPelicula);
       }
 
-      /* =========================
-         CREAR
-         ========================= */
-
-      else {
-
-        const pelicula =
-          await this.movieService.createMovie({
-            title:
-              this.nuevaPelicula.title.trim(),
-
-            synopsis:
-              this.nuevaPelicula.synopsis.trim()
-                || null,
-
-            duration_minutes:
-              this.nuevaPelicula.duration_minutes,
-
-            poster_url:
-              this.nuevaPelicula.poster_url.trim()
-                || null,
-
-            release_date:
-              this.nuevaPelicula.release_date
-                || null,
-
-            age_rating:
-              this.nuevaPelicula.age_rating,
-
-            pre_sale_enabled:
-              this.nuevaPelicula.pre_sale_enabled,
-
-            pre_sale_price:
-              this.nuevaPelicula.pre_sale_price,
-          });
-
-        if (!pelicula) {
-
-          this.error =
-            'No se pudo crear la película.';
-
-          return;
-        }
-      }
-
-      this.cerrarFormulario();
+      this.mostrarFormulario = false;
+      this.editando = false;
+      this.peliculaEditandoId = null;
+      this.limpiarFormulario();
 
       await this.cargarPeliculas();
-
     } catch (error) {
+      console.error('ERROR AL GUARDAR PELÍCULA:', error);
 
-      console.error(
-        'ERROR AL GUARDAR PELÍCULA:',
-        error
-      );
-
-      this.error =
-        'Ocurrió un error al guardar la película.';
-
+      this.error = this.editando
+        ? 'No se pudieron guardar los cambios. Revisá la consola para conocer el error.'
+        : 'No se pudo crear la película. Revisá la consola para conocer el error.';
     } finally {
-
       this.guardando = false;
-
       this.changeDetector.detectChanges();
     }
   }
 
-  /* =========================
-     ACTIVAR / DESACTIVAR
-     ========================= */
-
   async cambiarEstado(movie: Movie) {
+    this.error = '';
 
-    const nuevoEstado =
-      !movie.is_active;
-
-    const pelicula =
-      await this.movieService.updateMovie(
+    try {
+      const pelicula = await this.movieService.updateMovie(
         movie.id,
-        {
-          is_active: nuevoEstado,
-        }
+        { is_active: !movie.is_active }
       );
 
-    if (!pelicula) {
+      if (!pelicula) {
+        this.error = 'No se pudo cambiar el estado de la película.';
+        return;
+      }
 
-      this.error =
-        'No se pudo cambiar el estado de la película.';
-
+      await this.cargarPeliculas();
+    } catch (error) {
+      console.error('ERROR AL CAMBIAR ESTADO:', error);
+      this.error = 'Ocurrió un error al cambiar el estado de la película.';
+    } finally {
       this.changeDetector.detectChanges();
-
-      return;
     }
-
-    await this.cargarPeliculas();
   }
 
   async eliminarPelicula(movie: Movie) {
     const confirmar = window.confirm(
-      `¿Seguro que querés eliminar la película "${movie.title}"?`
+      `¿Seguro que querés eliminar definitivamente la película "${movie.title}"?`
     );
 
-    if (!confirmar) {
-      return;
+    if (!confirmar) return;
+
+    this.error = '';
+
+    try {
+      const eliminado = await this.movieService.permanentlyDeleteMovie(
+        movie.id
+      );
+
+      if (!eliminado) {
+        this.error =
+          'No se pudo eliminar la película. Puede tener funciones u otros registros asociados.';
+        return;
+      }
+
+      await this.cargarPeliculas();
+    } catch (error) {
+      console.error('ERROR AL ELIMINAR PELÍCULA:', error);
+      this.error =
+        'Ocurrió un error al eliminar la película. Revisá si tiene registros asociados.';
+    } finally {
+      this.changeDetector.detectChanges();
     }
-
-    const eliminado = await this.movieService.permanentlyDeleteMovie(movie.id);
-
-    if (!eliminado) {
-      this.error = 'No se pudo eliminar la película.';
-      return;
-    }
-
-    await this.cargarPeliculas();
   }
 }

@@ -8,13 +8,7 @@ import { Movie } from '../../movies/movie';
   providedIn: 'root',
 })
 export class AdminMovieService {
-
-  /* =========================
-     OBTENER PELÍCULAS
-     ========================= */
-
   async getMovies(): Promise<Movie[]> {
-
     const { data, error } = await supabase
       .from('movies')
       .select('*')
@@ -39,11 +33,7 @@ export class AdminMovieService {
 
     return data ?? [];
   }
-
-  /* =========================
-     CREAR PELÍCULA
-     ========================= */
-
+  
   async createMovie(movie: {
     title: string;
     synopsis: string | null;
@@ -53,8 +43,7 @@ export class AdminMovieService {
     age_rating: number | null;
     pre_sale_enabled: boolean;
     pre_sale_price: number | null;
-  }): Promise<Movie | null> {
-
+  }): Promise<Movie> {
     const { data, error } = await supabase
       .from('movies')
       .insert(movie)
@@ -62,21 +51,12 @@ export class AdminMovieService {
       .single();
 
     if (error) {
-
-      console.error(
-        'Error al crear película:',
-        error
-      );
-
-      return null;
+      console.error('Error al crear película:', error);
+      throw error;
     }
 
     return data;
   }
-
-  /* =========================
-     ACTUALIZAR PELÍCULA
-     ========================= */
 
   async updateMovie(
     id: string,
@@ -91,8 +71,7 @@ export class AdminMovieService {
       pre_sale_enabled: boolean;
       pre_sale_price: number | null;
     }>
-  ): Promise<Movie | null> {
-
+  ): Promise<Movie> {
     const { data, error } = await supabase
       .from('movies')
       .update(movie)
@@ -101,21 +80,12 @@ export class AdminMovieService {
       .single();
 
     if (error) {
-
-      console.error(
-        'Error al actualizar película:',
-        error
-      );
-
-      return null;
+      console.error('Error al actualizar película:', error);
+      throw error;
     }
 
     return data;
   }
-
-  /* =========================
-     DESACTIVAR PELÍCULA
-     ========================= */
 
   async deleteMovie(
     id: string
@@ -140,10 +110,6 @@ export class AdminMovieService {
 
     return true;
   }
-
-  /* =========================
-     ELIMINAR DEFINITIVAMENTE
-     ========================= */
 
   async permanentlyDeleteMovie(
     id: string
