@@ -279,11 +279,6 @@
 
         </section>
 
-
-        <!-- =========================
-             QR
-             ========================= -->
-
         <section class="qr-section">
 
           <h2>
@@ -292,11 +287,19 @@
 
           <div class="qr-container">
 
-            <div class="qr-placeholder">
-              <span>
-                QR
-              </span>
-            </div>
+            @if (qrImage) {
+              <img
+                class="qr-image"
+                [src]="qrImage"
+                alt="Código QR de tu entrada"
+                width="240"
+                height="240"
+              />
+            } @else {
+              <div class="qr-placeholder">
+                Generando QR...
+              </div>
+            }
 
           </div>
 

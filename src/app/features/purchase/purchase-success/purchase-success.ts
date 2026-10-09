@@ -15,6 +15,8 @@ import {
   PurchaseTicketService,
 } from '../../../services/purchase-ticket.service';
 
+import * as QRCode from 'qrcode';
+
 @Component({
   selector: 'app-purchase-success',
   imports: [],
@@ -22,7 +24,6 @@ import {
   styleUrl: './purchase-success.scss',
 })
 export class PurchaseSuccess implements OnInit {
-
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -32,47 +33,35 @@ export class PurchaseSuccess implements OnInit {
   );
 
   purchase: PurchaseData | null = null;
+  qrImage = '';
 
   loading = true;
   error = '';
 
   async ngOnInit() {
-
     const ticketId =
       this.route.snapshot.queryParamMap.get('ticket');
 
-    console.log(
-      'TICKET DE LA URL:',
-      ticketId
-    );
+    console.log('TICKET DE LA URL:', ticketId);
 
     if (ticketId) {
       await this.loadTicket(ticketId);
       return;
     }
 
-    const navigation =
-      this.router.getCurrentNavigation();
+    const navigation = this.router.getCurrentNavigation();
 
     this.purchase =
       navigation?.extras.state?.['purchase'] ?? null;
 
     if (!this.purchase) {
-
       const savedPurchase =
-        sessionStorage.getItem(
-          'purchase-success'
-        );
+        sessionStorage.getItem('purchase-success');
 
       if (savedPurchase) {
-
         try {
-
-          this.purchase =
-            JSON.parse(savedPurchase);
-
+          this.purchase = JSON.parse(savedPurchase);
         } catch (error) {
-
           console.error(
             'ERROR LEYENDO purchase-success:',
             error
@@ -84,86 +73,84 @@ export class PurchaseSuccess implements OnInit {
       }
     }
 
-    this.loading = false;
+    if (this.purchase) {
+      await this.generateQr();
+    }
 
+    this.loading = false;
     this.cdr.detectChanges();
   }
 
-  async loadTicket(ticketId: string) {
+  private async generateQr() {
+    const qrCode = this.purchase?.qrCode;
 
+    if (!qrCode) {
+      this.qrImage = '';
+      return;
+    }
+
+    try {
+      this.qrImage = await QRCode.toDataURL(qrCode, {
+        width: 240,
+        margin: 2,
+        errorCorrectionLevel: 'M',
+      });
+    } catch (error) {
+      console.error('ERROR GENERANDO QR:', error);
+
+      this.error = 'No se pudo generar el código QR.';
+    }
+  }
+
+  async loadTicket(ticketId: string) {
     this.loading = true;
     this.error = '';
 
     try {
-
-      console.log(
-        'CARGANDO TICKET:',
-        ticketId
-      );
+      console.log('CARGANDO TICKET:', ticketId);
 
       this.purchase =
         await this.purchaseTicketService.getTicket(
           ticketId
         );
 
-      console.log(
-        'TICKET CARGADO:',
-        this.purchase
-      );
+      console.log('TICKET CARGADO:', this.purchase);
 
+      await this.generateQr();
     } catch (error: any) {
-
-      console.error(
-        'ERROR CARGANDO ENTRADA:',
-        error
-      );
+      console.error('ERROR CARGANDO ENTRADA:', error);
 
       this.error =
-        error?.message ??
-        'No se pudo cargar la entrada.';
-
+        error?.message ?? 'No se pudo cargar la entrada.';
     } finally {
-
       this.loading = false;
 
-      console.log(
-        'LOADING FINAL:',
-        this.loading
-      );
+      console.log('LOADING FINAL:', this.loading);
 
       this.cdr.detectChanges();
     }
   }
 
   volverAlInicio() {
+    sessionStorage.removeItem('purchase-success');
 
-    sessionStorage.removeItem(
-      'purchase-success'
-    );
-
-    this.router.navigate([
-      '/home',
-    ]);
+    // Las compras de invitados guardadas en localStorage
+    // no se eliminan al volver al inicio.
+    this.router.navigate(['/home']);
   }
 
   volverAEntradas() {
-
-    this.router.navigate([
-      '/mis-entradas',
-    ]);
+    this.router.navigate(['/mis-entradas']);
   }
 
   getSeatLabel(
     seat: PurchaseData['seats'][number]
   ) {
-
     return `${seat.row_label}${seat.seat_number}`;
   }
 
   getSeatTypeLabel(type: string) {
-
     switch (type) {
-
       case 'normal':
         return 'Normal';
 
@@ -179,14 +166,11 @@ export class PurchaseSuccess implements OnInit {
   }
 
   formatDate(date: string) {
-
     if (!date) {
       return '';
     }
 
-    return new Date(
-      date
-    ).toLocaleDateString(
+    return new Date(date).toLocaleDateString(
       'es-AR',
       {
         day: '2-digit',
@@ -197,7 +181,6 @@ export class PurchaseSuccess implements OnInit {
   }
 
   formatPrice(price: number) {
-
     return price.toLocaleString(
       'es-AR',
       {

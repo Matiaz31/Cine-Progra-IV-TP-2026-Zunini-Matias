@@ -619,3 +619,23 @@ h1 {
     height: 140px;
   }
 }
+
+.qr-image {
+  display: block;
+  width: 240px;
+  height: 240px;
+  max-width: 100%;
+  margin: 0 auto;
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.qr-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  color: var(--text-secondary);
+}

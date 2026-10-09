@@ -75,10 +75,6 @@ export class PurchaseSummary implements OnInit {
   }
 
   private loadPurchaseSelection() {
-    /*
-     * Primero intentamos leer los query params por compatibilidad
-     * con el flujo anterior.
-     */
     this.screeningId =
       this.route.snapshot.queryParamMap.get('screeningId') ?? '';
 
@@ -89,10 +85,6 @@ export class PurchaseSummary implements OnInit {
       ? seatsParam.split(',').filter(Boolean)
       : [];
 
-    /*
-     * Si no llegaron por URL, usamos la nueva selección
-     * guardada en sessionStorage.
-     */
     if (!this.screeningId || this.seatIds.length === 0) {
       const savedSelection =
         sessionStorage.getItem('purchase-selection');
@@ -368,7 +360,6 @@ export class PurchaseSummary implements OnInit {
           : 'Compra anónima'
       );
 
-      // 1. Crear orden
       const {
         data: order,
         error: orderError,
@@ -394,7 +385,6 @@ export class PurchaseSummary implements OnInit {
         order
       );
 
-      // 2. Crear los items de las entradas
       for (const seat of this.selectedSeats) {
         const seatPrice =
           this.getSeatPrice(seat);
@@ -421,10 +411,6 @@ export class PurchaseSummary implements OnInit {
         'Order items de tickets creados.'
       );
 
-      // ========================================
-      // ORDER ITEMS DEL CANDY BAR - PRODUCTOS
-      // ========================================
-
       for (const product of this.candyBar.products) {
         const { error: productError } = await supabase.rpc(
           'add_order_item',
@@ -446,10 +432,6 @@ export class PurchaseSummary implements OnInit {
         'Order items de productos del Candy Bar creados.'
       );
 
-      // ========================================
-      // ORDER ITEMS DEL CANDY BAR - COMBOS
-      // ========================================
-
       for (const combo of this.candyBar.combos) {
         const { error: comboError } = await supabase.rpc(
           'add_order_item',
@@ -459,6 +441,7 @@ export class PurchaseSummary implements OnInit {
             p_product_id: null,
             p_quantity: combo.quantity,
             p_unit_price: combo.price,
+            p_combo_id: combo.id,
           }
         );
 
@@ -471,7 +454,6 @@ export class PurchaseSummary implements OnInit {
         'Order items de combos del Candy Bar creados.'
       );
 
-      // 3. Crear ticket
       const qrCode =
         `TICKET-${crypto.randomUUID()}`;
 
@@ -502,7 +484,6 @@ export class PurchaseSummary implements OnInit {
         ticket
       );
 
-      // 4. Asociar butacas
       for (const seat of this.selectedSeats) {
         const {
           error: seatError,
@@ -523,7 +504,31 @@ export class PurchaseSummary implements OnInit {
         'Butacas asociadas al ticket.'
       );
 
-      // 5. Preparar información del comprobante
+      const {
+        data: paidOrder,
+        error: paymentError,
+      } = await supabase.rpc(
+        'confirm_test_order_paid',
+        {
+          p_order_id: order.id,
+        }
+      );
+
+      if (paymentError) {
+        throw paymentError;
+      }
+
+      if (!paidOrder) {
+        throw new Error(
+          'No se pudo confirmar el pago de prueba.'
+        );
+      }
+
+      console.log(
+        'Orden confirmada como pagada:',
+        paidOrder
+      );
+
       const purchaseData = {
         orderId: order.id,
         ticketId: ticket.id,
@@ -569,37 +574,70 @@ export class PurchaseSummary implements OnInit {
         'Datos del comprobante:',
         purchaseData
       );
+      
+      if (!userId) {
+        try {
+          const storageKey = 'guest-purchases';
 
-      // 6. Guardar datos del comprobante
+          const savedPurchases =
+            localStorage.getItem(storageKey);
+
+          let purchases: typeof purchaseData[] = [];
+
+          if (savedPurchases) {
+            try {
+              purchases = JSON.parse(savedPurchases);
+            } catch (parseError) {
+              console.error(
+                'No se pudieron leer las entradas guardadas:',
+                parseError
+              );
+            }
+          }
+
+          // Evitar duplicar un ticket si ya estaba guardado.
+          const updatedPurchases = [
+            ...purchases.filter(
+              (item) => item.ticketId !== purchaseData.ticketId
+            ),
+            purchaseData,
+          ];
+
+          localStorage.setItem(
+            storageKey,
+            JSON.stringify(updatedPurchases)
+          );
+
+          console.log(
+            'Entradas de invitado guardadas:',
+            updatedPurchases
+          );
+        } catch (storageError) {
+          console.error(
+            'No se pudieron guardar las entradas del invitado:',
+            storageError
+          );
+        }
+      }
+      
       sessionStorage.setItem(
         'purchase-success',
-        JSON.stringify(
-          purchaseData
-        )
+        JSON.stringify(purchaseData)
       );
 
-      // 7. Limpiar selección del flujo
-      sessionStorage.removeItem(
-        'purchase-selection'
-      );
+      sessionStorage.removeItem('purchase-selection');
+      sessionStorage.removeItem('candy-bar-selection');
 
-      sessionStorage.removeItem(
-        'candy-bar-selection'
-      );
-
-      // 8. Ir a compra exitosa
       this.router.navigate(
         ['/compra-exitosa'],
         {
           state: {
-            purchase:
-              purchaseData,
+            purchase: purchaseData,
           },
         }
       );
 
     } catch (error: any) {
-
       console.error(
         'ERROR EN LA COMPRA:',
         error
@@ -608,12 +646,9 @@ export class PurchaseSummary implements OnInit {
       this.error =
         error?.message ??
         'No se pudo completar la compra.';
-
     } finally {
-
       this.purchasing = false;
       this.cdr.detectChanges();
-
     }
   }
 }
