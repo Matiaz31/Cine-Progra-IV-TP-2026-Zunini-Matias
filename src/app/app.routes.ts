@@ -49,11 +49,6 @@ export const routes: Routes = [
     path: 'compra-exitosa',
     component: PurchaseSuccess,
   },
-  /*
-   * =========================
-   * ADMINISTRACIÓN
-   * =========================
-   */
   {
     path: 'admin',
     component: Admin,
@@ -78,11 +73,6 @@ export const routes: Routes = [
       },
     ],
   },
-  /*
-   * =========================
-   * EMPLEADO
-   * =========================
-   */
   {
     path: 'empleado',
     loadComponent: () =>
@@ -97,7 +87,6 @@ export const routes: Routes = [
   {
     path: 'mis-entradas',
     component: MisEntradas,
-    canActivate: [authGuard],
   },
   {
     path: '',

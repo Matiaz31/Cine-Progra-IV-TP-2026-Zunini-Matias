@@ -17,6 +17,18 @@ import {
 
 import * as QRCode from 'qrcode';
 
+interface GuestPurchase {
+  orderId: string;
+  ticketId: string;
+  qrCode: string;
+  movieTitle: string;
+  screeningDate: string;
+  screeningTime: string;
+  seats: PurchaseData['seats'];
+  total: number;
+  candyBar?: unknown;
+}
+
 @Component({
   selector: 'app-purchase-success',
   imports: [],
@@ -81,6 +93,53 @@ export class PurchaseSuccess implements OnInit {
     this.cdr.detectChanges();
   }
 
+  private findGuestPurchase(
+    ticketId: string
+  ): PurchaseData | null {
+    try {
+      const savedPurchases =
+        localStorage.getItem('guest-purchases');
+
+      if (!savedPurchases) {
+        return null;
+      }
+
+      const purchases: GuestPurchase[] =
+        JSON.parse(savedPurchases);
+
+      if (!Array.isArray(purchases)) {
+        return null;
+      }
+
+      const guestPurchase = purchases.find(
+        (item) => item.ticketId === ticketId
+      );
+
+      if (!guestPurchase) {
+        return null;
+      }
+
+      return {
+        orderId: guestPurchase.orderId,
+        ticketId: guestPurchase.ticketId,
+        qrCode: guestPurchase.qrCode,
+        movieTitle: guestPurchase.movieTitle,
+        screeningDate: guestPurchase.screeningDate,
+        screeningTime: guestPurchase.screeningTime,
+        seats: guestPurchase.seats ?? [],
+        total: Number(guestPurchase.total ?? 0),
+        candyBar: guestPurchase.candyBar,
+      } as PurchaseData;
+    } catch (error) {
+      console.error(
+        'ERROR LEYENDO COMPRA DE INVITADO:',
+        error
+      );
+
+      return null;
+    }
+  }
+
   private async generateQr() {
     const qrCode = this.purchase?.qrCode;
 
@@ -97,7 +156,6 @@ export class PurchaseSuccess implements OnInit {
       });
     } catch (error) {
       console.error('ERROR GENERANDO QR:', error);
-
       this.error = 'No se pudo generar el código QR.';
     }
   }
@@ -107,14 +165,41 @@ export class PurchaseSuccess implements OnInit {
     this.error = '';
 
     try {
-      console.log('CARGANDO TICKET:', ticketId);
+      console.log('BUSCANDO ENTRADA:', ticketId);
 
-      this.purchase =
-        await this.purchaseTicketService.getTicket(
-          ticketId
+      this.purchase = this.findGuestPurchase(ticketId);
+
+      if (this.purchase) {
+        console.log(
+          'ENTRADA DE INVITADO RECUPERADA:',
+          this.purchase
         );
 
-      console.log('TICKET CARGADO:', this.purchase);
+        await this.generateQr();
+        return;
+      }
+
+      const {
+        data: { session },
+        error: sessionError,
+      } = await (
+        await import('../../../core/supabase')
+      ).supabase.auth.getSession();
+
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      if (!session?.user) {
+        this.error =
+          'No se encontró esta entrada entre tus compras de invitado. Si la compra se realizó en otro navegador o dispositivo, iniciá sesión con la cuenta correspondiente o volvé a Mis entradas.';
+        return;
+      }
+
+      this.purchase =
+        await this.purchaseTicketService.getTicket(ticketId);
+
+      console.log('ENTRADA CARGADA:', this.purchase);
 
       await this.generateQr();
     } catch (error: any) {
@@ -124,18 +209,12 @@ export class PurchaseSuccess implements OnInit {
         error?.message ?? 'No se pudo cargar la entrada.';
     } finally {
       this.loading = false;
-
-      console.log('LOADING FINAL:', this.loading);
-
       this.cdr.detectChanges();
     }
   }
 
   volverAlInicio() {
     sessionStorage.removeItem('purchase-success');
-
-    // Las compras de invitados guardadas en localStorage
-    // no se eliminan al volver al inicio.
     this.router.navigate(['/home']);
   }
 
@@ -153,13 +232,10 @@ export class PurchaseSuccess implements OnInit {
     switch (type) {
       case 'normal':
         return 'Normal';
-
       case 'accessible':
         return 'Accesible';
-
       case 'vip':
         return 'VIP';
-
       default:
         return type;
     }
@@ -170,24 +246,18 @@ export class PurchaseSuccess implements OnInit {
       return '';
     }
 
-    return new Date(date).toLocaleDateString(
-      'es-AR',
-      {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      }
-    );
+    return new Date(date).toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   }
 
   formatPrice(price: number) {
-    return price.toLocaleString(
-      'es-AR',
-      {
-        style: 'currency',
-        currency: 'ARS',
-        maximumFractionDigits: 0,
-      }
-    );
+    return price.toLocaleString('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      maximumFractionDigits: 0,
+    });
   }
 }

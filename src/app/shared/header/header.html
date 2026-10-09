@@ -38,8 +38,7 @@
 
     <nav class="main-nav">
 
-      @if (role() === 'customer') {
-
+      @if (role() === 'customer' || !role()) {
         <a
           routerLink="/home"
           routerLinkActive="active"
@@ -60,7 +59,6 @@
       }
 
       @if (role() === 'employee') {
-
         <a
           routerLink="/empleado"
           routerLinkActive="active"
@@ -70,7 +68,6 @@
       }
 
       @if (role() === 'admin') {
-
         <a
           routerLink="/admin"
           routerLinkActive="active"

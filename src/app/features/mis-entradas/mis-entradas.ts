@@ -7,6 +7,13 @@ import {
 import { Router } from '@angular/router';
 import { supabase } from '../../core/supabase';
 
+interface TicketSeat {
+  row_label: string;
+  seat_number: number;
+  seat_type: string;
+  price: number;
+}
+
 interface TicketGroup {
   ticket_id: string;
   order_id: string;
@@ -18,12 +25,19 @@ interface TicketGroup {
   ticket_status: string;
   order_status: string;
   order_total: number;
-  seats: {
-    row_label: string;
-    seat_number: number;
-    seat_type: string;
-    price: number;
-  }[];
+  seats: TicketSeat[];
+}
+
+interface GuestPurchase {
+  orderId: string;
+  ticketId: string;
+  qrCode: string;
+  movieTitle: string;
+  screeningDate: string;
+  screeningTime: string;
+  seats: TicketSeat[];
+  total: number;
+  candyBar?: unknown;
 }
 
 @Component({
@@ -37,7 +51,6 @@ export class MisEntradas implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   entries: TicketGroup[] = [];
-
   loading = true;
   error = '';
 
@@ -48,20 +61,20 @@ export class MisEntradas implements OnInit {
   async loadEntries() {
     this.loading = true;
     this.error = '';
+    this.entries = [];
 
     try {
       const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      if (userError) {
-        throw userError;
+      if (sessionError) {
+        throw sessionError;
       }
 
-      if (!user) {
-        this.error =
-          'Debés iniciar sesión para ver tus entradas.';
+      if (!session?.user) {
+        this.loadGuestEntries();
         return;
       }
 
@@ -72,30 +85,25 @@ export class MisEntradas implements OnInit {
           total,
           status,
           created_at,
-
           tickets (
             id,
             screening_id,
             qr_code,
             status,
             created_at,
-
             ticket_seats (
               price,
               seat_id,
-
               seats (
                 row_label,
                 seat_number,
                 seat_type
               )
             ),
-
             screenings (
               start_time,
               format,
               language,
-
               movies (
                 id,
                 title
@@ -103,20 +111,15 @@ export class MisEntradas implements OnInit {
             )
           )
         `)
-        .eq('user_id', user.id)
-        .order('created_at', {
-          ascending: false,
-        });
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
 
       if (error) {
         throw error;
       }
 
-      this.entries = [];
-
       for (const order of data ?? []) {
         for (const ticket of order.tickets ?? []) {
-
           const screening = Array.isArray(ticket.screenings)
             ? ticket.screenings[0]
             : ticket.screenings;
@@ -125,74 +128,89 @@ export class MisEntradas implements OnInit {
             ? screening.movies[0]
             : screening?.movies;
 
-          const seats =
-            (ticket.ticket_seats ?? []).map((ticketSeat: any) => {
+          const seats: TicketSeat[] = (
+            ticket.ticket_seats ?? []
+          ).map((ticketSeat: any) => {
+            const seat = Array.isArray(ticketSeat.seats)
+              ? ticketSeat.seats[0]
+              : ticketSeat.seats;
 
-              const seat = Array.isArray(ticketSeat.seats)
-                ? ticketSeat.seats[0]
-                : ticketSeat.seats;
-
-              return {
-                row_label: seat?.row_label ?? '',
-                seat_number: seat?.seat_number ?? 0,
-                seat_type: seat?.seat_type ?? 'normal',
-                price: Number(ticketSeat.price ?? 0),
-              };
-            });
+            return {
+              row_label: seat?.row_label ?? '',
+              seat_number: seat?.seat_number ?? 0,
+              seat_type: seat?.seat_type ?? 'normal',
+              price: Number(ticketSeat.price ?? 0),
+            };
+          });
 
           this.entries.push({
             ticket_id: ticket.id,
             order_id: order.id,
-
-            movie_title:
-              movie?.title ?? 'Película',
-
-            start_time:
-              screening?.start_time ?? '',
-
-            format:
-              screening?.format ?? '',
-
-            language:
-              screening?.language ?? '',
-
-            qr_code:
-              ticket.qr_code,
-
-            ticket_status:
-              ticket.status,
-
-            order_status:
-              order.status,
-
-            order_total:
-              Number(order.total ?? 0),
-
+            movie_title: movie?.title ?? 'Película',
+            start_time: screening?.start_time ?? '',
+            format: screening?.format ?? '',
+            language: screening?.language ?? '',
+            qr_code: ticket.qr_code ?? '',
+            ticket_status: ticket.status,
+            order_status: order.status,
+            order_total: Number(order.total ?? 0),
             seats,
           });
         }
       }
-
     } catch (error: any) {
-
-      console.error(
-        'ERROR CARGANDO ENTRADAS:',
-        error
-      );
+      console.error('ERROR CARGANDO ENTRADAS:', error);
 
       this.error =
-        error?.message ??
-        'No se pudieron cargar tus entradas.';
-
+        error?.message ?? 'No se pudieron cargar tus entradas.';
     } finally {
-
       this.loading = false;
       this.cdr.detectChanges();
-
     }
   }
 
-  getSeatLabel(seat: TicketGroup['seats'][number]) {
+  private loadGuestEntries() {
+    try {
+      const savedPurchases = localStorage.getItem('guest-purchases');
+
+      if (!savedPurchases) {
+        this.entries = [];
+        return;
+      }
+
+      const purchases: GuestPurchase[] = JSON.parse(savedPurchases);
+
+      if (!Array.isArray(purchases)) {
+        this.entries = [];
+        return;
+      }
+
+      this.entries = purchases.map((purchase) => ({
+        ticket_id: purchase.ticketId,
+        order_id: purchase.orderId,
+        movie_title: purchase.movieTitle ?? 'Película',
+        start_time: purchase.screeningDate ?? '',
+        format: '',
+        language: '',
+        qr_code: purchase.qrCode ?? '',
+        ticket_status: 'valid',
+        order_status: 'paid',
+        order_total: Number(purchase.total ?? 0),
+        seats: (purchase.seats ?? []).map((seat) => ({
+          row_label: seat.row_label ?? '',
+          seat_number: Number(seat.seat_number ?? 0),
+          seat_type: seat.seat_type ?? 'normal',
+          price: Number(seat.price ?? 0),
+        })),
+      }));
+    } catch (error) {
+      console.error('ERROR LEYENDO ENTRADAS DE INVITADO:', error);
+      this.entries = [];
+      this.error = 'No se pudieron leer las entradas guardadas en este navegador.';
+    }
+  }
+
+  getSeatLabel(seat: TicketSeat) {
     return `${seat.row_label}${seat.seat_number}`;
   }
 
@@ -200,10 +218,8 @@ export class MisEntradas implements OnInit {
     switch (type) {
       case 'vip':
         return 'VIP';
-
       case 'accessible':
         return 'Accesible';
-
       default:
         return 'Normal';
     }
@@ -213,13 +229,10 @@ export class MisEntradas implements OnInit {
     switch (status) {
       case 'valid':
         return 'Válida';
-
       case 'used':
         return 'Usada';
-
       case 'cancelled':
         return 'Cancelada';
-
       default:
         return status;
     }
@@ -229,13 +242,10 @@ export class MisEntradas implements OnInit {
     switch (status) {
       case 'valid':
         return 'valid';
-
       case 'used':
         return 'used';
-
       case 'cancelled':
         return 'cancelled';
-
       default:
         return '';
     }
@@ -265,14 +275,11 @@ export class MisEntradas implements OnInit {
   }
 
   verEntrada(ticketId: string) {
-    this.router.navigate(
-      ['/compra-exitosa'],
-      {
-        queryParams: {
-          ticket: ticketId,
-        },
-      }
-    );
+    this.router.navigate(['/compra-exitosa'], {
+      queryParams: {
+        ticket: ticketId,
+      },
+    });
   }
 
   formatPrice(price: number) {
