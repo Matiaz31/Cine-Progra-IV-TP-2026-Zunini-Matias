@@ -241,11 +241,13 @@ export class SeatSelection implements OnInit {
   }
 
   getSeatPriceLabel(seatType: string): string {
-    let price = this.screeningPrice;
+    const seat = this.seats.find(
+      (item) => item.seat_type === seatType
+    );
 
-    if (seatType === 'vip') {
-      price = Math.round(this.screeningPrice * 1.20);
-    }
+    const price = seat
+      ? this.getSeatPrice(seat)
+      : this.screeningPrice;
 
     return price.toLocaleString('es-AR');
   }

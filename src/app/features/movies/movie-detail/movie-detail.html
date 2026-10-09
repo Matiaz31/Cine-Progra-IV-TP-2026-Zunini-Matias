@@ -59,6 +59,35 @@
           </p>
         }
 
+        <div class="movie-rating-summary">
+          <strong>Calificación de usuarios:</strong>
+
+          @if (reviews.length > 0) {
+            <div class="rating-display">
+              <span class="rating-stars" aria-label="Estrellas promedio">
+                @for (star of [1, 2, 3, 4, 5]; track star) {
+                  <span [class.star-filled]="star <= averageRating">
+                    ★
+                  </span>
+                }
+              </span>
+
+              <span class="rating-number">
+                {{ averageRating | number: '1.1-1' }}/5
+              </span>
+
+              <span class="rating-count">
+                ({{ reviews.length }}
+                {{ reviews.length === 1 ? 'reseña' : 'reseñas' }})
+              </span>
+            </div>
+          } @else {
+            <p class="no-rating">
+              Esta película todavía no tiene calificaciones.
+            </p>
+          }
+        </div>
+
         <button
           type="button"
           class="btn btn-outline"
@@ -86,7 +115,6 @@
         <div class="movies-grid">
 
           @for (screening of screenings; track screening.id) {
-
             <article
               class="card screening-card"
               role="button"
@@ -129,11 +157,155 @@
               </div>
 
             </article>
-
           }
 
         </div>
       }
+
+    </section>
+
+    <section class="section reviews-section">
+
+      <h2>Reseñas y opiniones</h2>
+
+      <p class="screening-instruction">
+        Compartí tu opinión y calificá la película del 1 al 5.
+      </p>
+
+      @if (reviewLoading) {
+        <p>Cargando reseñas...</p>
+      } @else {
+
+        @if (reviews.length === 0) {
+          <div class="card empty-reviews">
+            <p>Todavía no hay reseñas para esta película.</p>
+            <p>¡Sé el primero en compartir tu opinión!</p>
+          </div>
+        } @else {
+          <div class="reviews-list">
+
+            @for (review of reviews; track review.id) {
+              <article class="card review-card">
+
+                <div class="review-header">
+                  <div class="review-stars" aria-label="Calificación">
+                    @for (star of [1, 2, 3, 4, 5]; track star) {
+                      <span [class.star-filled]="star <= review.rating">
+                        ★
+                      </span>
+                    }
+                  </div>
+
+                  <time [attr.datetime]="review.created_at">
+                    {{ review.created_at | date: 'dd/MM/yyyy' }}
+                  </time>
+                </div>
+
+                @if (review.comment) {
+                  <p class="review-comment">
+                    {{ review.comment }}
+                  </p>
+                } @else {
+                  <p class="review-comment review-no-comment">
+                    El usuario no agregó un comentario.
+                  </p>
+                }
+
+                @if (review.user_id === currentUserId) {
+                  <span class="my-review-label">
+                    Tu reseña
+                  </span>
+                }
+
+              </article>
+            }
+
+          </div>
+        }
+
+      }
+
+      <div class="card review-form-card">
+
+        <h3>
+          {{ myReviewId ? 'Editar mi reseña' : 'Dejar una reseña' }}
+        </h3>
+
+        @if (!currentUserId) {
+          <p>
+            Iniciá sesión para calificar esta película y compartir tu opinión.
+          </p>
+        } @else {
+
+          <form (ngSubmit)="guardarResena()">
+
+            <div class="form-group">
+              <label for="review-rating">
+                Tu calificación
+              </label>
+
+              <select
+                id="review-rating"
+                name="rating"
+                [(ngModel)]="selectedRating"
+                required
+              >
+                <option [ngValue]="5">★★★★★ - Excelente</option>
+                <option [ngValue]="4">★★★★☆ - Muy buena</option>
+                <option [ngValue]="3">★★★☆☆ - Buena</option>
+                <option [ngValue]="2">★★☆☆☆ - Regular</option>
+                <option [ngValue]="1">★☆☆☆☆ - Mala</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="review-comment">
+                Comentario (opcional)
+              </label>
+
+              <textarea
+                id="review-comment"
+                name="comment"
+                [(ngModel)]="reviewComment"
+                rows="4"
+                maxlength="1000"
+                placeholder="¿Qué te pareció la película?"
+              ></textarea>
+
+              <small>
+                Máximo 1000 caracteres.
+              </small>
+            </div>
+
+            @if (reviewError) {
+              <p class="review-feedback review-feedback-error">
+                {{ reviewError }}
+              </p>
+            }
+
+            @if (reviewMessage) {
+              <p class="review-feedback review-feedback-success">
+                {{ reviewMessage }}
+              </p>
+            }
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="reviewSaving"
+            >
+              @if (reviewSaving) {
+                Guardando...
+              } @else {
+                {{ myReviewId ? 'Actualizar reseña' : 'Publicar reseña' }}
+              }
+            </button>
+
+          </form>
+
+        }
+
+      </div>
 
     </section>
   }
