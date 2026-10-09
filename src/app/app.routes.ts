@@ -10,6 +10,7 @@ import { PurchaseSuccess } from './features/purchase/purchase-success/purchase-s
 import { MisEntradas } from './features/mis-entradas/mis-entradas';
 import { CandyBar } from './features/candy-bar/candy-bar/candy-bar';
 import { Admin } from './features/admin/admin';
+import { Profile } from './features/profile/profile';
 
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
@@ -48,6 +49,11 @@ export const routes: Routes = [
   {
     path: 'compra-exitosa',
     component: PurchaseSuccess,
+  },
+  {
+    path: 'perfil',
+    component: Profile,
+    canActivate: [authGuard],
   },
   {
     path: 'admin',

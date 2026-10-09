@@ -16,6 +16,7 @@ export class Header {
   private auth = inject(AuthService);
   private router = inject(Router);
 
+  hasSession = signal(false);
   role = signal<string | null>(null);
 
   constructor() {
@@ -27,11 +28,15 @@ export class Header {
       const { data, error } = await this.auth.getUser();
 
       if (error || !data.user) {
+        this.hasSession.set(false);
         this.role.set(null);
         return;
       }
 
+      this.hasSession.set(true);
+
       const role = await this.auth.getRole(data.user.id);
+      this.role.set(role);
 
       console.log('HEADER - usuario:', data.user.email);
       console.log('HEADER - rol:', role);

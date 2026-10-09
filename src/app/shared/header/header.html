@@ -22,21 +22,27 @@
       </a>
     }
 
-    @if (!role()) {
+    @if (!hasSession()) {
       <div class="brand-group">
         <a class="brand" routerLink="/home">
           <span class="brand-mark">◆</span>
           <span>Cine Progra IV</span>
         </a>
 
-        <a class="brand-msg">
+        <span class="brand-msg">
           <span class="brand-mark">◆</span>
           <span>Usted no tiene una cuenta iniciada</span>
-        </a>
+        </span>
       </div>
     }
 
     <nav class="main-nav">
+
+      @if (hasSession()) {
+        <a routerLink="/perfil" routerLinkActive="active">
+          Ir a Perfil
+        </a>
+      }
 
       @if (role() === 'customer' || !role()) {
         <a

@@ -1,0 +1,180 @@
+<section class="profile-container">
+  <div class="profile-card">
+    <header class="profile-header">
+      <h1>Mi perfil</h1>
+      <p>Consultá y actualizá tus datos personales.</p>
+    </header>
+
+    @if (loading) {
+      <p class="status-message">Cargando perfil...</p>
+    } @else {
+      @if (errorMessage) {
+        <p class="message error">{{ errorMessage }}</p>
+      }
+
+      @if (successMessage) {
+        <p class="message success">{{ successMessage }}</p>
+      }
+
+      <form (ngSubmit)="saveProfile()">
+        <div class="form-grid">
+
+          <div class="form-group">
+            <div class="field-label">
+              <label for="firstName">Nombre</label>
+              <button
+                type="button"
+                class="edit-button"
+                [class.editing]="editModes.firstName"
+                (click)="editModes.firstName = !editModes.firstName"
+                [attr.aria-label]="editModes.firstName ? 'Bloquear nombre' : 'Editar nombre'"
+                [title]="editModes.firstName ? 'Bloquear nombre' : 'Editar nombre'"
+              >✎</button>
+            </div>
+
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              [(ngModel)]="firstName"
+              [readonly]="!editModes.firstName"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <div class="field-label">
+              <label for="lastName">Apellido</label>
+              <button
+                type="button"
+                class="edit-button"
+                [class.editing]="editModes.lastName"
+                (click)="editModes.lastName = !editModes.lastName"
+                [attr.aria-label]="editModes.lastName ? 'Bloquear apellido' : 'Editar apellido'"
+                [title]="editModes.lastName ? 'Bloquear apellido' : 'Editar apellido'"
+              >✎</button>
+            </div>
+
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              [(ngModel)]="lastName"
+              [readonly]="!editModes.lastName"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <div class="field-label">
+              <label for="birthDate">Fecha de nacimiento</label>
+              <button
+                type="button"
+                class="edit-button"
+                [class.editing]="editModes.birthDate"
+                (click)="editModes.birthDate = !editModes.birthDate"
+                [attr.aria-label]="editModes.birthDate ? 'Bloquear fecha' : 'Editar fecha'"
+                [title]="editModes.birthDate ? 'Bloquear fecha' : 'Editar fecha'"
+              >✎</button>
+            </div>
+
+            <input
+              id="birthDate"
+              name="birthDate"
+              type="date"
+              [(ngModel)]="birthDate"
+              [disabled]="!editModes.birthDate"
+              required
+            />
+          </div>
+
+          <div class="form-group email-group">
+            <div class="field-label">
+              <label for="email">Correo electrónico</label>
+            </div>
+
+            <input
+              id="email"
+              name="email"
+              type="email"
+              [value]="email"
+              readonly
+            />
+          </div>
+
+          <div class="form-group">
+            <div class="field-label">
+              <label for="bloodType">Grupo sanguíneo</label>
+              <button
+                type="button"
+                class="edit-button"
+                [class.editing]="editModes.bloodType"
+                (click)="editModes.bloodType = !editModes.bloodType"
+                [attr.aria-label]="editModes.bloodType ? 'Bloquear grupo sanguíneo' : 'Editar grupo sanguíneo'"
+                [title]="editModes.bloodType ? 'Bloquear grupo sanguíneo' : 'Editar grupo sanguíneo'"
+              >✎</button>
+            </div>
+
+            <select
+              id="bloodType"
+              name="bloodType"
+              [(ngModel)]="bloodType"
+              [disabled]="!editModes.bloodType"
+            >
+              <option value="">No especificado</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <div class="field-label">
+              <label for="eyeColor">Color de ojos</label>
+              <button
+                type="button"
+                class="edit-button"
+                [class.editing]="editModes.eyeColor"
+                (click)="editModes.eyeColor = !editModes.eyeColor"
+                [attr.aria-label]="editModes.eyeColor ? 'Bloquear color de ojos' : 'Editar color de ojos'"
+                [title]="editModes.eyeColor ? 'Bloquear color de ojos' : 'Editar color de ojos'"
+              >✎</button>
+            </div>
+
+            <input
+              id="eyeColor"
+              name="eyeColor"
+              type="text"
+              [(ngModel)]="eyeColor"
+              [readonly]="!editModes.eyeColor"
+              placeholder="Ej. Marrón"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="vacationDays">Días de vacaciones</label>
+            <input
+              id="vacationDays"
+              name="vacationDays"
+              type="number"
+              [value]="vacationDays"
+              readonly
+            />
+          </div>
+
+        </div>
+
+        @if (isEditing) {
+          <button type="submit" [disabled]="saving">
+            {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        }
+      </form>
+    }
+  </div>
+</section>
