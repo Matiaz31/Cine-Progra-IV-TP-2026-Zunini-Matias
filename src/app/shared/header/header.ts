@@ -4,7 +4,6 @@ import {
   RouterLink,
   RouterLinkActive,
 } from '@angular/router';
-
 import { AuthService } from '../../core/auth';
 
 @Component({
@@ -14,7 +13,6 @@ import { AuthService } from '../../core/auth';
   styleUrl: './header.scss',
 })
 export class Header {
-
   private auth = inject(AuthService);
   private router = inject(Router);
 
@@ -52,5 +50,9 @@ export class Header {
     this.role.set(null);
 
     await this.router.navigate(['/login']);
+  }
+
+  volverAlLogin(): void {
+    this.router.navigate(['/login']);
   }
 }

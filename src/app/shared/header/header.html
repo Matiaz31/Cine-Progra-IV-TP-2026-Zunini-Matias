@@ -23,10 +23,17 @@
     }
 
     @if (!role()) {
-      <a class="brand" routerLink="/home">
-        <span class="brand-mark">◆</span>
-        <span>Cine Progra IV</span>
-      </a>
+      <div class="brand-group">
+        <a class="brand" routerLink="/home">
+          <span class="brand-mark">◆</span>
+          <span>Cine Progra IV</span>
+        </a>
+
+        <a class="brand-name">
+          <span class="brand-mark">◆</span>
+          <span>Zunini Matías</span>
+        </a>
+      </div>
     }
 
     <nav class="main-nav">
@@ -79,6 +86,14 @@
           (click)="logout()"
         >
           Cerrar sesión
+        </button>
+      } @else {
+        <button
+          type="button"
+          class="btn-login"
+          (click)="volverAlLogin()"
+        >
+          Iniciar sesión
         </button>
       }
 

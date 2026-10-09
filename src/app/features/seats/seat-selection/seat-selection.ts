@@ -27,50 +27,26 @@ export class SeatSelection implements OnInit {
 
   screeningPrice = 0;
 
-  readonly rows = [
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-  ];
-
   loading = true;
   error = '';
+  selectionError = '';
+
+  mostrarCandyBar = false;
+
+  readonly rows = [
+    'A', 'B', 'C', 'D', 'E',
+    'F', 'G', 'H', 'I', 'J',
+    'K', 'L', 'M', 'N', 'O',
+    'P', 'Q', 'R', 'S', 'T',
+  ];
 
   async ngOnInit() {
-    console.log('SEAT SELECTION: iniciando');
-
     this.screeningId =
       this.route.snapshot.paramMap.get('id') ?? '';
 
-    console.log(
-      'SEAT SELECTION: screeningId:',
-      this.screeningId
-    );
-
     if (!this.screeningId) {
-      this.error =
-        'No se encontró la función seleccionada.';
-
+      this.error = 'No se encontró la función seleccionada.';
       this.loading = false;
-      this.cdr.detectChanges();
-
       return;
     }
 
@@ -82,136 +58,56 @@ export class SeatSelection implements OnInit {
     this.error = '';
 
     try {
-      console.log(
-        'SEAT SELECTION: buscando función...'
-      );
+      const { data: screening, error: screeningError } =
+        await supabase
+          .from('screenings')
+          .select('id, room_id, price')
+          .eq('id', this.screeningId)
+          .single();
 
-      const {
-        data: screening,
-        error: screeningError,
-      } = await supabase
-        .from('screenings')
-        .select('id, room_id, price')
-        .eq('id', this.screeningId)
-        .single();
-
-      if (screeningError) {
-        console.error(
-          'Error buscando función:',
-          screeningError
-        );
-
-        throw screeningError;
-      }
-
+      if (screeningError) throw screeningError;
       if (!screening) {
-        throw new Error(
-          'No se encontró la función.'
-        );
+        throw new Error('No se encontró la función.');
       }
 
-      console.log(
-        'SEAT SELECTION: función encontrada:',
-        screening
-      );
+      this.screeningPrice = Number(screening.price);
 
-      this.screeningPrice =
-        Number(screening.price);
+      const { data: seats, error: seatsError } =
+        await supabase
+          .from('seats')
+          .select('*')
+          .eq('room_id', screening.room_id)
+          .eq('is_active', true)
+          .order('row_label')
+          .order('seat_number');
 
-      console.log(
-        'SEAT SELECTION: precio:',
-        this.screeningPrice
-      );
-
-      console.log(
-        'SEAT SELECTION: buscando butacas...'
-      );
-
-      const {
-        data: seats,
-        error: seatsError,
-      } = await supabase
-        .from('seats')
-        .select('*')
-        .eq('room_id', screening.room_id)
-        .eq('is_active', true)
-        .order('row_label')
-        .order('seat_number');
-
-      if (seatsError) {
-        console.error(
-          'Error buscando butacas:',
-          seatsError
-        );
-
-        throw seatsError;
-      }
+      if (seatsError) throw seatsError;
 
       this.seats = seats ?? [];
 
-      console.log(
-        'SEAT SELECTION: butacas encontradas:',
-        this.seats.length
-      );
+      const { data: occupiedSeats, error: occupiedError } =
+        await supabase
+          .from('ticket_seats')
+          .select(`
+            seat_id,
+            tickets!inner (
+              status
+            )
+          `)
+          .eq('screening_id', this.screeningId)
+          .neq('tickets.status', 'cancelled');
 
-      console.log(
-        'SEAT SELECTION: buscando butacas ocupadas...'
-      );
-
-      const {
-        data: occupiedSeats,
-        error: occupiedError,
-      } = await supabase
-        .from('ticket_seats')
-        .select(`
-          seat_id,
-          tickets!inner (
-            status
-          )
-        `)
-        .eq('screening_id', this.screeningId)
-        .neq('tickets.status', 'cancelled');
-
-      if (occupiedError) {
-        console.error(
-          'Error buscando butacas ocupadas:',
-          occupiedError
-        );
-
-        throw occupiedError;
-      }
+      if (occupiedError) throw occupiedError;
 
       this.occupiedSeatIds = new Set(
-        (occupiedSeats ?? []).map(
-          (seat) => seat.seat_id
-        )
-      );
-
-      console.log(
-        'SEAT SELECTION: butacas ocupadas:',
-        this.occupiedSeatIds.size
-      );
-
-      console.log(
-        'SEAT SELECTION: carga terminada'
+        (occupiedSeats ?? []).map((seat) => seat.seat_id)
       );
     } catch (error: any) {
-      console.error(
-        'SEAT SELECTION: ERROR GENERAL:',
-        error
-      );
-
+      console.error('Error cargando butacas:', error);
       this.error =
-        error?.message ??
-        'No se pudieron cargar las butacas.';
+        error?.message ?? 'No se pudieron cargar las butacas.';
     } finally {
       this.loading = false;
-
-      console.log(
-        'SEAT SELECTION: loading =',
-        this.loading
-      );
-
       this.cdr.detectChanges();
     }
   }
@@ -239,28 +135,91 @@ export class SeatSelection implements OnInit {
   }
 
   isVipRow(row: string): boolean {
-    return (
-      row === 'R' ||
-      row === 'S' ||
-      row === 'T'
+    return ['R', 'S', 'T'].includes(row);
+  }
+
+  /**
+   * Identifica el bloque físico de la butaca.
+   * Los pasillos separan los bloques, aunque los números
+   * de las butacas sean consecutivos.
+   */
+  private getSeatBlock(seat: Seat): string {
+    const number = seat.seat_number;
+
+    if (this.isSpecialRow(seat.row_label)) {
+      if (number <= 2) return 'izquierdo';
+      if (number <= 12) return 'central';
+      return 'derecho';
+    }
+
+    if (number <= 4) return 'izquierdo';
+    if (number <= 24) return 'central';
+    return 'derecho';
+  }
+
+  /**
+   * Una selección múltiple debe estar en una sola fila,
+   * en un solo bloque y con números consecutivos.
+   */
+  validarButacasContiguas(): boolean {
+    if (this.selectedSeats.length <= 1) {
+      return true;
+    }
+
+    const firstSeat = this.selectedSeats[0];
+
+    const mismaFila = this.selectedSeats.every(
+      (seat) => seat.row_label === firstSeat.row_label
     );
+
+    if (!mismaFila) {
+      this.selectionError =
+        'Elegí las butacas de una misma fila para continuar.';
+      return false;
+    }
+
+    const mismoBloque = this.selectedSeats.every(
+      (seat) =>
+        this.getSeatBlock(seat) ===
+        this.getSeatBlock(firstSeat)
+    );
+
+    if (!mismoBloque) {
+      this.selectionError =
+        'No podés seleccionar butacas que estén separadas por un pasillo.';
+      return false;
+    }
+
+    const numeros = this.selectedSeats
+      .map((seat) => seat.seat_number)
+      .sort((a, b) => a - b);
+
+    for (let i = 1; i < numeros.length; i++) {
+      if (numeros[i] !== numeros[i - 1] + 1) {
+        this.selectionError =
+          'Las butacas deben ser consecutivas, sin espacios entre ellas.';
+        return false;
+      }
+    }
+
+    this.selectionError = '';
+    return true;
   }
 
   toggleSeat(seat: Seat) {
-    if (this.isOccupied(seat)) {
-      return;
-    }
+    if (this.isOccupied(seat)) return;
 
-    const index =
-      this.selectedSeats.findIndex(
-        (selected) => selected.id === seat.id
-      );
+    const index = this.selectedSeats.findIndex(
+      (selected) => selected.id === seat.id
+    );
 
     if (index >= 0) {
       this.selectedSeats.splice(index, 1);
     } else {
       this.selectedSeats.push(seat);
     }
+
+    this.selectionError = '';
   }
 
   isSelected(seat: Seat): boolean {
@@ -274,24 +233,18 @@ export class SeatSelection implements OnInit {
   }
 
   getSeatPrice(seat: Seat): number {
-    const modifier =
-      Number(seat.price_modifier ?? 0);
+    const modifier = Number(seat.price_modifier ?? 0);
 
-    const price =
-      Math.round(
-        this.screeningPrice * (1 + modifier)
-      );
-
-    return price;
+    return Math.round(
+      this.screeningPrice * (1 + modifier)
+    );
   }
 
   getSeatPriceLabel(seatType: string): string {
     let price = this.screeningPrice;
 
     if (seatType === 'vip') {
-      price = Math.round(
-        this.screeningPrice * 1.20
-      );
+      price = Math.round(this.screeningPrice * 1.20);
     }
 
     return price.toLocaleString('es-AR');
@@ -299,8 +252,7 @@ export class SeatSelection implements OnInit {
 
   getTotal(): number {
     return this.selectedSeats.reduce(
-      (total, seat) =>
-        total + this.getSeatPrice(seat),
+      (total, seat) => total + this.getSeatPrice(seat),
       0
     );
   }
@@ -323,10 +275,11 @@ export class SeatSelection implements OnInit {
     ).length;
   }
 
-  mostrarCandyBar = false;
-
   continuar() {
-    if (this.selectedSeats.length === 0) {
+    if (this.selectedSeats.length === 0) return;
+
+    if (!this.validarButacasContiguas()) {
+      this.cdr.detectChanges();
       return;
     }
 
@@ -362,11 +315,8 @@ export class SeatSelection implements OnInit {
     switch (seat.seat_type) {
       case 'vip':
         return 'VIP';
-
       case 'accessible':
         return 'Accesible';
-
-      case 'normal':
       default:
         return 'Normal';
     }

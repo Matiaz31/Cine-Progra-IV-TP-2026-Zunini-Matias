@@ -250,7 +250,11 @@
         </div>
 
       </div>
-
+      @if (selectionError) {
+        <div class="alert alert-danger" role="alert">
+          {{ selectionError }}
+        </div>
+      }
       <div class="seat-summary">
 
         <div>

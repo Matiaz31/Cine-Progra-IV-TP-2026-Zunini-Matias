@@ -20,49 +20,40 @@ export const routes: Routes = [
     path: 'login',
     component: Login,
   },
-
   {
     path: 'register',
     component: Register,
   },
-
   {
     path: 'home',
     component: Home,
     canActivate: [homeGuard],
   },
-
   {
     path: 'pelicula/:id',
     component: MovieDetail,
   },
-
   {
     path: 'seleccion-butacas/:id',
     component: SeatSelection,
   },
-
   {
     path: 'candy-bar',
     component: CandyBar,
   },
-
   {
     path: 'resumen-compra',
     component: PurchaseSummary,
   },
-
   {
     path: 'compra-exitosa',
     component: PurchaseSuccess,
   },
-
   /*
    * =========================
    * ADMINISTRACIÓN
    * =========================
    */
-
   {
     path: 'admin',
     component: Admin,
@@ -78,7 +69,6 @@ export const routes: Routes = [
             m => m.Peliculas
           ),
       },
-
       {
         path: 'generos',
         loadComponent: () =>
@@ -88,13 +78,11 @@ export const routes: Routes = [
       },
     ],
   },
-
   /*
    * =========================
    * EMPLEADO
    * =========================
    */
-
   {
     path: 'empleado',
     loadComponent: () =>
@@ -106,21 +94,18 @@ export const routes: Routes = [
       roleGuard(['employee']),
     ],
   },
-
   {
     path: 'mis-entradas',
     component: MisEntradas,
     canActivate: [authGuard],
   },
-
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'login',
     pathMatch: 'full',
   },
-
   {
     path: '**',
-    redirectTo: 'home',
+    redirectTo: 'login',
   },
 ];
