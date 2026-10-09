@@ -37,7 +37,7 @@
   gap: 1.5rem;
 }
 
-.brand-name {
+.brand-msg {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -53,7 +53,7 @@
   white-space: nowrap;
 }
 
-.brand-name .brand-mark {
+.brand-msg .brand-mark {
   font-size: 0.65rem;
   color: var(--color-secondary);
 }
