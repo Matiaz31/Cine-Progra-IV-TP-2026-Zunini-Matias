@@ -19,7 +19,6 @@ import { supabase } from '../../core/supabase';
 })
 export class Empleado implements AfterViewInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
-  
 
   @ViewChild('video')
   videoElement!: ElementRef<HTMLVideoElement>;
@@ -28,9 +27,13 @@ export class Empleado implements AfterViewInit, OnDestroy {
   private scannerControls: { stop: () => void } | undefined;
 
   qrCode = '';
+  private ultimoQr = '';
 
   scannerActivo = false;
   loading = false;
+
+  entradaValidada = false;
+  candyBarRetirado = false;
 
   error = '';
   success = '';
@@ -55,8 +58,7 @@ export class Empleado implements AfterViewInit, OnDestroy {
           this.videoElement.nativeElement,
           (result) => {
             if (result) {
-              this.qrCode = result.getText();
-
+              this.establecerQr(result.getText());
               this.detenerScanner();
 
               this.success = 'QR detectado correctamente.';
@@ -82,24 +84,55 @@ export class Empleado implements AfterViewInit, OnDestroy {
   detenerScanner() {
     this.scannerControls?.stop();
     this.scannerControls = undefined;
-
     this.scannerActivo = false;
 
     this.cdr.detectChanges();
   }
 
+  alCambiarQr(valor: string) {
+    this.establecerQr(valor);
+  }
+
+  private establecerQr(valor: string) {
+    const nuevoQr = valor.trim();
+
+    if (nuevoQr !== this.ultimoQr) {
+      this.entradaValidada = false;
+      this.candyBarRetirado = false;
+      this.ultimoQr = nuevoQr;
+    }
+
+    this.qrCode = valor;
+    this.error = '';
+    this.success = '';
+  }
+
   async validarEntrada() {
+    if (this.entradaValidada) {
+      return;
+    }
+
     await this.ejecutarAccion('validate_ticket_qr');
   }
 
   async retirarCandyBar() {
+    if (this.candyBarRetirado) {
+      return;
+    }
+
     await this.ejecutarAccion('redeem_candy_bar_qr');
   }
 
   private async ejecutarAccion(funcion: string) {
-    if (!this.qrCode.trim()) {
+    const codigo = this.qrCode.trim();
+
+    if (!codigo) {
       this.error = 'Escaneá un QR o ingresá el código manualmente.';
       this.success = '';
+      return;
+    }
+
+    if (this.loading) {
       return;
     }
 
@@ -109,7 +142,7 @@ export class Empleado implements AfterViewInit, OnDestroy {
 
     try {
       const { error } = await supabase.rpc(funcion, {
-        p_qr_code: this.qrCode.trim(),
+        p_qr_code: codigo,
       });
 
       if (error) {
@@ -117,12 +150,12 @@ export class Empleado implements AfterViewInit, OnDestroy {
       }
 
       if (funcion === 'validate_ticket_qr') {
+        this.entradaValidada = true;
         this.success = 'Entrada validada correctamente.';
       } else {
+        this.candyBarRetirado = true;
         this.success = 'Candy Bar retirado correctamente.';
       }
-
-      this.qrCode = '';
     } catch (error: any) {
       console.error(`ERROR ${funcion}:`, error);
 

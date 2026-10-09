@@ -1,7 +1,5 @@
 <div class="empleado-page">
-
   <div class="empleado-card">
-
     <div class="empleado-header">
       <h1>Control de acceso</h1>
 
@@ -11,10 +9,8 @@
     </div>
 
     <div class="scanner-section">
-
       @if (scannerActivo) {
         <div class="scanner-container">
-
           <video
             #video
             class="scanner-video"
@@ -24,7 +20,6 @@
           ></video>
 
           <div class="scanner-frame"></div>
-
         </div>
 
         <button
@@ -46,11 +41,9 @@
           📷 Escanear QR con cámara
         </button>
       }
-
     </div>
 
     <div class="qr-section">
-
       <label for="qrCode">
         Código QR
       </label>
@@ -58,31 +51,29 @@
       <input
         id="qrCode"
         type="text"
-        [(ngModel)]="qrCode"
+        [ngModel]="qrCode"
+        (ngModelChange)="alCambiarQr($event)"
         placeholder="Ingresá el código manualmente"
         [disabled]="loading"
       />
-
     </div>
 
     <div class="empleado-actions">
-
       <button
         type="button"
         (click)="validarEntrada()"
-        [disabled]="loading || !qrCode.trim()"
+        [disabled]="loading || !qrCode.trim() || entradaValidada"
       >
-        Validar entrada
+        {{ entradaValidada ? 'Entrada validada' : 'Validar entrada' }}
       </button>
 
       <button
         type="button"
         (click)="retirarCandyBar()"
-        [disabled]="loading || !qrCode.trim()"
+        [disabled]="loading || !qrCode.trim() || candyBarRetirado"
       >
-        Retirar Candy Bar
+        {{ candyBarRetirado ? 'Candy Bar retirado' : 'Retirar Candy Bar' }}
       </button>
-
     </div>
 
     @if (success) {
@@ -96,7 +87,5 @@
         {{ error }}
       </p>
     }
-
   </div>
-
 </div>
