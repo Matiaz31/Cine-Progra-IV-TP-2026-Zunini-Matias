@@ -105,7 +105,7 @@ export class PurchaseSummary implements OnInit {
     await this.loadLoyaltyInfo();
 
     if (this.selectedSeats.length > 0) {
-      this.selectedRewardSeatId = this.selectedSeats[0].id;
+      this.selectedRewardSeatId = this.rewardEligibleSeats[0]?.id ?? '';
     }
   }
 
@@ -503,8 +503,16 @@ export class PurchaseSummary implements OnInit {
       this.pointsBalance >= this.rewardCost &&
       this.selectedRewardSeatId &&
       this.selectedSeats.some(
-        (seat) => seat.id === this.selectedRewardSeatId,
+        (seat) =>
+          seat.id === this.selectedRewardSeatId &&
+          seat.seat_type !== 'vip',
       ),
+    );
+  }
+
+  get rewardEligibleSeats(): Seat[] {
+    return this.selectedSeats.filter(
+      (seat) => seat.seat_type !== 'vip',
     );
   }
 
@@ -555,6 +563,18 @@ export class PurchaseSummary implements OnInit {
 
       const userId = user?.id ?? null;
 
+            if (this.useTicketReward) {
+        if (
+          !userId ||
+          !this.rewardId ||
+          !this.canRedeemTicketReward()
+        ) {
+          throw new Error(
+            'No podés canjear la entrada gratis. Revisá tu sesión y tu saldo de puntos.'
+          );
+        }
+      }
+
       const {
         data: order,
         error: orderError,
@@ -587,9 +607,7 @@ export class PurchaseSummary implements OnInit {
       }
 
       if (!order) {
-        throw new Error(
-          'No se pudo crear la orden.'
-        );
+        throw new Error('No se pudo crear la orden.');
       }
 
       for (const seat of this.selectedSeats) {
@@ -674,19 +692,18 @@ export class PurchaseSummary implements OnInit {
         );
       }
 
-      for (const seat of this.selectedSeats) {
-        const {
-          error: seatError,
-        } = await supabase.rpc(
-          'add_ticket_seat',
+      if (this.useTicketReward) {
+        const { error: rewardError } = await supabase.rpc(
+          'apply_ticket_reward',
           {
-            p_ticket_id: ticket.id,
-            p_seat_id: seat.id,
+            p_order_id: order.id,
+            p_reward_id: this.rewardId,
+            p_seat_id: this.selectedRewardSeatId,
           }
         );
 
-        if (seatError) {
-          throw seatError;
+        if (rewardError) {
+          throw rewardError;
         }
       }
 
@@ -731,21 +748,23 @@ export class PurchaseSummary implements OnInit {
           ),
 
         seats:
-          this.selectedSeats.map(
-            (seat) => ({
-              id: seat.id,
-              row_label: seat.row_label,
-              seat_number:
-                seat.seat_number,
-              seat_type:
-                seat.seat_type,
-              price:
-                this.getSeatPrice(
-                  seat
-                ),
-            })
+          this.selectedSeats.map((seat) => ({
+            id: seat.id,
+            row_label: seat.row_label,
+            seat_number:
+              seat.seat_number,
+            seat_type:
+              seat.seat_type,
+            price:
+              this.useTicketReward &&
+              seat.id === this.selectedRewardSeatId
+                ? 0
+                : this.getSeatPrice(seat),
+          })
           ),
-        total: this.getFinalTotal(),
+        total: Number(
+          paidOrder.total ?? this.getFinalTotal()
+        ),
         couponApplied: this.couponApplied,
         candyBar: this.candyBar,
       };

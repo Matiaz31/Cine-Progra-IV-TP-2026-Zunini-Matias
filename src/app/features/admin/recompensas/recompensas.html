@@ -7,73 +7,81 @@
   </header>
 
   @if (error) {
-    <div class="message message-error" role="alert">
-      {{ error }}
-    </div>
+    <div class="message message-error" role="alert">{{ error }}</div>
   }
-
   @if (mensaje) {
-    <div class="message message-success" role="status">
-      {{ mensaje }}
-    </div>
+    <div class="message message-success" role="status">{{ mensaje }}</div>
   }
 
-  <!-- Formulario para crear una recompensa -->
   <section class="rewards-card">
     <h3>Crear recompensa</h3>
 
     <form #rewardForm="ngForm" (ngSubmit)="crearRecompensa()">
       <div class="form-grid">
         <div class="form-field">
-          <label for="reward-name">Nombre de la recompensa</label>
+          <label for="reward-name">Nombre del canje</label>
           <input
             id="reward-name"
             name="name"
             type="text"
             [(ngModel)]="nuevaRecompensa.name"
-            placeholder="Ej. Pochoclos"
+            placeholder="Ej. Entrada gratis"
             required
             maxlength="100"
           />
         </div>
 
         <div class="form-field">
-          <label for="reward-product">Producto asociado (opcional)</label>
+          <label for="reward-type">Tipo de canje</label>
           <select
-            id="reward-product"
-            name="product_id"
-            [(ngModel)]="nuevaRecompensa.product_id"
-          >
-            <option [ngValue]="null">Sin producto asociado</option>
-
-            @for (producto of productos; track producto.id) {
-              <option [ngValue]="producto.id">
-                {{ producto.name }} — {{ producto.price | number:'1.2-2' }}
-              </option>
-            }
-          </select>
-
-          @if (cargandoProductos) {
-            <small>Cargando productos...</small>
-          }
-
-          @if (errorProductos) {
-            <small class="message-error">{{ errorProductos }}</small>
-          }
-        </div>
-
-        <div class="form-field">
-          <label for="reward-type">Tipo de recompensa</label>
-          <input
             id="reward-type"
             name="type"
-            type="text"
             [(ngModel)]="nuevaRecompensa.type"
-            placeholder="Ej. ticket o product"
             required
-            maxlength="50"
-          />
+          >
+            <option value="product">Producto</option>
+            <option value="ticket">Ticket</option>
+          </select>
         </div>
+
+        @if (nuevaRecompensa.type === 'product') {
+          <div class="form-field">
+            <label for="reward-product">Producto asociado</label>
+            <select
+              id="reward-product"
+              name="product_id"
+              [(ngModel)]="nuevaRecompensa.product_id"
+              required
+            >
+              <option [ngValue]="null" disabled>Elegí un producto</option>
+              @for (producto of productos; track producto.id) {
+                <option [ngValue]="producto.id">
+                  {{ producto.name }} — {{ producto.price | number:'1.2-2' }}
+                </option>
+              }
+            </select>
+
+            @if (cargandoProductos) {
+              <small>Cargando productos...</small>
+            }
+            @if (errorProductos) {
+              <small class="message-error">{{ errorProductos }}</small>
+            }
+          </div>
+        } @else {
+          <div class="form-field">
+            <label for="reward-seat-type">Tipo de asiento</label>
+            <select
+              id="reward-seat-type"
+              name="seat_type"
+              [(ngModel)]="nuevaRecompensa.seat_type"
+              required
+            >
+              <option value="normal">Normal</option>
+            </select>
+            <small>Este beneficio se aplica a una butaca normal.</small>
+          </div>
+        }
 
         <div class="form-field">
           <label for="reward-cost">Costo en puntos</label>
@@ -105,7 +113,7 @@
       <button
         type="submit"
         class="primary-button"
-        [disabled]="rewardForm.invalid || creando || cargando"
+        [disabled]="rewardForm.invalid || creando || cargando || (nuevaRecompensa.type === 'product' && cargandoProductos)"
       >
         @if (creando) {
           Guardando recompensa...
@@ -116,7 +124,6 @@
     </form>
   </section>
 
-  <!-- Listado de recompensas -->
   <section class="rewards-card">
     <div class="list-header">
       <div>
@@ -130,11 +137,7 @@
         (click)="cargarRecompensas()"
         [disabled]="cargando || creando"
       >
-        @if (cargando) {
-          Actualizando...
-        } @else {
-          Actualizar
-        }
+        @if (cargando) { Actualizando... } @else { Actualizar }
       </button>
     </div>
 
@@ -149,17 +152,24 @@
             <tr>
               <th>Nombre</th>
               <th>Tipo</th>
+              <th>Asociado</th>
               <th>Costo</th>
               <th>Estado</th>
               <th>Acción</th>
             </tr>
           </thead>
-
           <tbody>
             @for (recompensa of recompensas; track recompensa.id) {
               <tr>
                 <td>{{ recompensa.name }}</td>
-                <td>{{ recompensa.type }}</td>
+                <td>{{ esTicket(recompensa) ? 'Ticket' : 'Producto' }}</td>
+                <td>
+                  @if (esTicket(recompensa)) {
+                    Butaca normal
+                  } @else {
+                    {{ nombreProducto(recompensa.product_id) }}
+                  }
+                </td>
                 <td>{{ recompensa.points_cost }} puntos</td>
                 <td>
                   <span

@@ -94,10 +94,7 @@
 
         <div class="seat-list">
 
-          @for (
-            seat of selectedSeats;
-            track seat.id
-          ) {
+          @for (seat of rewardEligibleSeats; track seat.id) {
 
             <div
               class="seat-item"
@@ -130,7 +127,18 @@
               </div>
 
               <div class="seat-price">
-                {{ formatPrice(getSeatPrice(seat)) }}
+                @if (
+                  useTicketReward &&
+                  seat.id === selectedRewardSeatId &&
+                  canRedeemTicketReward()
+                ) {
+                  <span class="reward-free-label">Gratis</span>
+                  <span class="reward-original-price">
+                    {{ formatPrice(getSeatPrice(seat)) }}
+                  </span>
+                } @else {
+                  {{ formatPrice(getSeatPrice(seat)) }}
+                }
               </div>
 
             </div>
@@ -296,47 +304,46 @@
 
           @if (rewardId && rewardCost > 0) {
             @if (pointsBalance >= rewardCost) {
-              <label class="loyalty-option">
-                <input
-                  type="checkbox"
-                  [checked]="useTicketReward"
-                  (change)="useTicketReward = $any($event.target).checked"
-                />
-                <span>
-                  Canjear una entrada gratis
-                  <small>{{ rewardCost }} puntos</small>
-                </span>
-              </label>
+              @if (rewardEligibleSeats.length > 0) {
+                <label class="loyalty-option">
+                  <input
+                    type="checkbox"
+                    [checked]="useTicketReward"
+                    (change)="useTicketReward = $any($event.target).checked"
+                  />
+                  <span>
+                    Canjear una entrada gratis
+                    <small>{{ rewardCost }} puntos</small>
+                  </span>
+                </label>
 
-              @if (useTicketReward) {
-                <div class="reward-seat-selector">
-                  <label for="reward-seat">
-                    Elegí qué butaca querés canjear
-                  </label>
-
-                  <select
-                    id="reward-seat"
-                    [value]="selectedRewardSeatId"
-                    (change)="selectedRewardSeatId = $any($event.target).value"
-                  >
-                    @for (seat of selectedSeats; track seat.id) {
-                      <option [value]="seat.id">
-                        {{ seat.row_label }}{{ seat.seat_number }}
-                        — {{ formatPrice(getSeatPrice(seat)) }}
-                      </option>
-                    }
-                  </select>
-
-                  <p class="loyalty-description">
-                    Se descontará el precio de esa entrada del total
-                    y se utilizarán {{ rewardCost }} puntos.
-                  </p>
-                </div>
+                @if (useTicketReward) {
+                  <div class="reward-seat-selector">
+                    <label for="reward-seat">Elegí qué butaca querés canjear</label>
+                    <select
+                      id="reward-seat"
+                      [value]="selectedRewardSeatId"
+                      (change)="selectedRewardSeatId = $any($event.target).value"
+                    >
+                      @for (seat of rewardEligibleSeats; track seat.id) {
+                        <option [value]="seat.id">
+                          {{ seat.row_label }}{{ seat.seat_number }} — {{ formatPrice(getSeatPrice(seat)) }}
+                        </option>
+                      }
+                    </select>
+                    <p class="loyalty-description">
+                      Se descontará el precio de esa entrada del total y se utilizarán {{ rewardCost }} puntos.
+                    </p>
+                  </div>
+                }
+              } @else {
+                <p class="loyalty-description">
+                  No hay butacas disponibles para canjear. Las butacas VIP no admiten este beneficio.
+                </p>
               }
             } @else {
               <p class="loyalty-description">
                 Necesitás {{ rewardCost }} puntos para canjear una entrada gratis.
-                Te faltan {{ rewardCost - pointsBalance }} puntos.
               </p>
             }
           } @else {
