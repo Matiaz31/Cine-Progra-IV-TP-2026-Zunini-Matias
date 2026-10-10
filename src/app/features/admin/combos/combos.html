@@ -1,0 +1,264 @@
+<section class="combos-admin">
+  <header class="page-header">
+    <div>
+      <h2>Administración de combos</h2>
+      <p>Creá combos y administrá los productos que incluyen.</p>
+    </div>
+
+    <button class="btn btn-primary" type="button" (click)="nuevoCombo()">
+      + Nuevo combo
+    </button>
+  </header>
+
+  @if (error) {
+    <div class="message message-error">{{ error }}</div>
+  }
+
+  @if (mensaje) {
+    <div class="message message-success">{{ mensaje }}</div>
+  }
+
+  <section class="editor card">
+    <h3>{{ editandoId ? 'Editar combo' : 'Crear combo' }}</h3>
+
+    <form (ngSubmit)="guardarCombo()">
+      <div class="form-grid">
+        <label>
+          Nombre *
+          <input
+            type="text"
+            name="name"
+            [(ngModel)]="formulario.name"
+            maxlength="120"
+            required
+            placeholder="Ej.: Combo clásico"
+          />
+        </label>
+
+        <label>
+          Precio del combo *
+          <input
+            type="number"
+            name="price"
+            [(ngModel)]="formulario.price"
+            min="0.01"
+            step="0.01"
+            required
+          />
+        </label>
+
+        <label class="full-width">
+          Descripción
+          <textarea
+            name="description"
+            [(ngModel)]="formulario.description"
+            rows="3"
+            placeholder="Descripción del combo"
+          ></textarea>
+        </label>
+
+        <label class="full-width">
+          URL de la imagen
+          <input
+            type="url"
+            name="image_url"
+            [(ngModel)]="formulario.image_url"
+            placeholder="https://..."
+          />
+        </label>
+      </div>
+
+      <div class="items-header">
+        <div>
+          <h4>Productos incluidos</h4>
+          <p>Elegí los productos y sus cantidades.</p>
+        </div>
+
+        <button
+          class="btn btn-secondary"
+          type="button"
+          (click)="agregarProducto()"
+          [disabled]="productos.length === 0"
+        >
+          + Agregar producto
+        </button>
+      </div>
+
+      @if (productos.length === 0) {
+        <p class="empty">
+          No hay productos activos. Primero creá o activá productos.
+        </p>
+      }
+
+      @for (item of formulario.items; track $index; let i = $index) {
+        <div class="item-row">
+          <label class="product-field">
+            Producto
+            <select
+              [name]="'producto-' + i"
+              [(ngModel)]="item.product_id"
+              required
+            >
+              <option value="">Seleccioná un producto</option>
+              @for (producto of productos; track producto.id) {
+                <option [value]="producto.id">
+                  {{ producto.name }} — {{ producto.price | currency:'ARS ':'symbol':'1.2-2' }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label class="quantity-field">
+            Cantidad
+            <input
+              type="number"
+              [name]="'cantidad-' + i"
+              [(ngModel)]="item.quantity"
+              min="1"
+              step="1"
+              required
+            />
+          </label>
+
+          <button
+            class="btn btn-danger btn-remove"
+            type="button"
+            (click)="quitarProducto(i)"
+            [attr.aria-label]="'Quitar producto ' + (i + 1)"
+          >
+            Quitar
+          </button>
+        </div>
+      }
+
+      <div class="price-summary">
+        <span>Valor de los productos seleccionados</span>
+        <strong>
+          {{ precioProductos() | currency:'ARS ':'symbol':'1.2-2' }}
+        </strong>
+        <small>
+          Es una referencia calculada con los precios actuales de los productos.
+          El precio de venta del combo se configura arriba.
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button
+          class="btn btn-primary"
+          type="submit"
+          [disabled]="guardando || cargando"
+        >
+          {{
+            guardando
+              ? 'Guardando...'
+              : editandoId
+                ? 'Guardar cambios'
+                : 'Crear combo'
+          }}
+        </button>
+
+        @if (editandoId) {
+          <button
+            class="btn btn-secondary"
+            type="button"
+            (click)="cancelarEdicion()"
+            [disabled]="guardando"
+          >
+            Cancelar
+          </button>
+        }
+      </div>
+    </form>
+  </section>
+
+  <section class="listing">
+    <div class="listing-header">
+      <h3>Combos existentes</h3>
+      <button
+        class="btn btn-secondary"
+        type="button"
+        (click)="cargarDatos()"
+        [disabled]="cargando"
+      >
+        Actualizar
+      </button>
+    </div>
+
+    @if (cargando) {
+      <p class="empty">Cargando combos...</p>
+    } @else if (combos.length === 0) {
+      <p class="empty">Todavía no hay combos registrados.</p>
+    } @else {
+      <div class="combo-grid">
+        @for (combo of combos; track combo.id) {
+          <article class="combo-card card">
+            @if (combo.image_url) {
+              <img
+                class="combo-image"
+                [src]="combo.image_url"
+                [alt]="combo.name"
+                loading="lazy"
+              />
+            }
+
+            <div class="combo-content">
+              <div class="combo-title">
+                <h4>{{ combo.name }}</h4>
+                <span
+                  class="status"
+                  [class.status-active]="combo.is_active"
+                  [class.status-inactive]="!combo.is_active"
+                >
+                  {{ combo.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+
+              <p class="description">
+                {{ combo.description || 'Sin descripción.' }}
+              </p>
+
+              <strong class="combo-price">
+                {{ combo.price | currency:'ARS ':'symbol':'1.2-2' }}
+              </strong>
+
+              <p class="created">
+                Creado: {{ combo.created_at | date:'dd/MM/yyyy' }}
+              </p>
+
+              <div class="combo-actions">
+                <button
+                  class="btn btn-secondary"
+                  type="button"
+                  (click)="editarCombo(combo)"
+                  [disabled]="guardando"
+                >
+                  Editar
+                </button>
+
+                <button
+                  class="btn btn-estado"
+                  [class.btn-danger]="combo.is_active"
+                  [class.btn-secondary]="!combo.is_active"
+                  type="button"
+                  (click)="cambiarEstado(combo)"
+                  [disabled]="guardando"
+                >
+                  {{ combo.is_active ? 'Desactivar' : 'Activar' }}
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  (click)="borrarCombo(combo)"
+                  [disabled]="borrandoId !== null || guardando"
+                >
+                  {{ borrandoId === combo.id ? 'Borrando...' : 'Borrar' }}
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</section>

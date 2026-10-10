@@ -112,6 +112,11 @@ export const routes: Routes = [
             (m) => m.Butacas,
           ),
       },
+      {
+        path: 'combos',
+        loadComponent: () =>
+          import('./features/admin/combos/combos').then(m => m.Combos)
+      },
     ],
   },
   {

@@ -1,7 +1,8 @@
 .movie-detail {
   display: grid;
   grid-template-columns: 300px 1fr;
-  gap: var(--space-2xl);
+  gap: var(--space-xl)
+;
   padding: var(--space-xl);
   overflow: hidden;
 }
@@ -167,7 +168,8 @@
 /* Sección de reseñas */
 
 .reviews-section {
-  margin-top: var(--space-2xl);
+  margin-top: var(--space-xl)
+;
 }
 
 .reviews-section > h2 {

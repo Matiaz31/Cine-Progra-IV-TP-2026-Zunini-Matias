@@ -94,6 +94,7 @@ export class MovieDetail {
 
   private async loadReviews(movieId: string) {
     this.reviewLoading = true;
+    this.reviewError = '';
 
     const { data, error } = await supabase
       .from('reviews')
@@ -121,9 +122,13 @@ export class MovieDetail {
     this.reviewLoading = false;
   }
 
-  async guardarResena() {
+  async saveReview() {
     this.reviewMessage = '';
     this.reviewError = '';
+
+    if (this.reviewSaving) {
+      return;
+    }
 
     if (!this.currentUserId) {
       this.reviewError = 'Iniciá sesión para publicar una reseña.';
