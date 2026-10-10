@@ -669,28 +669,25 @@ export class PurchaseSummary implements OnInit {
 
       const qrCode =
         `TICKET-${crypto.randomUUID()}`;
-
+      
       const {
         data: ticket,
         error: ticketError,
-      } = await supabase.rpc(
-        'create_ticket',
-        {
-          p_order_id: order.id,
-          p_screening_id: this.screeningId,
-          p_qr_code: qrCode,
-        }
-      );
+      } = await supabase.rpc('create_ticket', {
+        p_order_id: order.id,
+        p_screening_id: this.screeningId,
+        p_qr_code: qrCode,
+        p_seat_ids: this.selectedSeats.map((seat) => seat.id),
+      });
 
       if (ticketError) {
         throw ticketError;
       }
 
       if (!ticket) {
-        throw new Error(
-          'No se pudo crear el ticket.'
-        );
+        throw new Error('No se pudo crear el ticket.');
       }
+
 
       if (this.useTicketReward) {
         const { error: rewardError } = await supabase.rpc(
