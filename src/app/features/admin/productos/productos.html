@@ -1,0 +1,283 @@
+
+<section class="products-page">
+  <header class="products-header">
+    <div>
+      <h2>Productos del Candy Bar</h2>
+      <p>Administrá los productos, precios, categorías y stock.</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="abrirFormulario()"
+      [disabled]="saving"
+    >
+      Nuevo producto
+    </button>
+  </header>
+
+  @if (error) {
+    <div class="products-message message-error">
+      {{ error }}
+    </div>
+  }
+
+  @if (success) {
+    <div class="products-message message-success">
+      {{ success }}
+    </div>
+  }
+
+  @if (mostrarFormulario) {
+    <form
+      class="card product-form"
+      (ngSubmit)="guardarProducto()"
+    >
+      <h3>
+        {{ editando ? 'Editar producto' : 'Nuevo producto' }}
+      </h3>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="product-name">Nombre *</label>
+
+          <input
+            id="product-name"
+            type="text"
+            name="nombre"
+            [(ngModel)]="nombre"
+            maxlength="150"
+            placeholder="Ej.: Pochoclos grandes"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="product-category">Categoría</label>
+
+          <select
+            id="product-category"
+            name="categoriaId"
+            [(ngModel)]="categoriaId"
+          >
+            <option value="">Sin categoría</option>
+
+            @for (category of categories; track category.id) {
+              <option [value]="category.id">
+                {{ category.name }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="product-price">Precio *</label>
+
+          <input
+            id="product-price"
+            type="number"
+            name="precio"
+            [(ngModel)]="precio"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="product-stock">Stock *</label>
+
+          <input
+            id="product-stock"
+            type="number"
+            name="stock"
+            [(ngModel)]="stock"
+            min="0"
+            step="1"
+            required
+          />
+        </div>
+
+        <div class="form-group form-group-full">
+          <label for="product-description">Descripción</label>
+
+          <textarea
+            id="product-description"
+            name="descripcion"
+            [(ngModel)]="descripcion"
+            rows="3"
+            maxlength="1000"
+            placeholder="Descripción del producto"
+          ></textarea>
+        </div>
+
+        <div class="form-group form-group-full">
+          <label for="product-image">URL de imagen</label>
+
+          <input
+            id="product-image"
+            type="url"
+            name="imagenUrl"
+            [(ngModel)]="imagenUrl"
+            placeholder="https://ejemplo.com/imagen.jpg"
+          />
+        </div>
+
+        @if (imagenUrl.trim()) {
+          <div class="form-group form-group-full image-preview">
+            <span>Vista previa</span>
+
+            <img
+              [src]="imagenUrl"
+              alt="Vista previa del producto"
+              (error)="imagenUrl = ''"
+            />
+          </div>
+        }
+
+        <div class="form-group form-group-full">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              name="activo"
+              [(ngModel)]="activo"
+            />
+            Producto activo y disponible para la venta
+          </label>
+        </div>
+      </div>
+
+      <p class="form-note">
+        Los campos marcados con * son obligatorios. El precio se guarda
+        en la moneda configurada para el sistema.
+      </p>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Guardando...' : 'Guardar producto' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="cerrarFormulario()"
+          [disabled]="saving"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (loading) {
+    <div class="card products-empty">
+      Cargando productos...
+    </div>
+  } @else if (products.length === 0) {
+    <div class="card products-empty">
+      <h3>No hay productos registrados</h3>
+      <p>Creá un producto para comenzar a administrar el Candy Bar.</p>
+    </div>
+  } @else {
+    <div class="card products-table-wrapper">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Creación</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (product of products; track product.id) {
+            <tr>
+              <td>
+                <div class="product-name-cell">
+                  @if (product.image_url) {
+                    <img
+                      class="product-thumbnail"
+                      [src]="product.image_url"
+                      [alt]="product.name"
+                      loading="lazy"
+                    />
+                  }
+
+                  <div>
+                    <strong>{{ product.name }}</strong>
+
+                    @if (product.description) {
+                      <p>{{ product.description }}</p>
+                    }
+                  </div>
+                </div>
+              </td>
+
+              <td>{{ nombreCategoria(product.category_id) }}</td>
+
+              <td class="price-cell">
+                {{ product.price | currency: 'ARS' : 'symbol' : '1.2-2' }}
+              </td>
+
+              <td>
+                <span
+                  class="stock-value"
+                  [class.stock-low]="product.stock <= 5"
+                >
+                  {{ product.stock }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="status-pill"
+                  [class.status-active]="product.is_active"
+                  [class.status-inactive]="!product.is_active"
+                >
+                  {{ product.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <td>
+                {{ product.created_at | date: 'dd/MM/yyyy' }}
+              </td>
+
+              <td>
+                <div class="product-actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    (click)="editarProducto(product)"
+                    [disabled]="saving"
+                >
+                    Editar
+                </button>
+
+                <button
+                    type="button"
+                    class="btn"
+                    [class.product-disable-button]="product.is_active"
+                    [class.product-enable-button]="!product.is_active"
+                    (click)="cambiarEstado(product)"
+                    [disabled]="saving || changingStatusId !== null"
+                >
+                    {{ product.is_active ? 'Desactivar' : 'Activar' }}
+                </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

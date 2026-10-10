@@ -1,0 +1,134 @@
+<section class="categories-page">
+
+  <header class="categories-header">
+    <div>
+      <h2>Categorías de productos</h2>
+      <p>Administrá las categorías del Candy Bar.</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="abrirFormulario()"
+      [disabled]="saving"
+    >
+      Nueva categoría
+    </button>
+  </header>
+
+  @if (error) {
+    <div class="categories-message message-error">
+      {{ error }}
+    </div>
+  }
+
+  @if (success) {
+    <div class="categories-message message-success">
+      {{ success }}
+    </div>
+  }
+
+  @if (mostrarFormulario) {
+    <form
+      class="card category-form"
+      (ngSubmit)="guardarCategoria()"
+    >
+      <h3>
+        {{ editando ? 'Editar categoría' : 'Nueva categoría' }}
+      </h3>
+
+      <div class="form-group">
+        <label for="category-name">
+          Nombre
+        </label>
+
+        <input
+          id="category-name"
+          type="text"
+          name="nombreCategoria"
+          [(ngModel)]="nombreCategoria"
+          maxlength="100"
+          placeholder="Ej.: Bebidas"
+          required
+          autofocus
+        />
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Guardando...' : 'Guardar categoría' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="cerrarFormulario()"
+          [disabled]="saving"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (loading) {
+    <p class="categories-empty">
+      Cargando categorías...
+    </p>
+  } @else if (categories.length === 0) {
+    <div class="card categories-empty">
+      <h3>No hay categorías registradas</h3>
+      <p>Creá una categoría para organizar los productos del Candy Bar.</p>
+    </div>
+  } @else {
+    <div class="card categories-table-wrapper">
+      <table class="categories-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Fecha de creación</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (category of categories; track category.id) {
+            <tr>
+              <td>{{ category.name }}</td>
+
+              <td>
+                {{ category.created_at | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+
+              <td>
+                <div class="category-actions">
+                  <button
+                    type="button"
+                    class="btn btn-outline"
+                    (click)="editarCategoria(category)"
+                    [disabled]="saving"
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    (click)="eliminarCategoria(category)"
+                    [disabled]="saving"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

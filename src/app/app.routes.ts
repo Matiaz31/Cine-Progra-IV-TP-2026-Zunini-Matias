@@ -77,6 +77,20 @@ export const routes: Routes = [
             m => m.Generos
           ),
       },
+      {
+        path: 'categorias',
+        loadComponent: () =>
+          import('./features/admin/categorias/categorias').then(
+            (m) => m.Categorias,
+          ),
+      },
+      {
+        path: 'productos',
+        loadComponent: () =>
+          import('./features/admin/productos/productos').then(
+            (m) => m.Productos,
+          ),
+      },
     ],
   },
   {
