@@ -1,0 +1,19 @@
+.profile-loading {
+  color: var(--text-secondary, #a4aab5);
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.auth-header p {
+  line-height: 1.6;
+}
+
+.form-group input[readonly] {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 0.5rem;
+}
