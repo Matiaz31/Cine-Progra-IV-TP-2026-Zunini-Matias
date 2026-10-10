@@ -1,7 +1,13 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+
+import {
+  Component,
+  OnInit,
+  ChangeDetectorRef,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { supabase } from '../../../core/supabase';
 import { DecimalPipe } from '@angular/common';
+import { supabase } from '../../../core/supabase';
 
 interface Reward {
   id: string;
@@ -27,140 +33,179 @@ interface Product {
   templateUrl: './recompensas.html',
   styleUrl: './recompensas.scss',
 })
-
 export class Recompensas implements OnInit {
-    private supabase = supabase;
-    private cdr = inject(ChangeDetectorRef);
+  private supabase = supabase;
+  private cdr = inject(ChangeDetectorRef);
 
+  productos: Product[] = [];
+  recompensas: Reward[] = [];
 
-    productos: Product[] = [];
-    cargandoProductos = false;
+  cargandoProductos = false;
+  cargando = false;
+  creando = false;
 
-    recompensas: Reward[] = [];
-    cargando = false;
-    error = '';
-    mensaje = '';
+  error = '';
+  errorProductos = '';
+  mensaje = '';
 
-    nuevaRecompensa = {
-        name: '',
-        type: '',
-        product_id: null as string | null,
-        points_cost: 0,
-        is_active: true,
-    };
+  nuevaRecompensa = {
+    name: '',
+    type: '',
+    product_id: null as string | null,
+    points_cost: 0,
+    is_active: true,
+  };
 
-    async ngOnInit(): Promise<void> {
-        await Promise.all([
-            this.cargarRecompensas(),
-            this.cargarProductos(),
-        ]);
+  async ngOnInit(): Promise<void> {
+    await Promise.all([
+      this.cargarRecompensas(),
+      this.cargarProductos(),
+    ]);
+  }
+
+  async cargarRecompensas(): Promise<void> {
+    this.cargando = true;
+    this.error = '';
+
+    try {
+      const { data, error } = await this.supabase
+        .from('rewards')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      this.recompensas = (data ?? []) as Reward[];
+    } catch (err: any) {
+      console.error('Error al cargar recompensas:', err);
+      this.error =
+        'No se pudieron cargar las recompensas: ' +
+        (err?.message ?? 'Error desconocido');
+    } finally {
+      this.cargando = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async crearRecompensa(): Promise<void> {
+    // Evita doble envío mientras se procesa la creación.
+    if (this.creando) return;
+
+    this.error = '';
+    this.mensaje = '';
+
+    const name = this.nuevaRecompensa.name.trim();
+    const type = this.nuevaRecompensa.type.trim();
+    const pointsCost = Number(this.nuevaRecompensa.points_cost);
+
+    if (
+      !name ||
+      !type ||
+      !Number.isInteger(pointsCost) ||
+      pointsCost <= 0
+    ) {
+      this.error =
+        'Completá el nombre, el tipo y un costo en puntos mayor que cero.';
+      return;
     }
 
-    async cargarRecompensas(): Promise<void> {
-        this.cargando = true;
-        this.error = '';
+    this.creando = true;
+    this.cdr.detectChanges();
 
-        try {
-            const { data, error } = await this.supabase
-            .from('rewards')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-            if (error) {
-            this.error = 'No se pudieron cargar las recompensas: ' + error.message;
-            return;
-            }
-
-            this.recompensas = (data ?? []) as Reward[];
-            console.log('RECOMPENSAS CARGADAS:', this.recompensas.length);
-        } catch (err) {
-            console.error('Error al cargar recompensas:', err);
-            this.error = 'Ocurrió un error al consultar las recompensas.';
-        } finally {
-            this.cargando = false;
-            this.cdr.detectChanges();
-        }
-    }
-
-    async crearRecompensa(): Promise<void> {
-        this.error = '';
-        this.mensaje = '';
-
-        const name = this.nuevaRecompensa.name.trim();
-        const type = this.nuevaRecompensa.type.trim();
-        const pointsCost = Number(this.nuevaRecompensa.points_cost);
-
-        if (!name || !type || !Number.isInteger(pointsCost) || pointsCost <= 0) {
-            this.error = 'Completá el nombre, el tipo y un costo en puntos mayor que cero.';
-            return;
-        }
-
-        const { error } = await this.supabase.from('rewards').insert({
-            name,
-            type,
-            product_id: this.nuevaRecompensa.product_id || null,
-            points_cost: pointsCost,
-            is_active: this.nuevaRecompensa.is_active,
+    try {
+      const { error } = await this.supabase
+        .from('rewards')
+        .insert({
+          name,
+          type,
+          product_id: this.nuevaRecompensa.product_id || null,
+          points_cost: pointsCost,
+          is_active: this.nuevaRecompensa.is_active,
         });
 
-        if (error) {
-            this.error = 'No se pudo crear la recompensa: ' + error.message;
-            return;
-        }
+      if (error) {
+        throw error;
+      }
 
+      // Limpiamos el formulario únicamente si se guardó correctamente.
+      this.nuevaRecompensa = {
+        name: '',
+        type: '',
+        product_id: null,
+        points_cost: 0,
+        is_active: true,
+      };
+
+      // Recargamos la lista antes de mostrar la confirmación.
+      await this.cargarRecompensas();
+
+      if (!this.error) {
         this.mensaje = 'Recompensa creada correctamente.';
-        this.nuevaRecompensa = {
-            name: '',
-            type: '',
-            product_id: null,
-            points_cost: 0,
-            is_active: true,
-        };
-
-        await this.cargarRecompensas();
+      }
+    } catch (err: any) {
+      console.error('Error al crear recompensa:', err);
+      this.error =
+        'No se pudo crear la recompensa: ' +
+        (err?.message ?? 'Error desconocido');
+    } finally {
+      this.creando = false;
+      this.cdr.detectChanges();
     }
+  }
 
   async cambiarEstado(recompensa: Reward): Promise<void> {
     this.error = '';
     this.mensaje = '';
 
-    const { error } = await this.supabase
-      .from('rewards')
-      .update({ is_active: !recompensa.is_active })
-      .eq('id', recompensa.id);
+    try {
+      const { error } = await this.supabase
+        .from('rewards')
+        .update({ is_active: !recompensa.is_active })
+        .eq('id', recompensa.id);
 
-    if (error) {
-      this.error = 'No se pudo actualizar la recompensa: ' + error.message;
-      return;
+      if (error) {
+        throw error;
+      }
+
+      await this.cargarRecompensas();
+
+      if (!this.error) {
+        this.mensaje = 'Estado de la recompensa actualizado.';
+      }
+    } catch (err: any) {
+      console.error('Error al cambiar estado:', err);
+      this.error =
+        'No se pudo actualizar la recompensa: ' +
+        (err?.message ?? 'Error desconocido');
     }
-
-    this.mensaje = 'Estado de la recompensa actualizado.';
-    await this.cargarRecompensas();
   }
-  
+
   async cargarProductos(): Promise<void> {
     this.cargandoProductos = true;
+    this.errorProductos = '';
 
     try {
-        const { data, error } = await this.supabase
+      const { data, error } = await this.supabase
         .from('products')
         .select('id, name, price, stock')
         .eq('is_active', true)
         .order('name', { ascending: true });
 
-        if (error) {
-        this.error = 'No se pudieron cargar los productos: ' + error.message;
-        return;
-        }
+      if (error) {
+        throw error;
+      }
 
-        this.productos = (data ?? []) as Product[];
-    } catch (err) {
-        console.error('Error al cargar productos:', err);
-        this.error = 'Ocurrió un error al consultar los productos.';
+      this.productos = (data ?? []) as Product[];
+    } catch (err: any) {
+      console.error('Error al cargar productos:', err);
+      this.errorProductos =
+        'No se pudieron cargar los productos: ' +
+        (err?.message ?? 'Error desconocido');
     } finally {
-        this.cargandoProductos = false;
-        this.cdr.detectChanges();
+      this.cargandoProductos = false;
+      this.cdr.detectChanges();
     }
-    }
-
+  }
 }
