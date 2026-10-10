@@ -1,0 +1,55 @@
+<div class="auth-page">
+  <div class="auth-card card">
+    <div class="auth-header">
+      <h1>Completá tu perfil</h1>
+      <p>Tu cuenta de Google ya está conectada. Necesitamos estos datos para terminar el registro en Cine Progra IV.</p>
+    </div>
+
+    @if (loading) {
+      <p class="profile-loading">Cargando los datos de tu cuenta...</p>
+    } @else {
+      <form (ngSubmit)="saveProfile()">
+        <div class="form-group">
+          <label for="oauth-email">Email</label>
+          <input id="oauth-email" class="form-control" type="email" [value]="email" readonly />
+        </div>
+        <div class="form-group">
+          <label for="oauth-firstName">Nombre</label>
+          <input id="oauth-firstName" class="form-control" type="text" name="firstName" [(ngModel)]="firstName" autocomplete="given-name" required />
+        </div>
+        <div class="form-group">
+          <label for="oauth-lastName">Apellido</label>
+          <input id="oauth-lastName" class="form-control" type="text" name="lastName" [(ngModel)]="lastName" autocomplete="family-name" required />
+        </div>
+        <div class="form-group">
+          <label for="oauth-birthDate">Fecha de nacimiento</label>
+          <input id="oauth-birthDate" class="form-control" type="date" name="birthDate" [(ngModel)]="birthDate" required />
+        </div>
+        <div class="form-group">
+          <label for="oauth-bloodType">Tipo de sangre (opcional)</label>
+          <select id="oauth-bloodType" class="form-control" name="bloodType" [(ngModel)]="bloodType">
+            <option value="">Prefiero no indicarlo</option>
+            <option value="A+">A+</option><option value="A-">A-</option>
+            <option value="B+">B+</option><option value="B-">B-</option>
+            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+            <option value="O+">O+</option><option value="O-">O-</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="oauth-eyeColor">Color de ojos (opcional)</label>
+          <input id="oauth-eyeColor" class="form-control" type="text" name="eyeColor" [(ngModel)]="eyeColor" placeholder="Ej.: marrón, azul, verde" />
+        </div>
+        <div class="form-group">
+          <label for="oauth-vacationDays">Días de vacaciones por año</label>
+          <input id="oauth-vacationDays" class="form-control" type="number" name="vacationDays" [(ngModel)]="vacationDays" min="0" />
+        </div>
+        @if (error) {
+          <div class="alert alert-danger">{{ error }}</div>
+        }
+        <button class="btn btn-primary auth-submit" type="submit" [disabled]="saving">
+          {{ saving ? 'Guardando perfil...' : 'Guardar y entrar' }}
+        </button>
+      </form>
+    }
+  </div>
+</div>
