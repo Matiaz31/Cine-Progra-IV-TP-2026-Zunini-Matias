@@ -1,0 +1,178 @@
+
+<div class="rewards-page">
+  <header class="rewards-header">
+    <div>
+      <h2>Recompensas</h2>
+      <p>Administrá los beneficios que los usuarios pueden canjear con sus puntos.</p>
+    </div>
+  </header>
+
+  @if (error) {
+    <div class="message message-error" role="alert">
+      {{ error }}
+    </div>
+  }
+
+  @if (mensaje) {
+    <div class="message message-success" role="status">
+      {{ mensaje }}
+    </div>
+  }
+
+  <section class="rewards-card">
+    <h3>Crear recompensa</h3>
+
+    <form (ngSubmit)="crearRecompensa()" #rewardForm="ngForm">
+    <div class="form-grid">
+
+        <div class="form-field">
+        <label for="reward-name">Nombre de la recompensa</label>
+        <input
+            id="reward-name"
+            name="name"
+            type="text"
+            [(ngModel)]="nuevaRecompensa.name"
+            placeholder="Ej. Combo pareja"
+            required
+            maxlength="100"
+        />
+        </div>
+
+        <div class="form-field">
+        <label for="reward-product">Producto asociado (opcional)</label>
+        <select
+            id="reward-product"
+            name="product_id"
+            [(ngModel)]="nuevaRecompensa.product_id"
+        >
+            <option [ngValue]="null">Sin producto asociado</option>
+
+            @for (producto of productos; track producto.id) {
+            <option [ngValue]="producto.id">
+                {{ producto.name }} — {{ producto.price | number:'1.2-2' }}
+            </option>
+            }
+        </select>
+
+        @if (cargandoProductos) {
+            <small>Cargando productos...</small>
+        }
+        </div>
+
+        <div class="form-field">
+        <label for="reward-type">Tipo de recompensa</label>
+        <input
+            id="reward-type"
+            name="type"
+            type="text"
+            [(ngModel)]="nuevaRecompensa.type"
+            placeholder="Ej. ticket o product"
+            required
+            maxlength="50"
+        />
+        </div>
+
+        <div class="form-field">
+        <label for="reward-cost">Costo en puntos</label>
+        <input
+            id="reward-cost"
+            name="points_cost"
+            type="number"
+            [(ngModel)]="nuevaRecompensa.points_cost"
+            min="1"
+            step="1"
+            required
+        />
+        </div>
+
+        <div class="form-field checkbox-field">
+        <label for="reward-active">Estado inicial</label>
+        <label class="checkbox-label">
+            <input
+            id="reward-active"
+            name="is_active"
+            type="checkbox"
+            [(ngModel)]="nuevaRecompensa.is_active"
+            />
+            Activa
+        </label>
+        </div>
+
+    </div>
+
+    <button
+        type="submit"
+        class="primary-button"
+        [disabled]="rewardForm.invalid || cargando"
+    >
+        Crear recompensa
+    </button>
+    </form>
+  </section>
+
+  <section class="rewards-card">
+    <div class="list-header">
+      <div>
+        <h3>Recompensas registradas</h3>
+        <p>Consultá los beneficios y cambiá su disponibilidad.</p>
+      </div>
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="cargarRecompensas()"
+        [disabled]="cargando"
+      >
+        Actualizar
+      </button>
+    </div>
+
+    @if (cargando) {
+      <p class="empty-state">Cargando recompensas...</p>
+    } @else if (recompensas.length === 0) {
+      <p class="empty-state">Todavía no hay recompensas registradas.</p>
+    } @else {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Costo</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (recompensa of recompensas; track recompensa.id) {
+              <tr>
+                <td>{{ recompensa.name }}</td>
+                <td>{{ recompensa.type }}</td>
+                <td>{{ recompensa.points_cost }} puntos</td>
+                <td>
+                  <span
+                    class="status"
+                    [class.status-active]="recompensa.is_active"
+                    [class.status-inactive]="!recompensa.is_active"
+                  >
+                    {{ recompensa.is_active ? 'Activa' : 'Inactiva' }}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="action-button"
+                    (click)="cambiarEstado(recompensa)"
+                  >
+                    {{ recompensa.is_active ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>
