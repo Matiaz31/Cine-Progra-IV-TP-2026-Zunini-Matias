@@ -137,6 +137,13 @@ export const routes: Routes = [
             m => m.Recompensas
           )
       },
+      {
+        path: 'logs',
+        loadComponent: () =>
+          import('./features/admin/logs/logs').then(
+            m => m.Logs
+          ),
+      },
     ],
   },
   {

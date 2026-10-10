@@ -1,0 +1,113 @@
+
+<section class="logs-page">
+  <header class="logs-header">
+    <div>
+      <h2>Historial de actividad</h2>
+      <p>Consultá las acciones realizadas en el sistema del cine.</p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="cargarLogs()"
+      [disabled]="cargando"
+    >
+      {{ cargando ? 'Actualizando...' : '↻ Actualizar' }}
+    </button>
+  </header>
+
+  <div class="logs-summary">
+    <div class="summary-card">
+      <span class="summary-icon">📋</span>
+      <div>
+        <span class="summary-label">Actividades encontradas</span>
+        <strong>{{ registros.length }}</strong>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-icon">👥</span>
+      <div>
+        <span class="summary-label">Usuarios registrados</span>
+        <strong>{{ contarUsuarios() }}</strong>
+      </div>
+    </div>
+  </div>
+
+  @if (cargando) {
+    <div class="state-message">Cargando historial de actividad...</div>
+  } @else if (error) {
+    <div class="error-message">{{ error }}</div>
+  } @else if (registros.length === 0) {
+    <div class="state-message">
+      <span>📭</span>
+      <strong>No hay actividades para mostrar</strong>
+      <p>Las acciones registradas aparecerán acá.</p>
+    </div>
+  } @else {
+    <div class="logs-list">
+      @for (registro of registros; track registro.id) {
+        <article class="log-card">
+          <div class="log-icon" [class]="claseAccion(registro.action)">
+            {{ iconoAccion(registro.action) }}
+          </div>
+
+          <div class="log-content">
+            <div class="log-title-row">
+              <h3>{{ descripcionAccion(registro) }}</h3>
+              <span class="log-date">
+                {{ registro.created_at | date:'dd/MM/yyyy HH:mm':'UTC' }}
+              </span>
+            </div>
+
+            <p class="log-description">
+              <strong>{{ nombreEntidad(registro.entity_type) }}</strong>
+
+              @if (nombreElemento(registro)) {
+                <span> · {{ nombreElemento(registro) }}</span>
+              }
+            </p>
+
+            <div class="log-meta">
+              <span>👤 {{ registro.usuario || 'Usuario no identificado' }}</span>
+
+              @if (registro.action === 'activate' || registro.action === 'deactivate') {
+                <span class="status-badge"
+                  [class.status-active]="registro.action === 'activate'"
+                  [class.status-inactive]="registro.action === 'deactivate'">
+                  {{ registro.action === 'activate' ? 'Activo' : 'Inactivo' }}
+                </span>
+              }
+            </div>
+
+            @if (tieneDetalles(registro)) {
+              <details class="log-details">
+                <summary>Ver detalles</summary>
+
+                <div class="details-content">
+                  @for (detalle of detallesLegibles(registro); track detalle.label) {
+                    <div class="detail-row">
+                      <span>{{ detalle.label }}</span>
+                      <strong>{{ detalle.value }}</strong>
+                    </div>
+                  }
+
+                  @if (registro.entity_id) {
+                    <div class="detail-row technical-detail">
+                      <span>Identificador del elemento</span>
+                      <code>{{ registro.entity_id }}</code>
+                    </div>
+                  }
+                </div>
+              </details>
+            }
+          </div>
+        </article>
+      }
+    </div>
+
+    <p class="logs-footer">
+      Se muestran hasta 200 actividades, de la más reciente a la más antigua.
+    </p>
+  }
+</section>
