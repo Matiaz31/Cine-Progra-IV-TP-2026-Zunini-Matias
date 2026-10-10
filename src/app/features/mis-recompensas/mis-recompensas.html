@@ -1,0 +1,165 @@
+
+<main class="rewards-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Programa de fidelización</p>
+      <h1>Mis puntos y recompensas</h1>
+      <p class="subtitle">
+        Acumulá puntos y consultá los beneficios disponibles de tu cuenta.
+      </p>
+    </div>
+
+    <a class="back-link" routerLink="/home">
+      Volver a películas
+    </a>
+  </header>
+
+  @if (error) {
+    <div class="alert alert-danger" role="alert">
+      {{ error }}
+    </div>
+  }
+
+  @if (cargando) {
+    <section class="info-card">
+      Cargando tus puntos y recompensas...
+    </section>
+  } @else if (usuarioId) {
+    <section class="balance-card">
+      <div class="balance-icon" aria-hidden="true">✦</div>
+
+      <div class="balance-copy">
+        <span class="balance-label">Tu saldo disponible</span>
+        <strong class="balance-value">
+          {{ puntosDisponibles.toLocaleString('es-AR') }}
+        </strong>
+        <span class="balance-caption">puntos</span>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="cargarDatos()"
+        [disabled]="cargando"
+      >
+        Actualizar saldo
+      </button>
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading">
+        <div>
+          <h2>Recompensas disponibles</h2>
+          <p>Estos son los beneficios activos del cine.</p>
+        </div>
+      </div>
+
+      @if (recompensas.length === 0) {
+        <div class="info-card">
+          Por ahora no hay recompensas activas.
+        </div>
+      } @else {
+        <div class="rewards-grid">
+          @for (recompensa of recompensas; track recompensa.id) {
+            <article class="reward-card">
+              <div class="reward-icon" aria-hidden="true">
+                {{
+                  recompensa.type.toLowerCase().includes('ticket') ||
+                  recompensa.type.toLowerCase().includes('entrada')
+                    ? '🎟️'
+                    : '🍿'
+                }}
+              </div>
+
+              <span class="reward-type">
+                {{ recompensa.type }}
+              </span>
+
+              <h3>{{ recompensa.name }}</h3>
+
+              @if (recompensa.product_name) {
+                <p class="product-name">
+                  Producto: {{ recompensa.product_name }}
+                </p>
+              } @else {
+                <p class="product-name">
+                  Beneficio del cine
+                </p>
+              }
+
+              <div class="reward-footer">
+                <strong>
+                  {{ recompensa.points_cost.toLocaleString('es-AR') }}
+                  puntos
+                </strong>
+
+                <span class="coming-soon">
+                  Canje próximamente
+                </span>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading">
+        <div>
+          <h2>Historial de movimientos</h2>
+          <p>Últimos 50 movimientos de tu cuenta.</p>
+        </div>
+      </div>
+
+      @if (movimientos.length === 0) {
+        <div class="info-card">
+          Todavía no tenés movimientos de puntos.
+        </div>
+      } @else {
+        <div class="history-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Movimiento</th>
+                <th>Detalle</th>
+                <th>Fecha</th>
+                <th class="numeric">Puntos</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (movimiento of movimientos; track movimiento.id) {
+                <tr>
+                  <td>
+                    {{ etiquetaMovimiento(movimiento.type) }}
+                  </td>
+
+                  <td>
+                    {{
+                      movimiento.description ||
+                      etiquetaMovimiento(movimiento.type)
+                    }}
+                  </td>
+
+                  <td>
+                    {{ formatDate(movimiento.created_at) }}
+                  </td>
+
+                  <td
+                    class="numeric"
+                    [class.positive]="puntosMovimiento(movimiento) > 0"
+                    [class.negative]="puntosMovimiento(movimiento) < 0"
+                  >
+                    {{
+                      puntosMovimiento(movimiento) > 0 ? '+' : ''
+                    }}{{ puntosMovimiento(movimiento).toLocaleString('es-AR') }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</main>

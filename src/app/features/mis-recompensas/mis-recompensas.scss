@@ -1,0 +1,253 @@
+
+.rewards-page {
+  width: min(1200px, calc(100% - 2rem));
+  margin: 2.5rem auto 4rem;
+  color: var(--color-text);
+}
+
+.page-header,
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  margin-bottom: 0.65rem;
+}
+
+.eyebrow {
+  margin-bottom: 0.5rem;
+  color: var(--color-secondary-hover);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.subtitle,
+.section-heading p {
+  margin-bottom: 0;
+  color: var(--color-text-secondary);
+}
+
+.back-link {
+  color: var(--color-primary-hover);
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.back-link:hover {
+  color: var(--color-text);
+}
+
+.balance-card {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  border: 1px solid rgba(118, 103, 168, 0.45);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    115deg,
+    rgba(118, 103, 168, 0.2),
+    var(--color-surface) 72%
+  );
+  box-shadow: var(--shadow-sm);
+}
+
+.balance-icon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: rgba(118, 103, 168, 0.25);
+  color: var(--color-primary-hover);
+  font-size: 1.8rem;
+}
+
+.balance-copy {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.balance-label,
+.balance-caption {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.balance-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  line-height: 1.1;
+}
+
+.balance-card button {
+  margin-left: auto;
+}
+
+.content-section {
+  margin-top: 2.5rem;
+}
+
+.section-heading {
+  margin-bottom: 1.2rem;
+}
+
+.section-heading h2 {
+  margin-bottom: 0.35rem;
+}
+
+.rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.reward-card,
+.info-card,
+.history-wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.reward-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
+  padding: 1.25rem;
+}
+
+.reward-icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(91, 157, 163, 0.13);
+  font-size: 1.5rem;
+}
+
+.reward-type {
+  color: var(--color-secondary-hover);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.reward-card h3 {
+  margin: 0.4rem 0;
+  font-size: 1.2rem;
+}
+
+.product-name {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.reward-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: auto;
+  padding-top: 1.25rem;
+}
+
+.reward-footer strong {
+  color: var(--color-primary-hover);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.coming-soon {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.info-card {
+  padding: 1.5rem;
+  color: var(--color-text-secondary);
+}
+
+.history-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+th {
+  color: var(--color-text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.numeric {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.positive {
+  color: #a7d8bc;
+}
+
+.negative {
+  color: #d8a0a7;
+}
+
+@media (max-width: 700px) {
+  .rewards-page {
+    width: calc(100% - 1.25rem);
+    margin-top: 1.5rem;
+  }
+
+  .page-header,
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .balance-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .balance-card button {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  th,
+  td {
+    padding: 0.75rem;
+  }
+}

@@ -58,8 +58,8 @@ export const routes: Routes = [
   {
     path: 'mis-recompensas',
     loadComponent: () =>
-      import('./features/recompensas-cliente/mis-recompensas').then(
-        m => m.MisRecompensas,
+      import('./features/mis-recompensas/mis-recompensas').then(
+        m => m.MisRecompensas
       ),
     canActivate: [authGuard, roleGuard(['customer'])],
   },
