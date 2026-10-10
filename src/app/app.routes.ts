@@ -56,6 +56,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'mis-recompensas',
+    loadComponent: () =>
+      import('./features/recompensas-cliente/mis-recompensas').then(
+        m => m.MisRecompensas,
+      ),
+    canActivate: [authGuard, roleGuard(['customer'])],
+  },
+  {
     path: 'admin',
     component: Admin,
     canActivate: [
