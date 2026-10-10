@@ -272,6 +272,85 @@
         </section>
 
       }
+      
+      <section class="loyalty-section">
+        <div class="section-heading">
+          <h2>🎟️ Canje de puntos</h2>
+        </div>
+
+        @if (loyaltyLoading) {
+          <p class="loyalty-description">
+            Consultando tu saldo de puntos...
+          </p>
+        } @else if (userId) {
+          <div class="loyalty-balance">
+            <span>Tu saldo disponible</span>
+            <strong>{{ pointsBalance }} puntos</strong>
+          </div>
+
+          @if (loyaltyMessage) {
+            <p class="loyalty-message error">
+              {{ loyaltyMessage }}
+            </p>
+          }
+
+          @if (rewardId && rewardCost > 0) {
+            @if (pointsBalance >= rewardCost) {
+              <label class="loyalty-option">
+                <input
+                  type="checkbox"
+                  [checked]="useTicketReward"
+                  (change)="useTicketReward = $any($event.target).checked"
+                />
+                <span>
+                  Canjear una entrada gratis
+                  <small>{{ rewardCost }} puntos</small>
+                </span>
+              </label>
+
+              @if (useTicketReward) {
+                <div class="reward-seat-selector">
+                  <label for="reward-seat">
+                    Elegí qué butaca querés canjear
+                  </label>
+
+                  <select
+                    id="reward-seat"
+                    [value]="selectedRewardSeatId"
+                    (change)="selectedRewardSeatId = $any($event.target).value"
+                  >
+                    @for (seat of selectedSeats; track seat.id) {
+                      <option [value]="seat.id">
+                        {{ seat.row_label }}{{ seat.seat_number }}
+                        — {{ formatPrice(getSeatPrice(seat)) }}
+                      </option>
+                    }
+                  </select>
+
+                  <p class="loyalty-description">
+                    Se descontará el precio de esa entrada del total
+                    y se utilizarán {{ rewardCost }} puntos.
+                  </p>
+                </div>
+              }
+            } @else {
+              <p class="loyalty-description">
+                Necesitás {{ rewardCost }} puntos para canjear una entrada gratis.
+                Te faltan {{ rewardCost - pointsBalance }} puntos.
+              </p>
+            }
+          } @else {
+            <p class="loyalty-description">
+              La recompensa de entrada gratis no está disponible.
+            </p>
+          }
+        } @else {
+          <p class="loyalty-description">
+            Iniciá sesión para acumular y canjear puntos.
+            Las compras como invitado no generan puntos.
+          </p>
+        }
+      </section>
 
       <section class="coupon-section">
         <h3>¿Tenés un cupón de descuento?</h3>
@@ -351,11 +430,17 @@
             </div>
 
           }
-          
+
           @if (couponApplied && couponDiscount > 0) {
             <div class="total-row coupon-discount-row">
               <span>Descuento del cupón</span>
               <strong>-{{ formatPrice(couponDiscount) }}</strong>
+            </div>
+          }
+          @if (useTicketReward && canRedeemTicketReward()) {
+            <div class="total-row reward-discount-row">
+              <span>Entrada gratis por puntos</span>
+              <strong>-{{ formatPrice(getSelectedRewardSeatPrice()) }}</strong>
             </div>
           }
 

@@ -45,6 +45,18 @@ export class PurchaseSummary implements OnInit {
   couponDiscount = 0;
   couponApplied = false;
 
+  userId: string | null = null;
+  pointsBalance = 0;
+
+  rewardId: string | null = null;
+  rewardCost = 0;
+  useTicketReward = false;
+  selectedRewardSeatId = '';
+
+  loyaltyLoading = false;
+  loyaltyMessage = '';
+
+
   validatingCoupon = false;
 
   onCouponCodeChange(value: string): void {
@@ -89,6 +101,12 @@ export class PurchaseSummary implements OnInit {
     }
 
     await this.loadSummary();
+
+    await this.loadLoyaltyInfo();
+
+    if (this.selectedSeats.length > 0) {
+      this.selectedRewardSeatId = this.selectedSeats[0].id;
+    }
   }
 
   private loadPurchaseSelection() {
@@ -278,7 +296,15 @@ export class PurchaseSummary implements OnInit {
   }
 
   getFinalTotal(): number {
-    return Math.max(0, this.getTotal() - this.couponDiscount);
+    const rewardDiscount =
+      this.useTicketReward && this.canRedeemTicketReward()
+        ? this.getSelectedRewardSeatPrice()
+        : 0;
+
+    return Math.max(
+      0,
+      this.getTotal() - this.couponDiscount - rewardDiscount,
+    );
   }
 
   getCandyBarItemsCount(): number {
@@ -391,6 +417,97 @@ export class PurchaseSummary implements OnInit {
         return 'Normal';
     }
   }
+
+  async loadLoyaltyInfo(): Promise<void> {
+    this.loyaltyLoading = true;
+    this.loyaltyMessage = '';
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) throw userError;
+
+      this.userId = user?.id ?? null;
+
+      // Los invitados pueden comprar, pero no canjear puntos.
+      if (!this.userId) return;
+
+      const [
+        { data: transactions, error: transactionsError },
+        { data: reward, error: rewardError },
+      ] = await Promise.all([
+        supabase
+          .from('points_transactions')
+          .select('type, amount')
+          .eq('user_id', this.userId),
+
+        supabase
+          .from('rewards')
+          .select('id, name, type, points_cost')
+          .eq('name', 'Entrada gratis')
+          .eq('is_active', true)
+          .maybeSingle(),
+      ]);
+
+      if (transactionsError) throw transactionsError;
+      if (rewardError) throw rewardError;
+
+      this.pointsBalance = (transactions ?? []).reduce(
+        (balance, transaction) => {
+          const amount = Number(transaction.amount ?? 0);
+
+          switch (transaction.type) {
+            case 'earned':
+              return balance + Math.abs(amount);
+            case 'redeemed':
+              return balance - Math.abs(amount);
+            case 'adjustment':
+              return balance + amount;
+            default:
+              return balance;
+          }
+        },
+        0,
+      );
+
+      if (reward) {
+        this.rewardId = reward.id;
+        this.rewardCost = Number(reward.points_cost ?? 0);
+      }
+    } catch (error: any) {
+      console.error('Error cargando puntos:', error);
+      this.loyaltyMessage =
+        error?.message ?? 'No se pudieron cargar tus puntos.';
+    } finally {
+      this.loyaltyLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  getSelectedRewardSeatPrice(): number {
+    const seat = this.selectedSeats.find(
+      (item) => item.id === this.selectedRewardSeatId,
+    );
+
+    return seat ? this.getSeatPrice(seat) : 0;
+  }
+
+  canRedeemTicketReward(): boolean {
+    return Boolean(
+      this.userId &&
+      this.rewardId &&
+      this.rewardCost > 0 &&
+      this.pointsBalance >= this.rewardCost &&
+      this.selectedRewardSeatId &&
+      this.selectedSeats.some(
+        (seat) => seat.id === this.selectedRewardSeatId,
+      ),
+    );
+  }
+
 
   formatDate(date: string): string {
     return new Date(date).toLocaleString('es-AR', {
