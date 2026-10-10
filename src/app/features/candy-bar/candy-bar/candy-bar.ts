@@ -43,13 +43,41 @@ export class CandyBar implements OnInit {
       this.products = products;
       this.combos = combos;
 
+      const savedSelection = sessionStorage.getItem('candy-bar-selection');
+
+      let savedProducts: { id: string; quantity: number }[] = [];
+      let savedCombos: { id: string; quantity: number }[] = [];
+
+      if (savedSelection) {
+        try {
+          const parsed = JSON.parse(savedSelection);
+          savedProducts = Array.isArray(parsed.products) ? parsed.products : [];
+          savedCombos = Array.isArray(parsed.combos) ? parsed.combos : [];
+        } catch {
+          sessionStorage.removeItem('candy-bar-selection');
+        }
+      }
+
       for (const product of products) {
-        this.productQuantities[product.id] = 0;
+        const saved = savedProducts.find(item => item.id === product.id);
+        const quantity = Number(saved?.quantity ?? 0);
+
+        this.productQuantities[product.id] = Math.max(
+          0,
+          Math.min(Number.isFinite(quantity) ? quantity : 0, product.stock)
+        );
       }
 
       for (const combo of combos) {
-        this.comboQuantities[combo.id] = 0;
+        const saved = savedCombos.find(item => item.id === combo.id);
+        const quantity = Number(saved?.quantity ?? 0);
+
+        this.comboQuantities[combo.id] = Math.max(
+          0,
+          Number.isFinite(quantity) ? quantity : 0
+        );
       }
+
     } catch (error: any) {
       console.error('ERROR CARGANDO CANDY BAR:', error);
       this.error =

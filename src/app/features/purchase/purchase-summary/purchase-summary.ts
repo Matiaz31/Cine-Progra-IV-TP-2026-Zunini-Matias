@@ -333,12 +333,6 @@ export class PurchaseSummary implements OnInit {
     this.success = '';
 
     try {
-      console.log('CONFIRMAR COMPRA');
-      console.log('Screening:', this.screeningId);
-      console.log('Butacas:', this.selectedSeats);
-      console.log('Candy Bar:', this.candyBar);
-      console.log('Total:', this.getTotal());
-
       const {
         data: { user },
         error: userError,
@@ -595,7 +589,6 @@ export class PurchaseSummary implements OnInit {
             }
           }
 
-          // Evitar duplicar un ticket si ya estaba guardado.
           const updatedPurchases = [
             ...purchases.filter(
               (item) => item.ticketId !== purchaseData.ticketId

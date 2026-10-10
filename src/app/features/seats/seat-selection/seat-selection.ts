@@ -2,6 +2,7 @@ import {
   ChangeDetectorRef,
   Component,
   inject,
+  OnDestroy,
   OnInit,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,10 +15,12 @@ import { Seat } from '../seat';
   templateUrl: './seat-selection.html',
   styleUrl: './seat-selection.scss',
 })
-export class SeatSelection implements OnInit {
+export class SeatSelection implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private realtimeChannel:
+    ReturnType<typeof supabase.channel> | null = null;
 
   screeningId = '';
 
@@ -40,6 +43,7 @@ export class SeatSelection implements OnInit {
     'P', 'Q', 'R', 'S', 'T',
   ];
 
+  
   async ngOnInit() {
     this.screeningId =
       this.route.snapshot.paramMap.get('id') ?? '';
@@ -51,7 +55,29 @@ export class SeatSelection implements OnInit {
     }
 
     await this.loadSeats();
+
+    const savedSelection = sessionStorage.getItem('purchase-selection');
+
+    if (savedSelection) {
+      try {
+        const selection = JSON.parse(savedSelection);
+
+        if (selection.screeningId === this.screeningId &&
+            Array.isArray(selection.seatIds)) {
+          this.selectedSeats = this.seats.filter(
+            seat =>
+              selection.seatIds.includes(seat.id) &&
+              !this.occupiedSeatIds.has(seat.id)
+          );
+        }
+      } catch (error) {
+        console.error('Error recuperando las butacas:', error);
+      }
+    }
+
+    this.cdr.detectChanges();
   }
+
 
   async loadSeats() {
     this.loading = true;
@@ -85,23 +111,9 @@ export class SeatSelection implements OnInit {
 
       this.seats = seats ?? [];
 
-      const { data: occupiedSeats, error: occupiedError } =
-        await supabase
-          .from('ticket_seats')
-          .select(`
-            seat_id,
-            tickets!inner (
-              status
-            )
-          `)
-          .eq('screening_id', this.screeningId)
-          .neq('tickets.status', 'cancelled');
+      await this.loadOccupiedSeats();
+      this.subscribeToSeatChanges();
 
-      if (occupiedError) throw occupiedError;
-
-      this.occupiedSeatIds = new Set(
-        (occupiedSeats ?? []).map((seat) => seat.seat_id)
-      );
     } catch (error: any) {
       console.error('Error cargando butacas:', error);
       this.error =
@@ -109,6 +121,114 @@ export class SeatSelection implements OnInit {
     } finally {
       this.loading = false;
       this.cdr.detectChanges();
+    }
+  }
+  
+  private async loadOccupiedSeats(): Promise<void> {
+    const { data, error } = await supabase.rpc(
+      'get_occupied_seat_ids',
+      {
+        p_screening_id: this.screeningId,
+      }
+    );
+
+    console.log('OCUPACIÓN - error:', error);
+    console.log('OCUPACIÓN - filas recibidas:', data);
+    console.log('OCUPACIÓN - cantidad:', data?.length ?? 0);
+
+    if (error) throw error;
+
+    const occupiedIds = new Set<string>(
+      ((data ?? []) as { seat_id: string }[]).map(
+        (item: { seat_id: string }) => item.seat_id
+      )
+    );
+
+    console.log(
+      'DEBUG - IDs ocupados:',
+      [...occupiedIds]
+    );
+
+    console.log(
+      'DEBUG - Butaca J11 en el mapa:',
+      this.seats.find(
+        (seat) =>
+          seat.row_label === 'J' &&
+          seat.seat_number === 11
+      )
+    );
+
+    console.log(
+      'DEBUG - J11 figura ocupada:',
+      this.seats.some(
+        (seat) =>
+          seat.row_label === 'J' &&
+          seat.seat_number === 11 &&
+          occupiedIds.has(seat.id)
+      )
+    );
+
+    const selectionChanged = this.selectedSeats.some(
+      (seat) => occupiedIds.has(seat.id)
+    );
+
+    if (selectionChanged) {
+      this.selectedSeats = this.selectedSeats.filter(
+        (seat) => !occupiedIds.has(seat.id)
+      );
+
+      this.selectionError =
+        'Una de las butacas seleccionadas acaba de ocuparse. Revisá tu selección.';
+    }
+
+    this.occupiedSeatIds = occupiedIds;
+    this.cdr.detectChanges();
+  }
+
+
+  
+  private subscribeToSeatChanges(): void {
+    if (this.realtimeChannel) return;
+
+    this.realtimeChannel = supabase
+      .channel(`screening:${this.screeningId}`)
+      .on(
+        'broadcast',
+        { event: 'seat_change' },
+        (payload) => {
+          console.log('REALTIME - cambio recibido:', payload);
+
+          if (
+            payload['payload']?.['screening_id'] === this.screeningId
+          ) {
+            void this.refreshOccupiedSeats();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('REALTIME - estado del canal:', status);
+
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('Error en Broadcast de butacas:', status);
+        }
+      });
+  }
+
+  private async refreshOccupiedSeats(): Promise<void> {
+    try {
+      await this.loadOccupiedSeats();
+    } catch (error) {
+      console.error(
+        'Error actualizando butacas ocupadas:',
+        error
+      );
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.realtimeChannel) {
+      void supabase.removeChannel(this.realtimeChannel);
+      this.realtimeChannel = null;
     }
   }
 
@@ -295,6 +415,7 @@ export class SeatSelection implements OnInit {
   }
 
   continuarSinCandyBar() {
+    sessionStorage.removeItem('candy-bar-selection');
     this.guardarSeleccion();
     this.router.navigate(['/resumen-compra']);
   }
