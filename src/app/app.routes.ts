@@ -91,6 +91,27 @@ export const routes: Routes = [
             (m) => m.Productos,
           ),
       },
+      {
+        path: 'salas',
+        loadComponent: () =>
+          import('./features/admin/salas/salas').then(
+            (m) => m.Salas,
+          ),
+      },
+      {
+        path: 'funciones',
+        loadComponent: () =>
+          import('./features/admin/funciones/funciones').then(
+            (m) => m.Funciones,
+          ),
+      },
+      {
+        path: 'butacas',
+        loadComponent: () =>
+          import('./features/admin/butacas/butacas').then(
+            (m) => m.Butacas,
+          ),
+      },
     ],
   },
   {

@@ -1,0 +1,151 @@
+<section class="admin-salas">
+  <header class="page-header">
+    <div>
+      <h1>Administración de salas</h1>
+      <p>Gestioná las salas disponibles en el cine.</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="abrirFormulario()"
+      [disabled]="loading || saving"
+    >
+      Nueva sala
+    </button>
+  </header>
+
+  @if (error) {
+    <div class="message message-error" role="alert">
+      {{ error }}
+    </div>
+  }
+
+  @if (success) {
+    <div class="message message-success" role="status">
+      {{ success }}
+    </div>
+  }
+
+  @if (mostrarFormulario) {
+    <section class="form-card">
+      <h2>{{ editando ? 'Editar sala' : 'Nueva sala' }}</h2>
+
+      <form (ngSubmit)="guardarSala()">
+        <div class="form-group">
+          <label for="nombreSala">Nombre de la sala</label>
+          <input
+            id="nombreSala"
+            type="text"
+            name="nombreSala"
+            [(ngModel)]="nombreSala"
+            placeholder="Ej.: Sala 2"
+            maxlength="100"
+            required
+          />
+        </div>
+
+        @if (editando) {
+          <div class="form-group form-check">
+            <input
+              id="estadoSala"
+              type="checkbox"
+              name="estadoSala"
+              [(ngModel)]="estadoSala"
+            />
+            <label for="estadoSala">Sala activa</label>
+          </div>
+        }
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="saving"
+          >
+            {{
+              saving
+                ? 'Guardando...'
+                : editando
+                  ? 'Guardar cambios'
+                  : 'Crear sala'
+            }}
+          </button>
+
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="cerrarFormulario()"
+            [disabled]="saving"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  <section class="rooms-card">
+    <h2>Salas registradas</h2>
+
+    @if (loading) {
+      <p class="empty-state">Cargando salas...</p>
+    } @else if (rooms.length === 0) {
+      <p class="empty-state">Todavía no hay salas registradas.</p>
+    } @else {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Fecha de creación</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (room of rooms; track room.id) {
+              <tr>
+                <td>{{ room.name }}</td>
+                <td>{{ room.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span
+                    class="status"
+                    [class.status-active]="room.is_active"
+                    [class.status-inactive]="!room.is_active"
+                  >
+                    {{ room.is_active ? 'Activa' : 'Inactiva' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      type="button"
+                      class="btn-secondary btn-small"
+                      (click)="editarSala(room)"
+                      [disabled]="saving"
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn-toggle btn-small"
+                      [class.btn-activate]="!room.is_active"
+                      [class.btn-deactivate]="room.is_active"
+                      (click)="cambiarEstadoSala(room)"
+                      [disabled]="saving"
+                    >
+                      {{ room.is_active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</section>

@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-
 import { supabase } from '../../../core/supabase';
-
 import { Movie } from '../../movies/movie';
 
 @Injectable({
@@ -33,7 +31,7 @@ export class AdminMovieService {
 
     return data ?? [];
   }
-  
+
   async createMovie(movie: {
     title: string;
     synopsis: string | null;

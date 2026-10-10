@@ -1,0 +1,207 @@
+<section class="admin-page">
+  <header class="page-header">
+    <div>
+      <h1>Butacas</h1>
+      <p>Administrá la distribución de asientos de cada sala.</p>
+    </div>
+  </header>
+
+  <p class="instruction">
+    Hacé clic en una butaca para editarla o eliminarla.
+  </p>
+
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">{{ successMessage }}</div>
+  }
+
+  <section class="room-selector">
+    <label for="room">Sala</label>
+    <select
+      id="room"
+      name="room"
+      [(ngModel)]="selectedRoomId"
+      (ngModelChange)="onRoomChange()"
+    >
+      @for (room of rooms; track room.id) {
+        <option [value]="room.id">
+          {{ room.name }}{{ room.is_active ? '' : ' (Inactiva)' }}
+        </option>
+      }
+    </select>
+  </section>
+
+  <section class="seat-legend">
+    <span><i class="legend-normal"></i> Normal</span>
+    <span><i class="legend-vip"></i> VIP</span>
+    <span><i class="legend-accessible"></i> Accesible</span>
+    <span><i class="legend-inactive"></i> Inactiva</span>
+  </section>
+
+  <section class="card seat-map">
+
+    @if (loading) {
+      <p class="empty-state">Cargando butacas...</p>
+    } @else if (!selectedRoomId) {
+      <p class="empty-state">Seleccioná una sala.</p>
+    } @else if (seats.length === 0) {
+      <p class="empty-state">Esta sala todavía no tiene butacas.</p>
+    } @else {
+      <div class="seat-grid">
+        @for (row of seatRows; track row.label) {
+          <div class="seat-row">
+            <span class="row-label">{{ row.label }}</span>
+
+            @for (seat of row.seats; track seat.id) {
+              <button
+                type="button"
+                class="seat"
+                [class.seat-normal]="seat.seat_type === 'normal' && seat.is_active"
+                [class.seat-vip]="seat.seat_type === 'vip' && seat.is_active"
+                [class.seat-accessible]="seat.seat_type === 'accessible' && seat.is_active"
+                [class.seat-inactive]="!seat.is_active"
+                [title]="'Fila ' + seat.row_label + ', butaca ' + seat.seat_number"
+                (click)="openEditForm(seat)"
+              >
+                {{ seat.seat_number }}
+              </button>
+            }
+
+            <span class="row-label">{{ row.label }}</span>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+    @if (showForm) {
+    <div class="modal-backdrop" (click)="closeForm()">
+      <section
+        class="card seat-editor modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="seat-modal-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="editor-header">
+          <div>
+            <h2 id="seat-modal-title">
+              {{ editingSeatId ? 'Editar butaca' : 'Nueva butaca' }}
+            </h2>
+            <p>
+              Fila {{ form.row_label || '—' }},
+              número {{ form.seat_number }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn-close"
+            (click)="closeForm()"
+            aria-label="Cerrar ventana"
+          >
+            ×
+          </button>
+        </div>
+
+        <form (ngSubmit)="saveSeat()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="row-label">Fila</label>
+              <input
+                id="row-label"
+                name="row_label"
+                type="text"
+                [(ngModel)]="form.row_label"
+                maxlength="5"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="seat-number">Número</label>
+              <input
+                id="seat-number"
+                name="seat_number"
+                type="number"
+                [(ngModel)]="form.seat_number"
+                min="1"
+                step="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="seat-type">Tipo</label>
+              <select
+                id="seat-type"
+                name="seat_type"
+                [(ngModel)]="form.seat_type"
+                required
+              >
+                <option value="normal">Normal</option>
+                <option value="vip">VIP</option>
+                <option value="accessible">Accesible</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="price-modifier">Modificador de precio</label>
+              <input
+                id="price-modifier"
+                name="price_modifier"
+                type="number"
+                [(ngModel)]="form.price_modifier"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+          </div>
+
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              name="is_active"
+              [(ngModel)]="form.is_active"
+            />
+            Butaca activa
+          </label>
+
+          <div class="editor-actions">
+            <button
+              type="button"
+              class="btn-danger"
+              [disabled]="saving"
+              (click)="deleteSeat()"
+            >
+              Eliminar
+            </button>
+
+            <div class="editor-actions-right">
+              <button
+                type="button"
+                class="btn-secondary"
+                (click)="closeForm()"
+                [disabled]="saving"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="saving"
+              >
+                {{ saving ? 'Guardando...' : 'Guardar' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</section>
