@@ -38,17 +38,14 @@
 
     <nav class="main-nav">
 
-      @if (role () === 'customer') {
+      @if (role() === 'customer') {
         <a routerLink="/perfil" routerLinkActive="active">
           Ir a Perfil
         </a>
       }
 
       @if (role() === 'customer' || !role()) {
-        <a
-          routerLink="/home"
-          routerLinkActive="active"
-        >
+        <a routerLink="/home" routerLinkActive="active">
           Películas
         </a>
 
@@ -56,28 +53,25 @@
           Próximamente
         </a>
 
-        <a
-          routerLink="/mis-entradas"
-          routerLinkActive="active"
-        >
+        <a routerLink="/mis-entradas" routerLinkActive="active">
           Mis entradas
         </a>
       }
 
+      @if (role() === 'customer') {
+        <a routerLink="/mis-recompensas" routerLinkActive="active">
+          Mis recompensas
+        </a>
+      }
+
       @if (role() === 'employee') {
-        <a
-          routerLink="/empleado"
-          routerLinkActive="active"
-        >
+        <a routerLink="/empleado" routerLinkActive="active">
           Panel empleado
         </a>
       }
 
       @if (role() === 'admin') {
-        <a
-          routerLink="/admin"
-          routerLinkActive="active"
-        >
+        <a routerLink="/admin" routerLinkActive="active">
           Panel administración
         </a>
       }
