@@ -9,10 +9,10 @@ Fecha de entrega: 13/10/2026.
 Repositorio: (https://github.com/Matiaz31/Cine-Progra-IV-TP-2026-Zunini-Matias.git)
 Aplicación: https://cine-progra-iv-tp-2026-zunini-matia.vercel.app
 
-Credenciales
+Credenciales:
 admin: admin@test.com, contraseña: 123456
 empleado: empleado@test.com, contraseña: 123456
-usuario: usuario@test.com, contraseña:123456
+usuario: cliente@test.com, contraseña:123456
 
 1. Objetivo del sistema
 Desarrollar una aplicación web para la gestión integral de un establecimiento de cine.
