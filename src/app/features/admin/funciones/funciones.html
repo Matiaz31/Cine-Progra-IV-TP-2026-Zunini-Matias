@@ -123,8 +123,10 @@
               [(ngModel)]="nuevaFuncion.price"
               min="0"
               step="0.01"
+              readonly
               required
             />
+            <small>Se toma del precio base configurado en Admin → Butacas.</small>
           </label>
 
           <div class="calculated-field">
