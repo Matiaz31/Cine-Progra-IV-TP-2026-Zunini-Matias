@@ -1,6 +1,8 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { supabase } from '../../../core/supabase';
+import { CurrencyPipe } from '@angular/common';
+
 
 type SeatType = 'normal' | 'accessible' | 'vip';
 
@@ -28,7 +30,7 @@ interface SeatRow {
 @Component({
   selector: 'app-butacas',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CurrencyPipe],
   templateUrl: './butacas.html',
   styleUrl: './butacas.scss',
 })
@@ -46,6 +48,12 @@ export class Butacas implements OnInit {
   errorMessage = '';
   successMessage = '';
 
+  baseTicketPrice = 0;
+  priceDraft = 0;
+  loadingTicketPrice = false;
+  editingTicketPrice = false;
+  savingTicketPrice = false;
+
   showForm = false;
   editingSeatId: string | null = null;
 
@@ -59,7 +67,82 @@ export class Butacas implements OnInit {
 
   ngOnInit(): void {
     void this.loadRooms();
+    void this.loadTicketPrice();
   }
+  
+  async loadTicketPrice(): Promise<void> {
+    this.loadingTicketPrice = true;
+
+    try {
+      const { data, error } = await supabase
+        .from('ticket_pricing_settings')
+        .select('base_price')
+        .eq('id', true)
+        .single();
+
+      if (error) throw error;
+
+      this.baseTicketPrice = Number(data.base_price);
+      console.log('Precio base cargado:', this.baseTicketPrice);
+      this.priceDraft = this.baseTicketPrice;
+    } catch (error) {
+      console.error('Error al cargar el precio base:', error);
+      this.errorMessage = 'No se pudo cargar el precio base de las entradas.';
+    } finally {
+      this.loadingTicketPrice = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  startEditingTicketPrice(): void {
+    this.priceDraft = this.baseTicketPrice;
+    this.editingTicketPrice = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  cancelEditingTicketPrice(): void {
+    this.priceDraft = this.baseTicketPrice;
+    this.editingTicketPrice = false;
+  }
+
+  async saveTicketPrice(): Promise<void> {
+    const price = Number(this.priceDraft);
+
+    if (!Number.isFinite(price) || price < 0) {
+      this.errorMessage =
+        'Ingresá un precio válido mayor o igual a cero.';
+      return;
+    }
+
+    this.savingTicketPrice = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    try {
+      const { error } = await supabase.rpc(
+        'set_global_ticket_price',
+        { p_price: price }
+      );
+
+      if (error) throw error;
+
+      this.baseTicketPrice = price;
+      this.priceDraft = price;
+      this.editingTicketPrice = false;
+
+      this.successMessage =
+        'Precio base actualizado y aplicado a las funciones existentes.';
+    } catch (error) {
+      console.error('Error al actualizar el precio base:', error);
+      this.errorMessage =
+        'No se pudo actualizar el precio base. Verificá que tu usuario tenga rol administrador.';
+    } finally {
+      this.savingTicketPrice = false;
+      this.cdr.detectChanges();
+    }
+  }
+
 
   async loadRooms(): Promise<void> {
     this.loading = true;

@@ -33,6 +33,66 @@
       }
     </select>
   </section>
+  
+  <section class="ticket-price" aria-label="Precio base de las entradas">
+    <div class="ticket-price-info">
+      <span class="ticket-price-label">Precio base de entrada</span>
+
+      @if (editingTicketPrice) {
+        <form class="ticket-price-editor" (ngSubmit)="saveTicketPrice()">
+          <span class="currency-prefix">$</span>
+
+          <input
+            id="base-ticket-price"
+            name="baseTicketPrice"
+            type="number"
+            [(ngModel)]="priceDraft"
+            min="0"
+            step="0.01"
+            required
+            [disabled]="loadingTicketPrice || savingTicketPrice"
+          />
+
+          <button
+            type="submit"
+            class="price-action price-save"
+            [disabled]="loadingTicketPrice || savingTicketPrice"
+          >
+            {{ savingTicketPrice ? 'Guardando...' : 'Guardar' }}
+          </button>
+
+          <button
+            type="button"
+            class="price-action price-cancel"
+            (click)="cancelEditingTicketPrice()"
+            [disabled]="savingTicketPrice"
+          >
+            Cancelar
+          </button>
+        </form>
+      } @else {
+        <div class="ticket-price-display">
+          <strong>
+            {{ loadingTicketPrice ? 'Cargando...' : (baseTicketPrice | currency:'ARS':'$':'1.0-2') }}
+          </strong>
+
+          <button
+            type="button"
+            class="price-edit-button"
+            aria-label="Editar precio base"
+            title="Editar precio"
+            (click)="startEditingTicketPrice()"
+            [disabled]="loadingTicketPrice || savingTicketPrice"
+          >✎</button>
+        </div>
+      }
+
+      <p>
+        Este precio se aplica a las funciones; los recargos se configuran por tipo de butaca.
+      </p>
+    </div>
+  </section>
+
 
   <section class="seat-legend">
     <span><i class="legend-normal"></i> Normal</span>
