@@ -38,6 +38,23 @@ export class PurchaseSummary implements OnInit {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
+  couponCode = '';
+  couponMessage = '';
+  couponMessageType: 'success' | 'error' | '' = '';
+  couponId: string | null = null;
+  couponDiscount = 0;
+  couponApplied = false;
+
+  validatingCoupon = false;
+
+  onCouponCodeChange(value: string): void {
+    this.couponCode = value;
+    this.couponApplied = false;
+    this.couponDiscount = 0;
+    this.couponMessage = '';
+    this.couponMessageType = '';
+  }
+
   screeningId = '';
   seatIds: string[] = [];
 
@@ -103,11 +120,6 @@ export class PurchaseSummary implements OnInit {
           Array.isArray(selection.seatIds)
             ? selection.seatIds
             : [];
-
-        console.log(
-          'SELECCIÓN DE COMPRA RECUPERADA:',
-          selection
-        );
       } catch (error) {
         console.error(
           'ERROR LEYENDO purchase-selection:',
@@ -138,10 +150,6 @@ export class PurchaseSummary implements OnInit {
           : [],
       };
 
-      console.log(
-        'CANDY BAR RECUPERADO:',
-        this.candyBar
-      );
     } catch (error) {
       console.error(
         'ERROR LEYENDO candy-bar-selection:',
@@ -269,6 +277,10 @@ export class PurchaseSummary implements OnInit {
     );
   }
 
+  getFinalTotal(): number {
+    return Math.max(0, this.getTotal() - this.couponDiscount);
+  }
+
   getCandyBarItemsCount(): number {
     const productsCount =
       this.candyBar.products.reduce(
@@ -285,6 +297,85 @@ export class PurchaseSummary implements OnInit {
       );
 
     return productsCount + combosCount;
+  }
+
+  async aplicarCupon(): Promise<void> {
+
+    const codigo = this.couponCode.trim();
+
+    if (!codigo) {
+      this.couponMessage = 'Ingresá un código de cupón.';
+      this.couponMessageType = 'error';
+      return;
+    }
+
+    if (this.validatingCoupon) return;
+
+    this.validatingCoupon = true;
+    this.couponMessage = '';
+    this.couponMessageType = '';
+    this.couponApplied = false;
+    this.couponDiscount = 0;
+    this.couponId = null;
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) throw userError;
+
+      if (!user) {
+        this.couponMessage =
+          'Para utilizar cupones, ingresá con tu cuenta.';
+        this.couponMessageType = 'error';
+        return;
+      }
+
+      const { data, error } = await supabase.rpc(
+        'calculate_coupon_discount',
+        {
+          p_coupon_code: codigo,
+          p_user_id: user.id,
+          p_subtotal: this.getTotal(),
+        }
+      );
+
+      if (error) throw error;
+
+      const resultado = Array.isArray(data) ? data[0] : data;
+
+      if (
+        !resultado?.coupon_id ||
+        Number(resultado.discount_amount) <= 0
+      ) {
+        this.couponMessage =
+          'El cupón no es válido o no corresponde a tu compra.';
+        this.couponMessageType = 'error';
+        return;
+      }
+
+      this.couponId = resultado.coupon_id;
+      this.couponDiscount = Number(resultado.discount_amount);
+      this.couponApplied = true;
+
+      this.couponMessage =
+        `¡Cupón aplicado! Descuento: ${this.formatPrice(this.couponDiscount)}.`;
+      this.couponMessageType = 'success';
+
+    } catch (error: any) {
+      console.error('Error validando el cupón:', error);
+
+      this.couponMessage =
+        error?.message ||
+        'No se pudo validar el cupón. Revisá el código e intentá nuevamente.';
+      this.couponMessageType = 'error';
+
+    } finally {
+      this.validatingCoupon = false;
+      this.cdr.detectChanges();
+    }
   }
 
   getSeatTypeLabel(seat: Seat): string {
@@ -347,13 +438,6 @@ export class PurchaseSummary implements OnInit {
 
       const userId = user?.id ?? null;
 
-      console.log(
-        'Tipo de compra:',
-        userId
-          ? 'Usuario registrado'
-          : 'Compra anónima'
-      );
-
       const {
         data: order,
         error: orderError,
@@ -363,6 +447,23 @@ export class PurchaseSummary implements OnInit {
         p_discount: 0,
         p_payment_method: 'test',
       });
+      
+      if (this.couponApplied && this.couponCode.trim()) {
+        const { data: couponOrder, error: couponError } =
+          await supabase.rpc('set_order_coupon', {
+            p_order_id: order.id,
+            p_coupon_code: this.couponCode.trim(),
+          });
+
+        if (couponError) {
+          throw couponError;
+        }
+
+        if (!couponOrder) {
+          throw new Error('No se pudo asociar el cupón a la orden.');
+        }
+
+      }
 
       if (orderError) {
         throw orderError;
@@ -373,11 +474,6 @@ export class PurchaseSummary implements OnInit {
           'No se pudo crear la orden.'
         );
       }
-
-      console.log(
-        'Orden creada:',
-        order
-      );
 
       for (const seat of this.selectedSeats) {
         const seatPrice =
@@ -401,10 +497,6 @@ export class PurchaseSummary implements OnInit {
         }
       }
 
-      console.log(
-        'Order items de tickets creados.'
-      );
-
       for (const product of this.candyBar.products) {
         const { error: productError } = await supabase.rpc(
           'add_order_item',
@@ -421,10 +513,6 @@ export class PurchaseSummary implements OnInit {
           throw productError;
         }
       }
-
-      console.log(
-        'Order items de productos del Candy Bar creados.'
-      );
 
       for (const combo of this.candyBar.combos) {
         const { error: comboError } = await supabase.rpc(
@@ -443,10 +531,6 @@ export class PurchaseSummary implements OnInit {
           throw comboError;
         }
       }
-
-      console.log(
-        'Order items de combos del Candy Bar creados.'
-      );
 
       const qrCode =
         `TICKET-${crypto.randomUUID()}`;
@@ -473,11 +557,6 @@ export class PurchaseSummary implements OnInit {
         );
       }
 
-      console.log(
-        'Ticket creado:',
-        ticket
-      );
-
       for (const seat of this.selectedSeats) {
         const {
           error: seatError,
@@ -493,10 +572,6 @@ export class PurchaseSummary implements OnInit {
           throw seatError;
         }
       }
-
-      console.log(
-        'Butacas asociadas al ticket.'
-      );
 
       const {
         data: paidOrder,
@@ -517,11 +592,6 @@ export class PurchaseSummary implements OnInit {
           'No se pudo confirmar el pago de prueba.'
         );
       }
-
-      console.log(
-        'Orden confirmada como pagada:',
-        paidOrder
-      );
 
       const purchaseData = {
         orderId: order.id,
@@ -558,16 +628,10 @@ export class PurchaseSummary implements OnInit {
                 ),
             })
           ),
-
-        total: this.getTotal(),
-
+        total: this.getFinalTotal(),
+        couponApplied: this.couponApplied,
         candyBar: this.candyBar,
       };
-
-      console.log(
-        'Datos del comprobante:',
-        purchaseData
-      );
       
       if (!userId) {
         try {
@@ -601,10 +665,6 @@ export class PurchaseSummary implements OnInit {
             JSON.stringify(updatedPurchases)
           );
 
-          console.log(
-            'Entradas de invitado guardadas:',
-            updatedPurchases
-          );
         } catch (storageError) {
           console.error(
             'No se pudieron guardar las entradas del invitado:',
@@ -615,6 +675,7 @@ export class PurchaseSummary implements OnInit {
       
       sessionStorage.setItem(
         'purchase-success',
+        
         JSON.stringify(purchaseData)
       );
 

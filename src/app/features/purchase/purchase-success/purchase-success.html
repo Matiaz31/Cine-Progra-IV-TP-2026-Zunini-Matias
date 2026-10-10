@@ -250,11 +250,6 @@
 
         }
 
-
-        <!-- =========================
-             PRECIO FINAL
-             ========================= -->
-
         <section class="final-total-section">
 
           <div class="final-total-row">
@@ -271,10 +266,17 @@
 
             </div>
 
-            <strong>
-              {{ formatPrice(purchase.total) }}
-            </strong>
+            <div class="final-total-price">
+              <strong>
+                {{ formatPrice(purchase.total) }}
+              </strong>
 
+              @if (purchase.couponApplied) {
+                <small class="coupon-applied-label">
+                  Cupón de descuento aplicado
+                </small>
+              }
+            </div>
           </div>
 
         </section>

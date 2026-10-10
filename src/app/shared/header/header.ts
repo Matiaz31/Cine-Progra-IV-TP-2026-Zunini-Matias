@@ -38,9 +38,6 @@ export class Header {
       const role = await this.auth.getRole(data.user.id);
       this.role.set(role);
 
-      console.log('HEADER - usuario:', data.user.email);
-      console.log('HEADER - rol:', role);
-
       this.role.set(role);
 
     } catch (error) {

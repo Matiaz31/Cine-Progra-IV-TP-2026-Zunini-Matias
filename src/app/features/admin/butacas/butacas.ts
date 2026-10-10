@@ -83,7 +83,6 @@ export class Butacas implements OnInit {
       if (error) throw error;
 
       this.baseTicketPrice = Number(data.base_price);
-      console.log('Precio base cargado:', this.baseTicketPrice);
       this.priceDraft = this.baseTicketPrice;
     } catch (error) {
       console.error('Error al cargar el precio base:', error);
@@ -260,8 +259,6 @@ export class Butacas implements OnInit {
 
   openEditForm(seat: Seat): void {
     this.editingSeatId = seat.id;
-    console.log('Butaca seleccionada:', seat);
-    console.log('Modificador recibido:', seat.price_modifier);
 
     this.form = {
       row_label: seat.row_label,

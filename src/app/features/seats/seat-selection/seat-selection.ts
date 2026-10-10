@@ -132,39 +132,11 @@ export class SeatSelection implements OnInit, OnDestroy {
       }
     );
 
-    console.log('OCUPACIÓN - error:', error);
-    console.log('OCUPACIÓN - filas recibidas:', data);
-    console.log('OCUPACIÓN - cantidad:', data?.length ?? 0);
-
     if (error) throw error;
 
     const occupiedIds = new Set<string>(
       ((data ?? []) as { seat_id: string }[]).map(
         (item: { seat_id: string }) => item.seat_id
-      )
-    );
-
-    console.log(
-      'DEBUG - IDs ocupados:',
-      [...occupiedIds]
-    );
-
-    console.log(
-      'DEBUG - Butaca J11 en el mapa:',
-      this.seats.find(
-        (seat) =>
-          seat.row_label === 'J' &&
-          seat.seat_number === 11
-      )
-    );
-
-    console.log(
-      'DEBUG - J11 figura ocupada:',
-      this.seats.some(
-        (seat) =>
-          seat.row_label === 'J' &&
-          seat.seat_number === 11 &&
-          occupiedIds.has(seat.id)
       )
     );
 
@@ -196,8 +168,6 @@ export class SeatSelection implements OnInit, OnDestroy {
         'broadcast',
         { event: 'seat_change' },
         (payload) => {
-          console.log('REALTIME - cambio recibido:', payload);
-
           if (
             payload['payload']?.['screening_id'] === this.screeningId
           ) {
@@ -206,8 +176,6 @@ export class SeatSelection implements OnInit, OnDestroy {
         }
       )
       .subscribe((status) => {
-        console.log('REALTIME - estado del canal:', status);
-
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           console.error('Error en Broadcast de butacas:', status);
         }

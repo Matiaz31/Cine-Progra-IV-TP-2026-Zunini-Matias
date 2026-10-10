@@ -113,23 +113,14 @@ export class Generos implements OnInit {
     this.cdr.detectChanges();
 
     try {
-      console.log('GÉNEROS: iniciando guardado');
-
       if (this.editando && this.generoEditandoId) {
-        console.log('GÉNEROS: actualizando en Supabase');
-
         await this.genreService.updateGenre(
           this.generoEditandoId,
           nombre
         );
 
-        console.log('GÉNEROS: actualización confirmada');
       } else {
-        console.log('GÉNEROS: creando en Supabase');
-
         await this.genreService.createGenre(nombre);
-
-        console.log('GÉNEROS: creación confirmada');
       }
 
       this.mostrarFormulario = false;
@@ -139,8 +130,6 @@ export class Generos implements OnInit {
 
       this.success = 'Género guardado correctamente.';
 
-      console.log('GÉNEROS: recargando lista');
-
       await this.cargarGeneros();
     } catch (error) {
       console.error('GÉNEROS: error al guardar', error);
@@ -149,7 +138,6 @@ export class Generos implements OnInit {
     } finally {
       this.saving = false;
       this.cdr.detectChanges();
-      console.log('GÉNEROS: finalizó el proceso');
     }
   }
 

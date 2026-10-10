@@ -639,3 +639,17 @@ h1 {
   min-height: 100px;
   color: var(--text-secondary);
 }
+
+.final-total-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.coupon-applied-label {
+  color: #5f9b7b;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: right;
+}

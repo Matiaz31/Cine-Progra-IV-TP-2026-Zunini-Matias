@@ -38,6 +38,7 @@ export interface PurchaseData {
   seats: PurchaseSeat[];
   total: number;
   candyBar: PurchaseCandyBar;
+  couponApplied?: boolean;
 }
 
 @Injectable({

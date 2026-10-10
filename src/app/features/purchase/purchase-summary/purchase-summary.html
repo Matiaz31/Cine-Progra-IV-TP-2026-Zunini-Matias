@@ -273,10 +273,57 @@
 
       }
 
+      <section class="coupon-section">
+        <h3>¿Tenés un cupón de descuento?</h3>
+
+        <p class="coupon-description">
+          Ingresá tu código para obtener un descuento en tu compra.
+        </p>
+
+        <div class="coupon-form">
+          <input
+            class="coupon-input"
+            type="text"
+            placeholder="Código del cupón"
+            aria-label="Código del cupón"
+            autocomplete="off"
+            [value]="couponCode"
+            [disabled]="validatingCoupon || couponApplied"
+            (input)="onCouponCodeChange($any($event.target).value)"
+            (keydown.enter)="aplicarCupon()"
+          />
+
+          <button
+            class="coupon-button"
+            type="button"
+            [disabled]="!couponCode.trim() || validatingCoupon || couponApplied"
+            (click)="aplicarCupon()"
+          >
+            {{
+              validatingCoupon
+                ? 'Validando...'
+                : couponApplied
+                  ? 'Aplicado'
+                  : 'Aplicar'
+            }}
+          </button>
+        </div>
+
+        @if (couponMessage) {
+          <p
+            class="coupon-message"
+            role="status"
+            [class.success]="couponMessageType === 'success'"
+            [class.error]="couponMessageType === 'error'"
+          >
+            {{ couponMessage }}
+          </p>
+        }
+      </section>
+
+
       <section class="purchase-total">
-
         <div class="total-breakdown">
-
           <div class="total-row">
 
             <span>
@@ -288,7 +335,6 @@
             </strong>
 
           </div>
-
 
           @if (getCandyBarTotal() > 0) {
 
@@ -305,6 +351,13 @@
             </div>
 
           }
+          
+          @if (couponApplied && couponDiscount > 0) {
+            <div class="total-row coupon-discount-row">
+              <span>Descuento del cupón</span>
+              <strong>-{{ formatPrice(couponDiscount) }}</strong>
+            </div>
+          }
 
         </div>
 
@@ -314,9 +367,7 @@
             Total
           </span>
 
-          <strong>
-            {{ formatPrice(getTotal()) }}
-          </strong>
+          <strong>{{ formatPrice(getFinalTotal()) }}</strong>
 
         </div>
 

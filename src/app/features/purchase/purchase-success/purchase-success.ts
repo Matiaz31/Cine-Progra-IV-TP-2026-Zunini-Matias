@@ -26,6 +26,7 @@ interface GuestPurchase {
   screeningTime: string;
   seats: PurchaseData['seats'];
   total: number;
+  couponApplied?: boolean;
   candyBar?: unknown;
 }
 
@@ -35,6 +36,7 @@ interface GuestPurchase {
   templateUrl: './purchase-success.html',
   styleUrl: './purchase-success.scss',
 })
+
 export class PurchaseSuccess implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
@@ -45,6 +47,7 @@ export class PurchaseSuccess implements OnInit {
   );
 
   purchase: PurchaseData | null = null;
+  
   qrImage = '';
 
   loading = true;
@@ -53,8 +56,6 @@ export class PurchaseSuccess implements OnInit {
   async ngOnInit() {
     const ticketId =
       this.route.snapshot.queryParamMap.get('ticket');
-
-    console.log('TICKET DE LA URL:', ticketId);
 
     if (ticketId) {
       await this.loadTicket(ticketId);
@@ -67,8 +68,7 @@ export class PurchaseSuccess implements OnInit {
       navigation?.extras.state?.['purchase'] ?? null;
 
     if (!this.purchase) {
-      const savedPurchase =
-        sessionStorage.getItem('purchase-success');
+      const savedPurchase = sessionStorage.getItem('purchase-success');
 
       if (savedPurchase) {
         try {
@@ -128,6 +128,7 @@ export class PurchaseSuccess implements OnInit {
         screeningTime: guestPurchase.screeningTime,
         seats: guestPurchase.seats ?? [],
         total: Number(guestPurchase.total ?? 0),
+        couponApplied: guestPurchase.couponApplied,
         candyBar: guestPurchase.candyBar,
       } as PurchaseData;
     } catch (error) {
@@ -165,16 +166,9 @@ export class PurchaseSuccess implements OnInit {
     this.error = '';
 
     try {
-      console.log('BUSCANDO ENTRADA:', ticketId);
-
       this.purchase = this.findGuestPurchase(ticketId);
 
       if (this.purchase) {
-        console.log(
-          'ENTRADA DE INVITADO RECUPERADA:',
-          this.purchase
-        );
-
         await this.generateQr();
         return;
       }
@@ -198,8 +192,6 @@ export class PurchaseSuccess implements OnInit {
 
       this.purchase =
         await this.purchaseTicketService.getTicket(ticketId);
-
-      console.log('ENTRADA CARGADA:', this.purchase);
 
       await this.generateQr();
     } catch (error: any) {

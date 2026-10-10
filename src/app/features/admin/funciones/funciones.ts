@@ -116,12 +116,6 @@ export class Funciones {
       if (funcionesResult.error) throw funcionesResult.error;
       if (precioResult.error) throw precioResult.error;
 
-      console.log(
-        'FUNCIONES COMPLETAS:',
-        JSON.stringify(funcionesResult.data, null, 2),
-      );
-      console.log('ERROR DE FUNCIONES:', funcionesResult.error);
-
       this.peliculas = (peliculasResult.data ?? []) as MovieOption[];
       this.baseTicketPrice = Number(precioResult.data.base_price);
       this.salas = (salasResult.data ?? []) as RoomOption[];

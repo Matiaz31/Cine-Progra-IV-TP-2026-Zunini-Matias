@@ -24,11 +24,6 @@ export class AdminMovieService {
       throw error;
     }
 
-    console.log(
-      'PELÍCULAS ADMIN:',
-      data
-    );
-
     return data ?? [];
   }
 

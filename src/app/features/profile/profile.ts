@@ -40,18 +40,11 @@ export class Profile implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    console.log('PERFIL: componente iniciado');
-
     await this.loadProfile();
 
-    console.log('PERFIL: carga finalizada', {
-      loading: this.loading,
-      error: this.errorMessage,
-    });
   }
 
   async loadProfile(): Promise<void> {
-    console.log('PERFIL: entrando a loadProfile');
     this.loading = true;
     this.errorMessage = '';
     this.successMessage = '';
