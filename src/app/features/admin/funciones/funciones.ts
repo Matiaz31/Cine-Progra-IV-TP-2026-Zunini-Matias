@@ -44,6 +44,7 @@ export class Funciones {
   peliculas: MovieOption[] = [];
   salas: RoomOption[] = [];
   funciones: Screening[] = [];
+  baseTicketPrice = 0;
 
   loading = true;
   guardando = false;
@@ -73,7 +74,7 @@ export class Funciones {
     this.error = '';
 
     try {
-      const [peliculasResult, salasResult, funcionesResult] =
+      const [peliculasResult, salasResult, funcionesResult, precioResult] =
         await Promise.all([
           supabase
             .from('movies')
@@ -102,11 +103,18 @@ export class Funciones {
               room:rooms!screenings_room_id_fkey(name)
             `)
             .order('start_time', { ascending: true }),
+
+          supabase
+            .from('ticket_pricing_settings')
+            .select('base_price')
+            .eq('id', true)
+            .single(),
         ]);
 
       if (peliculasResult.error) throw peliculasResult.error;
       if (salasResult.error) throw salasResult.error;
       if (funcionesResult.error) throw funcionesResult.error;
+      if (precioResult.error) throw precioResult.error;
 
       console.log(
         'FUNCIONES COMPLETAS:',
@@ -115,6 +123,7 @@ export class Funciones {
       console.log('ERROR DE FUNCIONES:', funcionesResult.error);
 
       this.peliculas = (peliculasResult.data ?? []) as MovieOption[];
+      this.baseTicketPrice = Number(precioResult.data.base_price);
       this.salas = (salasResult.data ?? []) as RoomOption[];
       this.funciones = (funcionesResult.data ?? []).map((funcion: any) => ({...funcion,
       movie: funcion.movie
@@ -203,7 +212,7 @@ export class Funciones {
       hora,
       format: funcion.format,
       language: funcion.language,
-      price: Number(funcion.price),
+      price: this.baseTicketPrice,
     };
 
     this.error = '';
@@ -212,7 +221,7 @@ export class Funciones {
 
     this.changeDetector.detectChanges();
   }
-  
+
   async eliminarFuncion(funcion: Screening) {
     if (this.guardando) return;
 
@@ -270,7 +279,7 @@ export class Funciones {
       hora: '',
       format: '2D',
       language: 'castellano',
-      price: 0,
+      price: this.baseTicketPrice,
     };
   }
 
@@ -312,10 +321,10 @@ export class Funciones {
       inicio.getTime() + pelicula.duration_minutes * 60_000,
     );
 
-    const precio = Number(this.nuevaFuncion.price);
+    const precio = Number(this.baseTicketPrice);
 
     if (!Number.isFinite(precio) || precio < 0) {
-      this.error = 'El precio debe ser un número mayor o igual a cero.';
+      this.error = 'El precio base configurado en Butacas no es válido.';
       return;
     }
 
