@@ -1,0 +1,272 @@
+
+<div class="cupones-admin">
+  <header class="page-header">
+    <div>
+      <h2>Cupones y descuentos</h2>
+      <p>Creá promociones y administrá sus condiciones de uso.</p>
+    </div>
+
+    <div class="header-stats">
+      <span class="stat-label">Cupones registrados</span>
+      <strong>{{ cupones.length }}</strong>
+      <span class="stat-detail">{{ totalActivos }} activos</span>
+    </div>
+  </header>
+
+  @if (error) {
+    <div class="message message-error" role="alert">
+      {{ error }}
+    </div>
+  }
+
+  @if (mensaje) {
+    <div class="message message-success" role="status">
+      {{ mensaje }}
+    </div>
+  }
+
+  <section class="editor">
+    <div class="section-heading">
+      <div>
+        <h3>{{ editandoId ? 'Editar cupón' : 'Crear cupón' }}</h3>
+        <p>Configurá el código, el descuento y sus condiciones.</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="guardarCupon()" #couponForm="ngForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="coupon-code">Código *</label>
+          <input
+            id="coupon-code"
+            name="code"
+            type="text"
+            [(ngModel)]="formulario.code"
+            placeholder="EJ: CINE20"
+            maxlength="50"
+            required
+          />
+          <small>Se guardará en mayúsculas.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="discount-type">Tipo de descuento *</label>
+          <select
+            id="discount-type"
+            name="discount_type"
+            [(ngModel)]="formulario.discount_type"
+            required
+          >
+            <option value="percentage">Porcentaje (%)</option>
+            <option value="fixed">Importe fijo ($)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="discount-value">
+            Descuento * {{ formulario.discount_type === 'percentage' ? '(%)' : '($)' }}
+          </label>
+          <input
+            id="discount-value"
+            name="discount_value"
+            type="number"
+            [(ngModel)]="formulario.discount_value"
+            min="0"
+            [max]="formulario.discount_type === 'percentage' ? 100 : null"
+            step="0.01"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="min-age">Edad mínima</label>
+          <input
+            id="min-age"
+            name="min_age"
+            type="number"
+            [(ngModel)]="formulario.min_age"
+            min="0"
+            step="1"
+            placeholder="Sin restricción"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="valid-from">Válido desde</label>
+          <input
+            id="valid-from"
+            name="valid_from"
+            type="datetime-local"
+            [(ngModel)]="formulario.valid_from"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="valid-until">Válido hasta</label>
+          <input
+            id="valid-until"
+            name="valid_until"
+            type="datetime-local"
+            [(ngModel)]="formulario.valid_until"
+          />
+        </div>
+      </div>
+
+      <div class="form-options">
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            name="first_purchase"
+            [(ngModel)]="formulario.first_purchase"
+          />
+          <span>Solo para la primera compra</span>
+        </label>
+
+        <label class="checkbox-option">
+          <input
+            type="checkbox"
+            name="is_active"
+            [(ngModel)]="formulario.is_active"
+          />
+          <span>Activar cupón</span>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="guardando || !couponForm.valid"
+        >
+          @if (guardando) {
+            Guardando...
+          } @else {
+            {{ editandoId ? 'Guardar cambios' : 'Crear cupón' }}
+          }
+        </button>
+
+        @if (editandoId) {
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="limpiarFormulario()"
+            [disabled]="guardando"
+          >
+            Cancelar edición
+          </button>
+        }
+      </div>
+    </form>
+  </section>
+
+  <section class="listing">
+    <div class="listing-header">
+      <div>
+        <h3>Cupones registrados</h3>
+        <p>Consultá y administrá los cupones existentes.</p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cargarCupones()"
+        [disabled]="cargando"
+      >
+        {{ cargando ? 'Actualizando...' : 'Actualizar listado' }}
+      </button>
+    </div>
+
+    @if (cargando) {
+      <p class="state-message">Cargando cupones...</p>
+    } @else if (cupones.length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">🎟️</span>
+        <h4>Todavía no hay cupones</h4>
+        <p>Creá el primero desde el formulario.</p>
+      </div>
+    } @else {
+      <div class="coupon-list">
+        @for (cupon of cupones; track cupon.id) {
+          <article class="coupon-card">
+            <div class="coupon-main">
+              <div class="coupon-title-row">
+                <h4>{{ cupon.code }}</h4>
+
+                <span
+                  class="status"
+                  [class.status-active]="cupon.is_active"
+                  [class.status-inactive]="!cupon.is_active"
+                >
+                  {{ cupon.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+
+              <p class="coupon-discount">
+                @if (cupon.discount_type === 'percentage') {
+                  {{ cupon.discount_value }}% de descuento
+                } @else {
+                  ${{ cupon.discount_value }} de descuento
+                }
+              </p>
+
+              <div class="coupon-details">
+                @if (cupon.min_age !== null) {
+                  <span>Edad mínima: {{ cupon.min_age }} años</span>
+                }
+
+                @if (cupon.first_purchase) {
+                  <span>Solo primera compra</span>
+                }
+
+                @if (cupon.valid_from) {
+                  <span>
+                    Desde: {{ cupon.valid_from | date: 'dd/MM/yyyy HH:mm' }}
+                  </span>
+                }
+
+                @if (cupon.valid_until) {
+                  <span>
+                    Hasta: {{ cupon.valid_until | date: 'dd/MM/yyyy HH:mm' }}
+                  </span>
+                }
+
+                @if (!cupon.valid_from && !cupon.valid_until) {
+                  <span>Sin fechas de vigencia configuradas</span>
+                }
+              </div>
+            </div>
+
+            <div class="coupon-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="editarCupon(cupon)"
+              >
+                Editar
+              </button>
+              
+              <button
+                type="button"
+                class="btn btn-danger"
+                (click)="eliminarCupon(cupon)"
+              >
+                Eliminar
+              </button>
+
+
+              <button
+                type="button"
+                class="btn"
+                [class.btn-success]="!cupon.is_active"
+                [class.btn-danger]="cupon.is_active"
+                (click)="cambiarEstado(cupon)"
+              >
+                {{ cupon.is_active ? 'Desactivar' : 'Activar' }}
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>

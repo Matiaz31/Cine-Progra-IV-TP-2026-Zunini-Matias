@@ -28,11 +28,6 @@
       </div>
 
     } @else {
-
-      <!-- =========================
-           PELÍCULA
-           ========================= -->
-
       <section class="movie-card">
 
         <div class="movie-info">
@@ -74,11 +69,6 @@
         </div>
 
       </section>
-
-
-      <!-- =========================
-           BUTACAS
-           ========================= -->
 
       <section class="seats-section">
 
@@ -151,11 +141,6 @@
 
       </section>
 
-
-      <!-- =========================
-           CANDY BAR
-           ========================= -->
-
       @if (
         candyBar.products.length > 0 ||
         candyBar.combos.length > 0
@@ -200,7 +185,7 @@
                   <div class="candy-bar-details">
 
                     <strong>
-                      {{ combo.name }}
+                      Combo: {{ combo.name }}
                     </strong>
 
                     <span>
@@ -288,11 +273,6 @@
 
       }
 
-
-      <!-- =========================
-           TOTAL
-           ========================= -->
-
       <section class="purchase-total">
 
         <div class="total-breakdown">
@@ -328,7 +308,6 @@
 
         </div>
 
-
         <div class="total-info">
 
           <span>
@@ -348,11 +327,6 @@
 
       </section>
 
-
-      <!-- =========================
-           ACCIONES
-           ========================= -->
-
       <div class="actions">
 
         @if (success) {
@@ -371,7 +345,6 @@
 
         }
 
-
         <button
           type="button"
           class="secondary-button"
@@ -379,7 +352,6 @@
         >
           Volver
         </button>
-
 
         <button
           type="button"
@@ -395,9 +367,6 @@
         </button>
 
       </div>
-
     }
-
   </div>
-
 </div>

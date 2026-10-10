@@ -117,6 +117,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/combos/combos').then(m => m.Combos)
       },
+      {
+        path: 'cupones',
+        loadComponent: () =>
+          import('./features/admin/cupones/cupones').then(m => m.Cupones)
+      }
     ],
   },
   {

@@ -19,16 +19,13 @@ import { filter } from 'rxjs';
   styleUrl: './admin.scss',
 })
 export class Admin {
-
   private router = inject(Router);
   private changeDetector = inject(ChangeDetectorRef);
 
   esInicio = false;
 
   constructor() {
-
     this.actualizarVista();
-
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd)
