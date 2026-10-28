@@ -447,7 +447,44 @@ Imágenes de productos.
 Avatares.
 El acceso a los archivos deberá respetar las reglas de seguridad correspondientes.
 
+RF-35 — Propuesta de películas por clientes
+
+El sistema deberá permitir que un cliente registrado proponga una película indicando título, descripción o sinopsis y justificación. Se registrará el usuario, la fecha y el estado de la propuesta. Un cliente podrá tener como máximo una propuesta pendiente, pero podrá enviar otra cuando la anterior haya sido resuelta.
+
+RF-36 — Revisión y resolución de propuestas
+
+El administrador autorizado podrá consultar, aceptar o rechazar propuestas pendientes. Al aceptar una propuesta, se abrirá el formulario existente de alta de películas con los datos compatibles precargados. La aceptación no creará automáticamente una película: el administrador deberá completar los datos faltantes y confirmar el alta mediante el flujo habitual.
+
+RF-37 — Configuración de permisos administrativos por sección
+
+El administrador principal podrá configurar permisos por usuario y sección administrativa, incluyendo las acciones de consulta, creación, modificación y eliminación cuando correspondan. La configuración deberá abarcar las secciones administrativas existentes y las nuevas secciones incorporadas. Los permisos deberán aplicarse tanto en la interfaz como en el servidor.
+
+RF-38 — Consulta de lista de espera por función
+
+Los clientes registrados podrán incorporarse a la lista de espera de una función sin disponibilidad de butacas. El sistema registrará el usuario, la función, la fecha de ingreso, el estado y el orden de atención. Desde su perfil, cada cliente podrá consultar su posición y abandonar la lista mientras su solicitud lo permita. El administrador podrá consultar la cantidad de personas en espera por función.
+
+RF-39 — Oferta de butacas liberadas a la lista de espera
+
+Cuando una cancelación libere butacas, el sistema ofrecerá la disponibilidad al primer cliente elegible de la lista. La oferta se notificará al cliente y tendrá una vigencia de 15 minutos. Si vence sin que se complete la compra, se ofrecerá al siguiente cliente. La disponibilidad deberá verificarse nuevamente en el servidor para evitar vender dos veces la misma butaca.
+
+RF-40 — Cancelación administrativa de una función
+
+Un administrador con el permiso correspondiente podrá cancelar una función. Antes de confirmar, el sistema mostrará la función y un resumen de las compras afectadas. Se impedirá realizar nuevas compras para esa función y se registrarán el motivo, el usuario responsable y la fecha y hora.
+
+RF-41 — Crédito por cancelación de función
+
+Por cada comprador afectado, el sistema generará un crédito equivalente al importe efectivamente pagado por la compra afectada, incluidas las entradas y los productos o combos del Candy Bar. El crédito deberá estar asociado al usuario y a la compra original, con trazabilidad suficiente para evitar acreditaciones duplicadas.
+
+RF-42 — Notificación por cancelación y alternativa de reubicación
+
+Cada cliente afectado recibirá una notificación con la función cancelada y el crédito generado. Se ofrecerá la posibilidad de consultar otras funciones de la misma película y utilizar el crédito para comprar una nueva entrada, sujeto a disponibilidad y a las reglas de compra vigentes.
+
+RF-43 — Operación atómica de cancelación de función
+
+La cancelación deberá ejecutarse mediante una operación transaccional en el servidor que mantenga consistentes el estado de la función, las entradas, las butacas, los créditos y los registros de notificación. Si falla una parte crítica, se revertirán los cambios de base de datos. Las notificaciones externas podrán procesarse de forma asíncrona, mediante eventos persistentes, sin perder avisos ni duplicarlos.
+
 4. Reglas de negocio
+
 RN-01 — Separación entre funciones
 No podrá existir una función en una sala hasta que hayan pasado 30 minutos desde la finalización de la función anterior.
 
@@ -544,6 +581,33 @@ Cada usuario deberá poder acceder únicamente a los datos propios que le corres
 Los datos administrativos estarán disponibles únicamente para usuarios autorizados.
 La seguridad deberá implementarse mediante Row Level Security de Supabase y controles de autorización por rol.
 
+RN-15 — Una propuesta pendiente por cliente. 
+Cada cliente podrá tener como máximo una propuesta pendiente. La restricción se garantizará también en la base de datos.
+
+RN-16 — La aceptación no implica alta automática. 
+La propuesta aceptada precarga el formulario de películas, pero el alta requiere revisión y confirmación administrativa.
+
+RN-17 — Autorización efectiva por permisos. 
+Ocultar botones o proteger rutas no es suficiente: las operaciones protegidas deberán validarse en el servidor mediante RLS y/o funciones seguras de Supabase.
+
+RN-18 — Orden de la lista de espera. 
+Las solicitudes elegibles se atenderán por orden de ingreso. No se permitirán solicitudes activas duplicadas del mismo cliente para la misma función.
+
+RN-19 — Vigencia de la oferta. 
+La oferta dura 15 minutos desde su emisión. Una compra solo se considerará confirmada cuando el servidor la valide antes del vencimiento y las butacas sigan disponibles.
+
+RN-20 — Importe del crédito. 
+El crédito se calculará sobre lo efectivamente pagado, contemplando descuentos y beneficios. Si una orden incluye más de una función, deberá determinarse el importe atribuible a la función cancelada sin acreditar importes ajenos ni duplicados.
+
+RN-21 — Cancelación completa o ninguna. 
+Los cambios de estado y las compensaciones deberán completarse de forma consistente. Los reintentos no podrán duplicar créditos ni registrar dos veces la misma cancelación.
+
+RN-22 — Reubicación sin devolución de dinero. 
+El cliente podrá utilizar el crédito para comprar otra función de la misma película. Si el precio es superior, abonará la diferencia; si es inferior, el saldo restante se conservará como crédito.
+
+RN-23 — Trazabilidad administrativa. 
+Las decisiones sobre propuestas, los cambios de permisos, las cancelaciones de funciones y los créditos deberán registrar responsable, fecha, hora, acción y registro afectado.
+
 5. Requerimientos no funcionales
 
 RNF-01 — Tecnología
@@ -618,6 +682,30 @@ Con documentación de decisiones técnicas.
 RNF-10 — Rendimiento
 La aplicación deberá evitar cargas innecesarias y utilizar mecanismos apropiados de carga diferida.
 Las funcionalidades administrativas y de empleados deberán poder cargarse de manera diferida cuando corresponda.
+
+RNF-11 — Integridad transaccional. 
+Las operaciones críticas deberán ejecutarse en el servidor mediante transacciones o funciones RPC seguras de Supabase.
+
+RNF-12 — Seguridad y mínimo privilegio. 
+Cada usuario dispondrá únicamente de los permisos necesarios. La autorización no dependerá exclusivamente de Angular y deberá aplicarse mediante controles del servidor y políticas RLS.
+
+RNF-13 — Concurrencia de butacas y lista de espera. 
+El sistema deberá evitar que dos clientes confirmen la misma butaca simultáneamente y deberá verificar la disponibilidad antes de aceptar una compra proveniente de una oferta.
+
+RNF-14 — Idempotencia y recuperación ante fallos. 
+Los reintentos no podrán duplicar créditos, cancelaciones ni compensaciones. Las notificaciones pendientes deberán permanecer registradas para poder reintentarse.
+
+RNF-15 — Trazabilidad y auditoría. 
+Los registros deberán permitir reconstruir qué ocurrió, cuándo ocurrió y qué usuario o proceso inició cada acción relevante.
+
+RNF-16 — Usabilidad y comunicación de estados. 
+La interfaz deberá mostrar claramente los estados de las propuestas, la posición en la lista de espera, el vencimiento de las ofertas, las cancelaciones y los créditos generados.
+
+RNF-17 — Mantenibilidad y reutilización. 
+Las ampliaciones deberán integrarse con Angular y Supabase, reutilizando los componentes y servicios existentes y centralizando las reglas críticas en el servidor.
+
+RNF-18 — Pruebas de aceptación. 
+Se deberán probar, como mínimo, propuestas duplicadas, aceptación y rechazo, permisos insuficientes, compras simultáneas de butacas, vencimiento de ofertas, cancelación con Candy Bar, reversión ante fallos y prevención de créditos duplicados.
 
 6. Requisitos técnicos de Angular
 La implementación deberá reflejar los conceptos trabajados durante la cursada.
