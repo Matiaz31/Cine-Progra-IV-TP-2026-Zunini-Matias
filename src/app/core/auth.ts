@@ -44,7 +44,7 @@ export class AuthService {
     return await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/home`,
+        redirectTo: `${window.location.origin}/completar-perfil`,
       },
     });
   }
@@ -53,7 +53,7 @@ export class AuthService {
     return await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/home`,
+        redirectTo: `${window.location.origin}/completar-perfil`,
       },
     });
   }

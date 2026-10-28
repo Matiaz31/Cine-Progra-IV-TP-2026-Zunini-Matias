@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
+import { CompleteProfile } from './features/auth/complete-profile/complete-profile';
 import { Home } from './features/home/home';
 import { MovieDetail } from './features/movies/movie-detail/movie-detail';
 import { SeatSelection } from './features/seats/seat-selection/seat-selection';
@@ -24,6 +25,10 @@ export const routes: Routes = [
   {
     path: 'register',
     component: Register,
+  },
+  {
+    path: 'completar-perfil',
+    component: CompleteProfile,
   },
   {
     path: 'home',
