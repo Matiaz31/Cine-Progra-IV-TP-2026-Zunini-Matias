@@ -70,7 +70,7 @@ export class CompleteProfile implements OnInit {
         metadata['last_name'] ?? nameParts.slice(1).join(' ')
       );
 
-      this.birthDate = String(metadata['birth_date'] ?? '');
+      this.birthDate = '';
       this.bloodType = String(metadata['blood_type'] ?? '');
       this.eyeColor = String(metadata['eye_color'] ?? '');
       this.vacationDays =
@@ -92,7 +92,7 @@ export class CompleteProfile implements OnInit {
         this.email = profile.email ?? this.email;
         this.firstName = profile.first_name ?? this.firstName;
         this.lastName = profile.last_name ?? this.lastName;
-        this.birthDate = profile.birth_date ?? this.birthDate;
+        this.birthDate = '';
         this.bloodType = profile.blood_type ?? this.bloodType;
         this.eyeColor = profile.eye_color ?? this.eyeColor;
         this.vacationDays =
