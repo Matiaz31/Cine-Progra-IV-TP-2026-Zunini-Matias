@@ -157,6 +157,13 @@ export const routes: Routes = [
             m => m.Logs
           ),
       },
+      {
+        path: 'propuestas-peliculas',
+        loadComponent: () =>
+          import('./features/admin/movie-proposals/movie-proposals').then(
+            m => m.MovieProposalsAdmin
+          ),
+      },
     ],
   },
   {
