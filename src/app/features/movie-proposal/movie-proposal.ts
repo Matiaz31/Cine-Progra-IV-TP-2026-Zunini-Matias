@@ -13,8 +13,8 @@ import {
 @Component({
   selector: 'app-movie-proposals',
   imports: [FormsModule],
-  templateUrl: './movie-proposals.html',
-  styleUrl: './movie-proposals.scss',
+  templateUrl: './movie-proposal.html',
+  styleUrl: './movie-proposal.scss',
 })
 export class MovieProposals {
   private proposalService = inject(MovieProposalService);

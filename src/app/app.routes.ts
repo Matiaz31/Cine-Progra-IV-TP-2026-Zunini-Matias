@@ -38,7 +38,7 @@ export const routes: Routes = [
   {
     path: 'proponer-pelicula',
     loadComponent: () =>
-      import('./features/movie-proposals/moive-proposals').then(
+      import('./features/movie-proposal/movie-proposal').then(
         m => m.MovieProposals
       ),
     canActivate: [authGuard],
