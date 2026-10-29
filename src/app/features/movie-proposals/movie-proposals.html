@@ -1,0 +1,117 @@
+
+<main class="container section">
+  <section class="card proposals-page">
+    <h1>Proponer una película</h1>
+
+    <p>
+      ¿Qué película te gustaría ver en nuestro cine?
+      Enviá tu propuesta para que el administrador la revise.
+    </p>
+
+    @if (error) {
+      <div class="proposal-message error" role="alert">
+        {{ error }}
+      </div>
+    }
+
+    @if (mensaje) {
+      <div class="proposal-message success" role="status">
+        {{ mensaje }}
+      </div>
+    }
+
+    @if (!propuestas.some(p => p.status === 'pending')) {
+      <form (ngSubmit)="enviarPropuesta()">
+        <div class="form-field">
+          <label for="proposal-title">Título de la película</label>
+          <input
+            id="proposal-title"
+            name="title"
+            type="text"
+            [(ngModel)]="formulario.title"
+            maxlength="200"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="proposal-description">Descripción</label>
+          <textarea
+            id="proposal-description"
+            name="description"
+            rows="4"
+            [(ngModel)]="formulario.description"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-field">
+          <label for="proposal-reason">¿Por qué querés que la incluyamos?</label>
+          <textarea
+            id="proposal-reason"
+            name="reason"
+            rows="3"
+            [(ngModel)]="formulario.reason"
+            required
+          ></textarea>
+        </div>
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="enviando"
+        >
+          {{ enviando ? 'Enviando...' : 'Enviar propuesta' }}
+        </button>
+      </form>
+    } @else {
+      <p class="pending-notice">
+        Ya tenés una propuesta pendiente. Cuando sea revisada,
+        vas a poder enviar otra.
+      </p>
+    }
+  </section>
+
+  <section class="section">
+    <h2>Mis propuestas</h2>
+
+    @if (cargando) {
+      <p>Cargando propuestas...</p>
+    } @else if (propuestas.length === 0) {
+      <p>Todavía no enviaste ninguna propuesta.</p>
+    } @else {
+      <div class="proposals-list">
+        @for (propuesta of propuestas; track propuesta.id) {
+          <article class="card proposal-card">
+            <h3>{{ propuesta.title }}</h3>
+
+            <p>{{ propuesta.description }}</p>
+            <p><strong>Motivo:</strong> {{ propuesta.reason }}</p>
+
+            <p>
+              <strong>Estado:</strong>
+              @switch (propuesta.status) {
+                @case ('pending') {
+                  Pendiente de revisión
+                }
+                @case ('accepted') {
+                  Aceptada
+                }
+                @case ('rejected') {
+                  Rechazada
+                }
+              }
+            </p>
+
+            @if (propuesta.review_comment) {
+              <p>
+                <strong>Comentario:</strong>
+                {{ propuesta.review_comment }}
+              </p>
+            }
+          </article>
+        }
+      </div>
+    }
+  </section>
+</main>

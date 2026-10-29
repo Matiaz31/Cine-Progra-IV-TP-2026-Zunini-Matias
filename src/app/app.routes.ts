@@ -36,6 +36,14 @@ export const routes: Routes = [
     canActivate: [homeGuard],
   },
   {
+    path: 'proponer-pelicula',
+    loadComponent: () =>
+      import('./features/movie-proposals/moive-proposals').then(
+        m => m.MovieProposals
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: 'pelicula/:id',
     component: MovieDetail,
   },
