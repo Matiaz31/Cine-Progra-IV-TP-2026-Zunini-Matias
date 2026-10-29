@@ -61,3 +61,48 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+
+/* Botón para enviar una propuesta */
+.submit-proposal-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.8rem 1.4rem;
+  border: 1px solid #8979bd;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7667a8, #62548f);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgb(118 103 168 / 18%);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.submit-proposal-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8979bd, #7667a8);
+  border-color: #a99bd4;
+  box-shadow: 0 6px 18px rgb(118 103 168 / 28%);
+  transform: translateY(-1px);
+}
+
+.submit-proposal-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-proposal-button:focus-visible {
+  outline: 2px solid #a99bd4;
+  outline-offset: 3px;
+}
+
+.submit-proposal-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}

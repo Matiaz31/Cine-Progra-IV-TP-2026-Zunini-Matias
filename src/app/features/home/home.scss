@@ -39,3 +39,45 @@
   color: var(--color-text-secondary);
   font-size: 1rem;
 }
+
+
+/* Acceso a propuestas de películas */
+.propose-movie-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid #8979bd;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7667a8, #62548f);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgb(118 103 168 / 18%);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.propose-movie-button:hover {
+  background: linear-gradient(135deg, #8979bd, #7667a8);
+  border-color: #a99bd4;
+  box-shadow: 0 6px 18px rgb(118 103 168 / 28%);
+  transform: translateY(-1px);
+}
+
+.propose-movie-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgb(118 103 168 / 18%);
+}
+
+.propose-movie-button:focus-visible {
+  outline: 2px solid #a99bd4;
+  outline-offset: 3px;
+}

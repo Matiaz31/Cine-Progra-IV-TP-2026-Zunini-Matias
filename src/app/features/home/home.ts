@@ -25,6 +25,10 @@ export class Home {
     this.loading = false;
     this.cdr.detectChanges();
   }
+  
+  proponerPelicula() {
+    this.router.navigate(['/proponer-pelicula']);
+  }
 
   verPelicula(id: string) {
     this.router.navigate(['/pelicula', id]);
