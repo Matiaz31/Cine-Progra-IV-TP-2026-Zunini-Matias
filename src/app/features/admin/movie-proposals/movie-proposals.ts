@@ -1,6 +1,10 @@
-
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+} from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import {
   MovieProposal,
   MovieProposalService,
@@ -16,6 +20,7 @@ import {
 export class MovieProposalsAdmin {
   private proposalService = inject(MovieProposalService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   propuestas: MovieProposal[] = [];
   cargando = true;
@@ -36,12 +41,32 @@ export class MovieProposalsAdmin {
         await this.proposalService.getPendingProposals();
     } catch (err) {
       console.error('Error al cargar propuestas:', err);
-      this.error = 'No se pudieron cargar las propuestas. Verificá los permisos de administrador.';
+      this.error =
+        'No se pudieron cargar las propuestas. Verificá los permisos de administrador.';
     } finally {
       this.cargando = false;
       this.cdr.detectChanges();
     }
   }
+
+
+async aceptarPropuesta(propuesta: MovieProposal): Promise<void> {
+  if (this.procesandoId) return;
+
+  this.error = '';
+  this.mensaje = '';
+
+  await this.router.navigate(['/admin/peliculas'], {
+    state: {
+      propuesta: {
+        id: propuesta.id,
+        title: propuesta.title,
+        description: propuesta.description ?? '',
+      },
+    },
+  });
+}
+
 
   async rechazarPropuesta(propuesta: MovieProposal): Promise<void> {
     if (this.procesandoId) return;
@@ -49,6 +74,7 @@ export class MovieProposalsAdmin {
     this.error = '';
     this.mensaje = '';
     this.procesandoId = propuesta.id;
+    this.cdr.detectChanges();
 
     try {
       await this.proposalService.reviewProposal(
@@ -56,7 +82,9 @@ export class MovieProposalsAdmin {
         'rejected'
       );
 
-      this.mensaje = `La propuesta "${propuesta.title}" fue rechazada.`;
+      this.mensaje =
+        `La propuesta "${propuesta.title}" fue rechazada.`;
+
       await this.cargarPropuestas();
     } catch (err) {
       console.error('Error al rechazar propuesta:', err);

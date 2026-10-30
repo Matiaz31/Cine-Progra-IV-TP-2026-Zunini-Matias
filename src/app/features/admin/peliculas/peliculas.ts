@@ -2,10 +2,12 @@ import {
   ChangeDetectorRef,
   Component,
   inject,
+  OnInit,
 } from '@angular/core';
-
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
+import { MovieProposalService } from '../../movie-proposal/movie-proposal.service';
 import { AdminMovieService } from './admin-movie.service';
 import { Movie } from '../../movies/movie';
 
@@ -18,7 +20,11 @@ import { Movie } from '../../movies/movie';
 export class Peliculas {
   private movieService = inject(AdminMovieService);
   private changeDetector = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
+  private proposalService = inject(MovieProposalService);
+  private propuestaPendienteId: string | null = null;
 
+  private propuestaAplicada = false;
   movies: Movie[] = [];
 
   loading = true;
@@ -40,8 +46,32 @@ export class Peliculas {
     pre_sale_price: null as number | null,
   };
 
-  async ngOnInit() {
+  async ngOnInit(): Promise<void> {
+    const state = history.state as {
+      propuesta?: {
+        id: string;
+        title: string;
+        description: string;
+      };
+    };
+
     await this.cargarPeliculas();
+
+    if (state.propuesta) {
+      this.propuestaPendienteId = state.propuesta.id;
+
+      this.editando = false;
+      this.peliculaEditandoId = null;
+      this.limpiarFormulario();
+
+      this.nuevaPelicula.title = state.propuesta.title;
+      this.nuevaPelicula.synopsis = state.propuesta.description;
+
+      this.error = '';
+      this.mostrarFormulario = true;
+
+      this.changeDetector.detectChanges();
+    }
   }
 
   async cargarPeliculas() {
@@ -186,6 +216,25 @@ export class Peliculas {
         );
       } else {
         pelicula = await this.movieService.createMovie(datosPelicula);
+
+        if (this.propuestaPendienteId) {
+          try {
+            await this.proposalService.reviewProposal(
+              this.propuestaPendienteId,
+              'accepted'
+            );
+
+            this.propuestaPendienteId = null;
+          } catch (error) {
+            console.error(
+              'La película se creó, pero no se pudo actualizar la propuesta:',
+              error
+            );
+
+            this.error =
+              'La película se creó, pero la propuesta sigue pendiente porque no se pudo actualizar su estado. No vuelvas a crearla.';
+          }
+        }
       }
 
       this.mostrarFormulario = false;

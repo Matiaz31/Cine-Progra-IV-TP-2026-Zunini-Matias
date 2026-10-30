@@ -61,6 +61,15 @@
 
           <footer class="proposal-actions">
             <button
+              class="accept-button"
+              type="button"
+              (click)="aceptarPropuesta(propuesta)"
+              [disabled]="procesandoId !== null"
+            >
+              {{ procesandoId === propuesta.id ? 'Procesando...' : 'Aceptar' }}
+            </button>
+
+            <button
               class="reject-button"
               type="button"
               (click)="rechazarPropuesta(propuesta)"
@@ -69,6 +78,7 @@
               {{ procesandoId === propuesta.id ? 'Procesando...' : 'Rechazar' }}
             </button>
           </footer>
+
         </article>
       }
     </div>
