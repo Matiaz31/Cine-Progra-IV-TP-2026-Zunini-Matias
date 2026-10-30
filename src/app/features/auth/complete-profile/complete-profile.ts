@@ -38,6 +38,26 @@ export class CompleteProfile implements OnInit {
     return `${date.getFullYear()}-${month}-${day}`;
   }
 
+  private async redirectByRole(userId: string): Promise<void> {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    const role = profile?.role;
+
+    if (role === 'admin') {
+      await this.router.navigate(['/admin']);
+    } else if (role === 'employee') {
+      await this.router.navigate(['/empleado']);
+    } else {
+      await this.router.navigate(['/home']);
+    }
+  }
+
   async ngOnInit(): Promise<void> {
     try {
       const {
@@ -70,9 +90,10 @@ export class CompleteProfile implements OnInit {
         metadata['last_name'] ?? nameParts.slice(1).join(' ')
       );
 
-      this.birthDate = '';
+      this.birthDate = String(metadata['birth_date'] ?? '');
       this.bloodType = String(metadata['blood_type'] ?? '');
       this.eyeColor = String(metadata['eye_color'] ?? '');
+
       this.vacationDays =
         metadata['vacation_days'] == null
           ? null
@@ -92,14 +113,24 @@ export class CompleteProfile implements OnInit {
         this.email = profile.email ?? this.email;
         this.firstName = profile.first_name ?? this.firstName;
         this.lastName = profile.last_name ?? this.lastName;
-        this.birthDate = '';
+        this.birthDate = profile.birth_date ?? this.birthDate;
         this.bloodType = profile.blood_type ?? this.bloodType;
         this.eyeColor = profile.eye_color ?? this.eyeColor;
         this.vacationDays =
           profile.vacation_days ?? this.vacationDays;
+
+        // Si los datos obligatorios ya están completos, no mostrar el formulario.
+        const profileComplete =
+          !!this.firstName.trim() &&
+          !!this.lastName.trim() &&
+          !!this.birthDate;
+
+        if (profileComplete) {
+          await this.redirectByRole(user.id);
+          return;
+        }
       }
 
-      // No redirigir automáticamente: el usuario debe confirmar el formulario.
     } catch (e) {
       console.error('No se pudo preparar el perfil OAuth:', e);
       this.error =
@@ -186,7 +217,8 @@ export class CompleteProfile implements OnInit {
 
       if (error) throw error;
 
-      await this.router.navigate(['/home']);
+      await this.redirectByRole(this.userId);
+
     } catch (e) {
       console.error('Error guardando el perfil OAuth:', e);
       this.error =

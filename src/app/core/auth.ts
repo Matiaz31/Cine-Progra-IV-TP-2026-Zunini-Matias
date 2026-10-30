@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-
 import { supabase } from './supabase';
 
 @Injectable({
@@ -71,6 +70,31 @@ export class AuthService {
     }
 
     return data?.role ?? null;
+  }
+
+  async getProfile(userId: string) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select(`
+        id,
+        email,
+        first_name,
+        last_name,
+        birth_date,
+        role,
+        blood_type,
+        eye_color,
+        vacation_days
+      `)
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error al obtener el perfil:', error);
+      throw error;
+    }
+
+    return data;
   }
 
   async logout() {
