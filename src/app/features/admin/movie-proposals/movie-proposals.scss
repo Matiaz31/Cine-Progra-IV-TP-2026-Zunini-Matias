@@ -1,0 +1,196 @@
+.proposals-container {
+  width: 100%;
+  padding: 2rem;
+  color: #e4e7ec;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  h1 {
+    margin: 0 0 0.5rem;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 2rem;
+  }
+
+  p {
+    margin: 0;
+    color: #a0a6b2;
+  }
+}
+
+.refresh-button,
+.reject-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.7rem 1.2rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease, opacity 150ms ease;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.refresh-button {
+  background: #7667a8;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #8979bd;
+  }
+}
+
+.proposals-list {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.proposal-card {
+  padding: 1.5rem;
+  background: #171c26;
+  border: 1px solid #2a303b;
+  border-radius: 10px;
+}
+
+.proposal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #2a303b;
+
+  h2 {
+    margin: 0 0 0.5rem;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 1.35rem;
+  }
+}
+
+.proposal-date {
+  color: #9299a6;
+  font-size: 0.85rem;
+}
+
+.status {
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
+  background: rgba(118, 103, 168, 0.18);
+  color: #b9a9ee;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.proposal-content {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem 0;
+
+  h3 {
+    margin: 0 0 0.5rem;
+    color: #b9a9ee;
+    font-size: 0.95rem;
+  }
+
+  p {
+    margin: 0;
+    color: #c5cad3;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+}
+
+.proposal-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #2a303b;
+}
+
+.reject-button {
+  background: #8e3f4a;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #a84b58;
+  }
+}
+
+.state-message,
+.empty-state {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background: #171c26;
+  border: 1px solid #2a303b;
+  border-radius: 10px;
+  color: #a0a6b2;
+}
+
+.empty-state {
+  h2 {
+    margin: 0 0 0.75rem;
+    color: #e4e7ec;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+
+  &.success {
+    background: rgba(54, 135, 98, 0.16);
+    border: 1px solid #368762;
+    color: #8bd5ad;
+  }
+
+  &.error {
+    background: rgba(168, 75, 88, 0.16);
+    border: 1px solid #a84b58;
+    color: #f0a3ac;
+  }
+}
+
+@media (max-width: 600px) {
+  .proposals-container {
+    padding: 1rem;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+
+    h1 {
+      font-size: 1.6rem;
+    }
+  }
+
+  .proposal-card {
+    padding: 1rem;
+  }
+
+  .proposal-header {
+    flex-direction: column;
+  }
+
+  .proposal-actions {
+    justify-content: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+}

@@ -1,0 +1,76 @@
+<section class="proposals-container">
+  <header class="page-header">
+    <div>
+      <h1>Propuestas de películas</h1>
+      <p>Revisá las películas sugeridas por los clientes.</p>
+    </div>
+
+    <button
+      class="refresh-button"
+      type="button"
+      (click)="cargarPropuestas()"
+      [disabled]="cargando"
+    >
+      Actualizar
+    </button>
+  </header>
+
+  @if (mensaje) {
+    <div class="message success">{{ mensaje }}</div>
+  }
+
+  @if (error) {
+    <div class="message error">{{ error }}</div>
+  }
+
+  @if (cargando) {
+    <div class="state-message">
+      Cargando propuestas...
+    </div>
+  } @else if (propuestas.length === 0) {
+    <div class="empty-state">
+      <h2>No hay propuestas pendientes</h2>
+      <p>Cuando un cliente sugiera una película, aparecerá aquí.</p>
+    </div>
+  } @else {
+    <div class="proposals-list">
+      @for (propuesta of propuestas; track propuesta.id) {
+        <article class="proposal-card">
+          <div class="proposal-header">
+            <div>
+              <h2>{{ propuesta.title }}</h2>
+              <span class="proposal-date">
+                Recibida: {{ propuesta.created_at | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+            </div>
+
+            <span class="status">Pendiente</span>
+          </div>
+
+          <div class="proposal-content">
+            <div>
+              <h3>Descripción</h3>
+              <p>{{ propuesta.description }}</p>
+            </div>
+
+            <div>
+              <h3>Motivo de la propuesta</h3>
+              <p>{{ propuesta.reason }}</p>
+            </div>
+          </div>
+
+          <footer class="proposal-actions">
+            <button
+              class="reject-button"
+              type="button"
+              (click)="rechazarPropuesta(propuesta)"
+              [disabled]="procesandoId !== null"
+            >
+              {{ procesandoId === propuesta.id ? 'Procesando...' : 'Rechazar' }}
+            </button>
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</section>

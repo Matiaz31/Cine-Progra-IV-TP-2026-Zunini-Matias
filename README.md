@@ -5,7 +5,7 @@ Alumno: Matías Gabriel Zunini
 Comisión: 141
 Materia: Programación IV
 Docente: Ricardo Gastón Plazas
-Fecha de entrega: 13/10/2026. 
+Fecha de entrega: 27/11/2026. 
 Repositorio: (https://github.com/Matiaz31/Cine-Progra-IV-TP-2026-Zunini-Matias.git)
 Aplicación: https://cine-progra-iv-tp-2026-zunini-matia.vercel.app
 
@@ -460,9 +460,24 @@ RF-36 — Revisión y resolución de propuestas
 
 El administrador autorizado podrá consultar, aceptar o rechazar propuestas pendientes. Al aceptar una propuesta, se abrirá el formulario existente de alta de películas con los datos compatibles precargados. La aceptación no creará automáticamente una película: el administrador deberá completar los datos faltantes y confirmar el alta mediante el flujo habitual.
 
-RF-37 — Configuración de permisos administrativos por sección
+RF-37 — Gestión de roles y configuración de permisos administrativos
 
-El administrador principal podrá configurar permisos por usuario y sección administrativa, incluyendo las acciones de consulta, creación, modificación y eliminación cuando correspondan. La configuración deberá abarcar las secciones administrativas existentes y las nuevas secciones incorporadas. Los permisos deberán aplicarse tanto en la interfaz como en el servidor.
+El administrador principal deberá poder crear, modificar y eliminar roles personalizados para organizar los permisos de acceso al sistema.
+
+Para cada rol, deberá poder configurar los permisos correspondientes a las distintas secciones administrativas, definiendo las acciones permitidas, tales como:
+
+- Consultar.
+- Crear.
+- Modificar.
+- Eliminar.
+
+Una vez configurados los roles, el administrador principal deberá poder seleccionar un usuario del sistema y asignarle uno de los roles existentes.
+
+Los permisos deberán aplicarse tanto en la interfaz como en el servidor, impidiendo que un usuario realice acciones para las cuales no posee autorización.
+
+El sistema deberá permitir crear roles con permisos específicos. Por ejemplo, un rol denominado "Solo reportes" podrá acceder únicamente a la sección de reportes, sin tener permisos para gestionar películas, funciones, productos ni otras secciones administrativas.
+
+La configuración de roles y los cambios de permisos deberán quedar registrados para garantizar su trazabilidad.
 
 RF-38 — Consulta de lista de espera por función
 
@@ -613,6 +628,16 @@ El cliente podrá utilizar el crédito para comprar otra función de la misma pe
 RN-23 — Trazabilidad administrativa. 
 Las decisiones sobre propuestas, los cambios de permisos, las cancelaciones de funciones y los créditos deberán registrar responsable, fecha, hora, acción y registro afectado.
 
+RN-24 — Compensación de compradores anónimos.
+
+Cuando una función sea cancelada y existan compras realizadas por clientes anónimos, el sistema deberá generar igualmente el crédito correspondiente al importe efectivamente pagado.
+
+Dicho crédito quedará inicialmente pendiente de vinculación a una cuenta de usuario. Para reclamarlo, el comprador deberá acreditar la titularidad de la compra mediante el correo electrónico utilizado y el comprobante correspondiente.
+
+Una vez verificada la titularidad, el crédito podrá vincularse a una cuenta registrada. También deberá contemplarse la posibilidad de resolver la compensación presencialmente en el cine mediante la presentación del comprobante de compra.
+
+El sistema deberá impedir que un mismo crédito sea reclamado o vinculado más de una vez.
+
 5. Requerimientos no funcionales
 
 RNF-01 — Tecnología
@@ -762,6 +787,7 @@ Reglas propias de la compra cuando corresponda.
 10. Historias de usuario / casos de uso
 HU-01 — Comprar entradas
 Como cliente quiero seleccionar una película, una función y mis butacas para comprar entradas para una función.
+
 Flujo principal
 El cliente consulta la cartelera.
 Selecciona una película.
@@ -786,6 +812,7 @@ La operación de pago puede fallar.
 
 HU-02 — Validar entrada mediante QR
 Como empleado quiero escanear un código QR para validar el ingreso de una persona a la sala.
+
 Flujo principal
 El empleado escanea el QR.
 El sistema identifica la entrada.
@@ -798,6 +825,7 @@ Si la entrada ya fue validada, el sistema deberá impedir un nuevo ingreso con l
 
 HU-03 — Retirar productos del Candy Bar
 Como empleado quiero validar el QR de una compra para entregar los productos adquiridos.
+
 Flujo principal
 El empleado escanea o ingresa manualmente el QR.
 El sistema identifica la compra.
@@ -810,6 +838,7 @@ La validación del Candy Bar deberá ser independiente de la validación del ing
 
 HU-04 — Cancelar una compra
 Como cliente registrado quiero cancelar una compra dentro del plazo permitido para recibir crédito para futuras compras.
+
 Flujo principal
 El usuario consulta sus compras.
 Selecciona una compra.
@@ -818,6 +847,104 @@ El sistema verifica que falten al menos 2 horas para la función.
 El sistema cancela la compra.
 El sistema genera crédito.
 El usuario puede utilizar el crédito en una futura compra.
+
+### HU-05 — Proponer una película
+
+Como cliente registrado quiero proponer una película para que el administrador pueda evaluar su incorporación al cine.
+
+Flujo principal
+
+1. El cliente ingresa a la sección de propuestas.
+2. El sistema verifica que no tenga otra propuesta pendiente.
+3. El cliente completa el título, la descripción o sinopsis y la justificación.
+4. El cliente envía la propuesta.
+5. El sistema registra la propuesta con su usuario, fecha y estado pendiente.
+6. El administrador consulta las propuestas recibidas.
+7. El administrador acepta o rechaza la propuesta.
+8. El sistema registra la decisión y notifica al cliente.
+
+Excepciones
+
+- Si el cliente ya tiene una propuesta pendiente, el sistema impedirá enviar otra.
+- Si faltan datos obligatorios, el sistema solicitará completarlos.
+- Si la propuesta es rechazada, el cliente recibirá una notificación con el resultado.
+- Si la propuesta es aceptada, se notificará al cliente y se habilitará el flujo administrativo de alta de película, sin crearla automáticamente.
+
+HU-06 — Administrar roles y permisos
+
+Como administrador principal quiero crear roles, configurar sus permisos y asignarlos a usuarios para controlar el acceso a las diferentes secciones administrativas.
+
+Flujo principal
+
+1. El administrador principal ingresa a la sección de gestión de roles.
+2. Selecciona la opción para crear un nuevo rol.
+3. Ingresa el nombre y la descripción del rol.
+4. Selecciona las secciones administrativas a las que podrá acceder.
+5. Configura las acciones permitidas para cada sección: consultar, crear, modificar y eliminar.
+6. Guarda la configuración del rol.
+7. Selecciona un usuario del sistema.
+8. Le asigna uno de los roles creados.
+9. El sistema registra la asignación y aplica los permisos correspondientes.
+10. El usuario accede únicamente a las secciones y acciones autorizadas.
+
+Excepciones
+
+- No se permitirá asignar roles inexistentes.
+- Un usuario no podrá ejecutar acciones que no estén contempladas en los permisos de su rol.
+- Si se modifican los permisos de un rol, los cambios deberán aplicarse a los usuarios que lo tengan asignado.
+- Los cambios de roles y permisos deberán quedar registrados para su auditoría.
+- Un usuario sin autorización no podrá modificar la configuración de roles.
+
+HU-07 — Incorporarse a una lista de espera
+
+Como cliente registrado quiero incorporarme a la lista de espera de una función sin butacas disponibles para tener la posibilidad de comprar una entrada si se libera una butaca.
+
+Flujo principal
+
+1. El cliente consulta una función.
+2. El sistema informa que no hay butacas disponibles.
+3. El cliente selecciona la opción para incorporarse a la lista de espera.
+4. El sistema registra su solicitud con fecha, hora, función y orden de ingreso.
+5. El cliente puede consultar su posición desde su perfil.
+6. Si se libera una butaca, el sistema ofrece la disponibilidad al primer cliente elegible.
+7. El cliente recibe una notificación con una oferta válida durante 15 minutos.
+8. El cliente acepta la oferta e inicia la compra.
+9. El servidor verifica que la oferta no haya vencido y que la butaca continúe disponible.
+10. Si se cumplen las condiciones, la compra se confirma.
+
+Excepciones
+
+- No se permitirá que un cliente tenga solicitudes activas duplicadas para la misma función.
+- Si el cliente abandona la lista, dejará de participar en el orden de atención.
+- Si la oferta vence sin confirmarse la compra, se ofrecerá la disponibilidad al siguiente cliente.
+- Si otro usuario ocupa la butaca antes de confirmar la compra, el sistema impedirá completar la operación.
+- La compra solamente se considerará confirmada cuando el servidor valide las condiciones antes del vencimiento de la oferta.
+
+HU-08 — Cancelar una función y compensar a los compradores
+
+Como administrador autorizado quiero cancelar una función para informar a los compradores afectados y generar las compensaciones correspondientes.
+
+Flujo principal
+
+1. El administrador selecciona la función que desea cancelar.
+2. Ingresa el motivo de la cancelación.
+3. El sistema muestra un resumen de las compras afectadas.
+4. El administrador revisa la información y confirma la cancelación.
+5. El sistema impide realizar nuevas compras para esa función.
+6. El sistema cancela la función y actualiza los estados correspondientes.
+7. Se calcula el importe efectivamente pagado por cada compra afectada, incluyendo entradas, productos y combos del Candy Bar.
+8. El sistema genera el crédito correspondiente para cada comprador.
+9. Se registra la cancelación y la compensación realizada.
+10. Los compradores reciben una notificación con la información de la cancelación y el crédito generado.
+11. Los clientes registrados pueden utilizar el crédito para adquirir otra función de la misma película, abonando la diferencia cuando corresponda.
+
+Excepciones
+
+- Si el administrador no tiene permisos suficientes, no podrá cancelar la función.
+- Si ocurre un error durante la operación crítica, los cambios deberán revertirse.
+- Los reintentos no podrán generar créditos duplicados.
+- Si el comprador realizó la compra de manera anónima, el crédito quedará pendiente de vinculación hasta que acredite la titularidad de la compra mediante el correo electrónico utilizado. Si no completa la vinculación, podrá resolver la compensación presencialmente en el cine presentando el comprobante de compra.
+- Si no existen funciones alternativas disponibles, el crédito permanecerá disponible para futuras compras según las reglas del sistema.
 
 11. Arquitectura y seguridad
 La aplicación utilizará una arquitectura basada en:
@@ -838,52 +965,47 @@ Las reglas críticas deberán quedar protegidas también en la base de datos o m
 
 12. Matriz de trazabilidad
 La siguiente matriz relaciona conceptos técnicos de la cursada con requerimientos funcionales o no funcionales del sistema.
-Concepto técnico
-Requisito relacionado
-Standalone Components
-RNF-01 / Arquitectura Angular
-Signals
-RF-09 / RNF-04
-Control Flow
-RF-02 / RF-09
-Lazy Loading
-RNF-10 / rutas /admin y /empleado
-Guards
-RF-02 / RF-31
-Pipe duracion
-RF-04
-Pipe precioArs
-RF-12 / RF-15
-Pipe edad
-RF-04 / RN-03
-appHighlightButaca
-RF-09
-appRestrictEdad
-RN-03 / RF-12
-Validadores custom
-RN-03 / RN-11 / RN-13
-Supabase Auth
-RF-01 / RF-02
-OAuth Google
-RF-02
-OAuth GitHub
-RF-02
-RLS
-RN-14 / RNF-07
-Supabase Realtime
-RF-09 / RNF-04
-Supabase Storage
-RF-34 / RNF-06
-RPC / Edge Function
-RF-12 / RN-13
-Service Worker
-RNF-01 / RNF-05
-PWA
-RNF-01 / RNF-05
-Guards por rol
-RF-31
-Lazy Loading administrativo
-RF-31 / RNF-10
+
+| Concepto técnico | Requisito relacionado |
+| Standalone Components | RNF-01 / Arquitectura Angular |
+| Signals | RF-09 / RNF-04 |
+| Control Flow | RF-02 / RF-09 |
+| Lazy Loading | RNF-10 / rutas /admin y /empleado |
+| Guards | RF-02 / RF-31 |
+| Pipe duracion | RF-04 |
+| Pipe precioArs | RF-12 / RF-15 |
+| Pipe edad | RF-04 / RN-03 |
+| appHighlightButaca | RF-09 |
+| appRestrictEdad | RN-03 / RF-12 |
+| Validadores custom | RN-03 / RN-11 / RN-13 |
+| Supabase Auth | RF-01 / RF-02 |
+| OAuth Google | RF-02 |
+| OAuth GitHub | RF-02 |
+| RLS | RN-14 / RNF-07 |
+| Supabase Realtime | RF-09 / RNF-04 |
+| Supabase Storage | RF-34 / RNF-06 |
+| RPC / Edge Function | RF-12 / RN-13 |
+| Service Worker | RNF-01 / RNF-05 |
+| PWA | RNF-01 / RNF-05 |
+| Guards por rol | RF-31 |
+| Lazy Loading administrativo | RF-31 / RNF-10 |
+| Gestión de propuestas de películas | RF-35 / RF-36 / RN-15 / RN-16 |
+| Notificaciones por aceptación o rechazo de propuestas | RF-29 / RF-36 / RN-16 |
+| Gestión de roles reutilizables | RF-37 / RN-17 / RN-23 |
+| Configuración de permisos por sección | RF-37 / RN-17 |
+| Asignación de roles a usuarios | RF-37 / RN-23 |
+| Control de acceso mediante permisos personalizados | RF-31 / RF-37 / RN-17 / RN-23 |
+| Gestión de lista de espera | RF-38 / RN-18 |
+| Generación de ofertas temporales | RF-39 / RN-19 |
+| Notificaciones de disponibilidad para lista de espera | RF-39 / RN-19 / RNF-13 |
+| Validación de disponibilidad de butacas | RF-38 / RF-39 / RN-18 / RN-19 |
+| Cancelación administrativa de funciones | RF-40 / RF-43 / RN-21 |
+| Generación de créditos por cancelación | RF-41 / RN-20 / RN-21 |
+| Compensación de compradores anónimos | RF-41 / RN-24 |
+| Notificaciones a compradores afectados por cancelaciones | RF-42 / RF-43 / RN-21 |
+| Operaciones atómicas e idempotentes de cancelación | RF-43 / RN-21 / RNF-11 / RNF-14 |
+| RPC / transacciones para operaciones críticas | RF-39 / RF-43 / RN-19 / RN-21 |
+| Registro y auditoría de operaciones administrativas | RF-37 / RF-40 / RF-43 / RN-23 |
 
 13. Reglas de seguridad
 El sistema deberá impedir que un usuario pueda acceder o modificar información que no le corresponda.
@@ -927,6 +1049,8 @@ Código QR.
 También deberá notificarse al cliente cuando su QR haya sido validado.
 Los usuarios que hayan activado una alerta para una película deberán recibir una notificación cuando se habilite la venta.
 El mecanismo concreto de envío deberá formar parte de la implementación técnica y documentación del proyecto.
+
+También deberá notificarse al cliente cuando una propuesta de película enviada por él sea aceptada o rechazada. La notificación deberá identificar la propuesta y comunicar el resultado de la decisión administrativa. Las notificaciones deberán quedar asociadas al usuario y registradas para permitir su consulta posterior.
 
 15. Logs de actividad
 Las actividades administrativas relevantes deberán quedar registradas.
