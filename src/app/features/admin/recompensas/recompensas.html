@@ -13,6 +13,7 @@
     <div class="message message-success" role="status">{{ mensaje }}</div>
   }
 
+  @if (puedeCrear) {
   <section class="rewards-card">
     <h3>Crear recompensa</h3>
 
@@ -123,7 +124,9 @@
       </button>
     </form>
   </section>
+  }
 
+  @if (permisos.view) {
   <section class="rewards-card">
     <div class="list-header">
       <div>
@@ -181,6 +184,7 @@
                   </span>
                 </td>
                 <td>
+                  @if (puedeModificar) {
                   <button
                     type="button"
                     class="action-button"
@@ -189,6 +193,7 @@
                   >
                     {{ recompensa.is_active ? 'Desactivar' : 'Activar' }}
                   </button>
+                  }
                 </td>
               </tr>
             }
@@ -197,4 +202,5 @@
       </div>
     }
   </section>
+  }
 </div>
