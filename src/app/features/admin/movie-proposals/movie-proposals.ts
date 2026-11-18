@@ -9,6 +9,7 @@ import {
   MovieProposal,
   MovieProposalService,
 } from '../../movie-proposal/movie-proposal.service';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 @Component({
   selector: 'app-movie-proposals-admin',
@@ -21,6 +22,9 @@ export class MovieProposalsAdmin {
   private proposalService = inject(MovieProposalService);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
+  private permissionsService = inject(AdminPermissionsService);
+  permisos: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+  puedeCrearPelicula = false;
 
   propuestas: MovieProposal[] = [];
   cargando = true;
@@ -29,10 +33,18 @@ export class MovieProposalsAdmin {
   mensaje = '';
 
   async ngOnInit(): Promise<void> {
+    const [propuestas, peliculas] = await Promise.all([
+      this.permissionsService.obtenerPermisos('movie_proposals'),
+      this.permissionsService.obtenerPermisos('movies'),
+    ]);
+    this.permisos = propuestas;
+    this.puedeCrearPelicula = peliculas.create;
+    if (!this.permisos.view) { this.error = 'No tenés permisos para consultar las propuestas.'; this.cargando = false; return; }
     await this.cargarPropuestas();
   }
 
   async cargarPropuestas(): Promise<void> {
+    if (!this.permisos.view) return;
     this.cargando = true;
     this.error = '';
 
@@ -51,7 +63,7 @@ export class MovieProposalsAdmin {
 
 
 async aceptarPropuesta(propuesta: MovieProposal): Promise<void> {
-  if (this.procesandoId) return;
+  if (this.procesandoId || !this.permisos.update || !this.puedeCrearPelicula) return;
 
   this.error = '';
   this.mensaje = '';
@@ -69,7 +81,7 @@ async aceptarPropuesta(propuesta: MovieProposal): Promise<void> {
 
 
   async rechazarPropuesta(propuesta: MovieProposal): Promise<void> {
-    if (this.procesandoId) return;
+    if (this.procesandoId || !this.permisos.update) return;
 
     this.error = '';
     this.mensaje = '';
