@@ -1,8 +1,8 @@
 <section class="admin-page">
   <header class="page-header">
     <div>
-      <h1>Butacas</h1>
-      <p>Administrá la distribución de asientos de cada sala.</p>
+      <h1>{{ permisos.view ? "Butacas" : "Preventa" }}</h1>
+      <p>{{ permisos.view ? "Administrá la distribución de asientos de cada sala." : "Configurá el precio base de las entradas." }}</p>
     </div>
     @if (puedeCrear) {
       <button type="button" class="btn-primary" (click)="openCreateForm()" [disabled]="!selectedRoomId || saving">
@@ -11,6 +11,7 @@
     }
   </header>
 
+  @if (permisos.view) {
   <p class="instruction">
     Hacé clic en una butaca para editarla o eliminarla.
   </p>
@@ -38,6 +39,7 @@
       }
     </select>
   </section>
+  }
   
   @if (permisosPrecio.view) {
   <section class="ticket-price" aria-label="Precio base de las entradas">
@@ -102,6 +104,7 @@
   </section>
   }
 
+  @if (permisos.view) {
   <section class="seat-legend">
     <span><i class="legend-normal"></i> Normal</span>
     <span><i class="legend-vip"></i> VIP</span>
@@ -276,5 +279,6 @@
         </form>
       </section>
     </div>
+  }
   }
 </section>
