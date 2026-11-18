@@ -74,6 +74,7 @@ export class AdminRoles implements OnInit {
 
   cargando = true;
   guardando = false;
+  mostrarEditor = false;
   error = '';
   mensaje = '';
 
@@ -118,6 +119,7 @@ export class AdminRoles implements OnInit {
   }
 
   nuevoRol(): void {
+    this.mostrarEditor = true;
     this.rolEditandoId = null;
     this.nombreRol = '';
     this.descripcionRol = '';
@@ -140,6 +142,7 @@ export class AdminRoles implements OnInit {
       return;
     }
 
+    this.mostrarEditor = true;
     this.rolEditandoId = rol.id;
     this.nombreRol = rol.name;
     this.descripcionRol = rol.description ?? '';
@@ -167,6 +170,7 @@ export class AdminRoles implements OnInit {
   }
 
   cancelarEdicion(): void {
+    this.mostrarEditor = false;
     this.rolEditandoId = null;
     this.nombreRol = '';
     this.descripcionRol = '';
@@ -295,6 +299,7 @@ export class AdminRoles implements OnInit {
         this.mensaje = 'Rol actualizado correctamente.';
       }
 
+      this.mostrarEditor = false;
       this.rolEditandoId = null;
       this.nombreRol = '';
       this.descripcionRol = '';

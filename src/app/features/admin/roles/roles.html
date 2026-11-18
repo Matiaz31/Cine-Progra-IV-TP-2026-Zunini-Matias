@@ -48,7 +48,7 @@
       }
     </section>
 
-    @if (rolEditandoId !== null || nombreRol !== '' || descripcionRol !== '') {
+    @if (mostrarEditor) {
       <section class="role-editor">
         <h2>{{ rolEditandoId ? 'Modificar rol' : 'Crear rol' }}</h2>
         <form (ngSubmit)="guardarRol()">
