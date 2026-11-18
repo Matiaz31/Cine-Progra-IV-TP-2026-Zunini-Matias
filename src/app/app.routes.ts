@@ -144,6 +144,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'preventa',
+        data: { permissionSection: 'ticket_pricing' },
+        loadComponent: () =>
+          import('./features/admin/butacas/butacas').then(
+            (m) => m.Butacas,
+          ),
+      },
+      {
         path: 'combos',
         data: { permissionSection: 'combos' },
         loadComponent: () =>
