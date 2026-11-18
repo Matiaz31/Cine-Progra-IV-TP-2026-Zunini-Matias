@@ -251,6 +251,7 @@
                 >
                   {{ combo.is_active ? 'Desactivar' : 'Activar' }}
                 </button>
+                }
 
                 @if (puedeEliminar) {
                 <button
@@ -261,7 +262,6 @@
                 >
                   {{ borrandoId === combo.id ? 'Borrando...' : 'Borrar' }}
                 </button>
-                }
                 }
               </div>
             </div>
