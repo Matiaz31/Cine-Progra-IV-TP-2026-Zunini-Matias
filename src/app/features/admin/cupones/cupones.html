@@ -25,6 +25,7 @@
     </div>
   }
 
+  @if (puedeCrear || (editandoId && puedeModificar)) {
   <section class="editor">
     <div class="section-heading">
       <div>
@@ -158,7 +159,9 @@
       </div>
     </form>
   </section>
+  }
 
+  @if (permisos.view) {
   <section class="listing">
     <div class="listing-header">
       <div>
@@ -237,6 +240,7 @@
             </div>
 
             <div class="coupon-actions">
+              @if (puedeModificar) {
               <button
                 type="button"
                 class="btn btn-secondary"
@@ -244,7 +248,9 @@
               >
                 Editar
               </button>
+              }
               
+              @if (puedeEliminar) {
               <button
                 type="button"
                 class="btn btn-danger"
@@ -252,8 +258,10 @@
               >
                 Eliminar
               </button>
+              }
 
 
+              @if (puedeModificar) {
               <button
                 type="button"
                 class="btn"
@@ -263,10 +271,12 @@
               >
                 {{ cupon.is_active ? 'Desactivar' : 'Activar' }}
               </button>
+              }
             </div>
           </article>
         }
       </div>
     }
   </section>
+  }
 </div>
