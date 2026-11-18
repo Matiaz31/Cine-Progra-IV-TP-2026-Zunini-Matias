@@ -6,6 +6,10 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminGenreService, Genre } from './admin-genre.service';
+import {
+  AdminPermissionSet,
+  AdminPermissionsService,
+} from '../../../core/admin-permissions.service';
 
 @Component({
   selector: 'app-generos',
@@ -14,12 +18,18 @@ import { AdminGenreService, Genre } from './admin-genre.service';
   templateUrl: './generos.html',
   styleUrl: './generos.scss',
 })
-
 export class Generos implements OnInit {
   private genreService = inject(AdminGenreService);
+  private permissionsService = inject(AdminPermissionsService);
   private cdr = inject(ChangeDetectorRef);
 
   genres: Genre[] = [];
+  permisos: AdminPermissionSet = {
+    view: false,
+    create: false,
+    update: false,
+    delete: false,
+  };
 
   loading = false;
   saving = false;
@@ -32,11 +42,40 @@ export class Generos implements OnInit {
   generoEditandoId: string | null = null;
   nombreGenero = '';
 
+  get puedeConsultar(): boolean {
+    return this.permisos.view;
+  }
+
+  get puedeCrear(): boolean {
+    return this.permisos.create;
+  }
+
+  get puedeModificar(): boolean {
+    return this.permisos.update;
+  }
+
+  get puedeEliminar(): boolean {
+    return this.permisos.delete;
+  }
+
   async ngOnInit(): Promise<void> {
+    this.permisos = await this.permissionsService.obtenerPermisos('genres');
+
+    if (!this.puedeConsultar) {
+      this.error = 'No tenés permisos para consultar los géneros.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     await this.cargarGeneros();
   }
 
   async cargarGeneros(): Promise<void> {
+    if (!this.puedeConsultar) {
+      this.error = 'No tenés permisos para consultar los géneros.';
+      return;
+    }
+
     this.loading = true;
     this.error = '';
 
@@ -52,6 +91,8 @@ export class Generos implements OnInit {
   }
 
   abrirFormulario(): void {
+    if (!this.puedeCrear || this.saving) return;
+
     this.editando = false;
     this.generoEditandoId = null;
     this.nombreGenero = '';
@@ -61,6 +102,8 @@ export class Generos implements OnInit {
   }
 
   editarGenero(genre: Genre): void {
+    if (!this.puedeModificar || this.saving) return;
+
     this.editando = true;
     this.generoEditandoId = genre.id;
     this.nombreGenero = genre.name;
@@ -83,7 +126,13 @@ export class Generos implements OnInit {
   }
 
   async guardarGenero(): Promise<void> {
-    if (this.saving) {
+    if (this.saving) return;
+
+    const permitido = this.editando ? this.puedeModificar : this.puedeCrear;
+    if (!permitido) {
+      this.error = this.editando
+        ? 'No tenés permisos para modificar géneros.'
+        : 'No tenés permisos para crear géneros.';
       return;
     }
 
@@ -118,7 +167,6 @@ export class Generos implements OnInit {
           this.generoEditandoId,
           nombre
         );
-
       } else {
         await this.genreService.createGenre(nombre);
       }
@@ -129,11 +177,10 @@ export class Generos implements OnInit {
       this.nombreGenero = '';
 
       this.success = 'Género guardado correctamente.';
-
       await this.cargarGeneros();
     } catch (error) {
       console.error('GÉNEROS: error al guardar', error);
-      this.error = 'No se pudo guardar el género.';
+      this.error = 'No se pudo guardar el género. Verificá tus permisos.';
       this.success = '';
     } finally {
       this.saving = false;
@@ -142,20 +189,22 @@ export class Generos implements OnInit {
   }
 
   async eliminarGenero(genre: Genre): Promise<void> {
+    if (!this.puedeEliminar || this.saving) {
+      this.error = 'No tenés permisos para eliminar géneros.';
+      return;
+    }
+
     const confirmar = window.confirm(
       `¿Querés eliminar el género "${genre.name}"?`
     );
 
-    if (!confirmar) {
-      return;
-    }
+    if (!confirmar) return;
 
     this.error = '';
     this.success = '';
 
     try {
       await this.genreService.deleteGenre(genre.id);
-
       this.success = 'Género eliminado correctamente.';
       await this.cargarGeneros();
     } catch (error) {
