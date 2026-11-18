@@ -2,6 +2,7 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { DatePipe, JsonPipe } from '@angular/common';
 import { supabase } from '../../../core/supabase';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 interface ActivityLog {
   id: string;
@@ -30,16 +31,22 @@ interface Profile {
 })
 export class Logs implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private permissionsService = inject(AdminPermissionsService);
+  puedeConsultar = false;
 
   registros: ActivityLog[] = [];
   cargando = false;
   error = '';
 
   async ngOnInit(): Promise<void> {
+    const permisos = await this.permissionsService.obtenerPermisos('activity_logs');
+    this.puedeConsultar = permisos.view;
+    if (!this.puedeConsultar) { this.error = 'No tenés permisos para consultar el historial de actividad.'; return; }
     await this.cargarLogs();
   }
 
   async cargarLogs(): Promise<void> {
+    if (!this.puedeConsultar) return;
     this.cargando = true;
     this.error = '';
 
