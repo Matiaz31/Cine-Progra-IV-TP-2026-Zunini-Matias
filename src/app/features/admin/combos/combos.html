@@ -5,9 +5,11 @@
       <p>Creá combos y administrá los productos que incluyen.</p>
     </div>
 
+    @if (puedeCrear) {
     <button class="btn btn-primary" type="button" (click)="nuevoCombo()">
       + Nuevo combo
     </button>
+    }
   </header>
 
   @if (error) {
@@ -18,6 +20,7 @@
     <div class="message message-success">{{ mensaje }}</div>
   }
 
+  @if (puedeCrear || (editandoId && puedeModificar)) {
   <section class="editor card">
     <h3>{{ editandoId ? 'Editar combo' : 'Crear combo' }}</h3>
 
@@ -170,7 +173,9 @@
       </div>
     </form>
   </section>
+  }
 
+  @if (permisos.view) {
   <section class="listing">
     <div class="listing-header">
       <h3>Combos existentes</h3>
@@ -226,6 +231,7 @@
               </p>
 
               <div class="combo-actions">
+                @if (puedeModificar) {
                 <button
                   class="btn btn-secondary"
                   type="button"
@@ -246,6 +252,7 @@
                   {{ combo.is_active ? 'Desactivar' : 'Activar' }}
                 </button>
 
+                @if (puedeEliminar) {
                 <button
                   type="button"
                   class="btn btn-danger"
@@ -254,6 +261,8 @@
                 >
                   {{ borrandoId === combo.id ? 'Borrando...' : 'Borrar' }}
                 </button>
+                }
+                }
               </div>
             </div>
           </article>
@@ -261,4 +270,5 @@
       </div>
     }
   </section>
+  }
 </section>
