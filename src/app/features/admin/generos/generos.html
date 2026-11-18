@@ -5,14 +5,16 @@
       <p>Administración de géneros cinematográficos.</p>
     </div>
 
-    <button
-      type="button"
-      class="primary-button"
-      (click)="abrirFormulario()"
-      [disabled]="saving"
-    >
-      Nuevo género
-    </button>
+    @if (puedeCrear) {
+      <button
+        type="button"
+        class="primary-button"
+        (click)="abrirFormulario()"
+        [disabled]="saving"
+      >
+        Nuevo género
+      </button>
+    }
   </div>
 
   @if (success) {
@@ -48,7 +50,6 @@
       <form (ngSubmit)="guardarGenero()">
         <div class="form-field">
           <label for="nombreGenero">Nombre</label>
-
           <input
             id="nombreGenero"
             type="text"
@@ -77,17 +78,19 @@
             Cancelar
           </button>
 
-          <button
-            type="submit"
-            class="primary-button"
-            [disabled]="saving"
-          >
-            @if (saving) {
-              Guardando...
-            } @else {
-              {{ editando ? 'Guardar cambios' : 'Crear género' }}
-            }
-          </button>
+          @if (editando ? puedeModificar : puedeCrear) {
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="saving"
+            >
+              @if (saving) {
+                Guardando...
+              } @else {
+                {{ editando ? 'Guardar cambios' : 'Crear género' }}
+              }
+            </button>
+          }
         </div>
       </form>
     </div>
@@ -111,23 +114,27 @@
             </div>
 
             <div class="genre-actions">
-              <button
-                type="button"
-                class="edit-button"
-                (click)="editarGenero(genre)"
-                [disabled]="saving"
-              >
-                Editar
-              </button>
+              @if (puedeModificar) {
+                <button
+                  type="button"
+                  class="edit-button"
+                  (click)="editarGenero(genre)"
+                  [disabled]="saving"
+                >
+                  Editar
+                </button>
+              }
 
-              <button
-                type="button"
-                class="delete-button"
-                (click)="eliminarGenero(genre)"
-                [disabled]="saving"
-              >
-                Eliminar
-              </button>
+              @if (puedeEliminar) {
+                <button
+                  type="button"
+                  class="delete-button"
+                  (click)="eliminarGenero(genre)"
+                  [disabled]="saving"
+                >
+                  Eliminar
+                </button>
+              }
             </div>
           </article>
         }
