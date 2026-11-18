@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { supabase } from '../../../core/supabase';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 interface ProductCategory {
   id: string;
@@ -31,6 +32,10 @@ interface Product {
 })
 export class Productos implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private permissionsService = inject(AdminPermissionsService);
+  permisos: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+  get puedeCrear(): boolean { return this.permisos.create; }
+  get puedeModificar(): boolean { return this.permisos.update; }
 
   products: Product[] = [];
   categories: ProductCategory[] = [];
@@ -55,10 +60,13 @@ export class Productos implements OnInit {
   activo = true;
 
   async ngOnInit(): Promise<void> {
+    this.permisos = await this.permissionsService.obtenerPermisos('products');
+    if (!this.permisos.view) { this.error = 'No tenés permisos para consultar los productos.'; return; }
     await this.cargarDatos();
   }
 
   async cargarDatos(): Promise<void> {
+    if (!this.permisos.view) return;
     this.loading = true;
 
     try {
@@ -102,6 +110,7 @@ export class Productos implements OnInit {
   }
 
   abrirFormulario(): void {
+    if (!this.puedeCrear) return;
     this.limpiarFormulario();
     this.error = '';
     this.success = '';
@@ -109,6 +118,7 @@ export class Productos implements OnInit {
   }
 
   editarProducto(product: Product): void {
+    if (!this.puedeModificar) return;
     this.editando = true;
     this.productoEditandoId = product.id;
 
@@ -160,6 +170,7 @@ export class Productos implements OnInit {
   }
 
   async guardarProducto(): Promise<void> {
+    if (this.editando ? !this.puedeModificar : !this.puedeCrear) { this.error = 'No tenés permisos para realizar esta operación.'; return; }
     if (this.saving) {
       return;
     }
@@ -284,6 +295,7 @@ export class Productos implements OnInit {
   }
 
   async cambiarEstado(product: Product): Promise<void> {
+    if (!this.puedeModificar) { this.error = 'No tenés permisos para modificar productos.'; return; }
     if (this.saving || this.changingStatusId) {
       return;
     }
