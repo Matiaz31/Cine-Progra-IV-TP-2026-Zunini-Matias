@@ -236,7 +236,6 @@ export class Recompensas implements OnInit {
   }
 
   async cargarProductos(): Promise<void> {
-    if (!this.puedeCrear) return;
     this.cargandoProductos = true;
     this.errorProductos = '';
 
