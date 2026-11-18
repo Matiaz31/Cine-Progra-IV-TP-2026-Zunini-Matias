@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { supabase } from '../../../core/supabase';
 import { ActivityLogService } from '../../../core/activity-log.service';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 interface Reward {
   id: string;
@@ -38,6 +39,10 @@ export class Recompensas implements OnInit {
   private supabase = supabase;
   private activityLog = inject(ActivityLogService);
   private cdr = inject(ChangeDetectorRef);
+  private permissionsService = inject(AdminPermissionsService);
+  permisos: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+  get puedeCrear(): boolean { return this.permisos.create; }
+  get puedeModificar(): boolean { return this.permisos.update; }
 
   productos: Product[] = [];
   recompensas: Reward[] = [];
@@ -60,10 +65,9 @@ export class Recompensas implements OnInit {
   };
 
   async ngOnInit(): Promise<void> {
-    await Promise.all([
-      this.cargarRecompensas(),
-      this.cargarProductos(),
-    ]);
+    this.permisos = await this.permissionsService.obtenerPermisos('rewards');
+    if (!this.permisos.view) { this.error = 'No tenés permisos para consultar las recompensas.'; return; }
+    await Promise.all([this.cargarRecompensas(), this.cargarProductos()]);
   }
 
   esTicket(recompensa: Reward): boolean {
@@ -80,6 +84,7 @@ export class Recompensas implements OnInit {
   }
 
   async cargarRecompensas(): Promise<void> {
+    if (!this.permisos.view) return;
     this.cargando = true;
     this.error = '';
 
@@ -104,6 +109,7 @@ export class Recompensas implements OnInit {
   }
 
   async crearRecompensa(): Promise<void> {
+    if (!this.puedeCrear) { this.error = 'No tenés permisos para crear recompensas.'; return; }
     if (this.creando) return;
 
     this.error = '';
@@ -188,6 +194,7 @@ export class Recompensas implements OnInit {
   }
 
   async cambiarEstado(recompensa: Reward): Promise<void> {
+    if (!this.puedeModificar) { this.error = 'No tenés permisos para modificar recompensas.'; return; }
     if (this.creando) return;
 
     this.error = '';
@@ -229,6 +236,7 @@ export class Recompensas implements OnInit {
   }
 
   async cargarProductos(): Promise<void> {
+    if (!this.puedeCrear) return;
     this.cargandoProductos = true;
     this.errorProductos = '';
 
