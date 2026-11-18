@@ -5,6 +5,7 @@
       <p>Administrá los horarios, las salas y los precios de las funciones.</p>
     </div>
 
+    @if (puedeCrear) {
     <button
       type="button"
       class="btn-primary"
@@ -13,6 +14,7 @@
     >
       Nueva función
     </button>
+    }
   </header>
 
   @if (error) {
@@ -23,7 +25,7 @@
     <div class="alert alert-success">{{ mensaje }}</div>
   }
 
-  @if (mostrarFormulario) {
+  @if (mostrarFormulario && (editando ? puedeModificar : puedeCrear)) {
     <section class="form-card">
       <div class="form-header">
         <h2>{{ editando ? 'Editar función' : 'Nueva función' }}</h2>
@@ -186,6 +188,7 @@
                 <td>{{ funcion.language }}</td>
                 <td>{{ funcion.price }}</td>
                 <td>
+                  @if (puedeModificar) {
                   <button
                     type="button"
                     class="btn-secondary"
@@ -194,7 +197,9 @@
                   >
                     Editar
                   </button>
+                  }
 
+                  @if (puedeEliminar) {
                   <button
                     type="button"
                     class="btn-danger"
@@ -203,6 +208,7 @@
                   >
                     Eliminar
                   </button>
+                  }
                 
                 </td>
               </tr>
