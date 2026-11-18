@@ -34,6 +34,7 @@
     </select>
   </section>
   
+  @if (permisosPrecio.view) {
   <section class="ticket-price" aria-label="Precio base de las entradas">
     <div class="ticket-price-info">
       <span class="ticket-price-label">Precio base de entrada</span>
@@ -76,6 +77,7 @@
             {{ loadingTicketPrice ? 'Cargando...' : (baseTicketPrice | currency:'ARS':'$':'1.0-2') }}
           </strong>
 
+          @if (puedeModificarPrecio) {
           <button
             type="button"
             class="price-edit-button"
@@ -84,6 +86,7 @@
             (click)="startEditingTicketPrice()"
             [disabled]="loadingTicketPrice || savingTicketPrice"
           >✎</button>
+          }
         </div>
       }
 
@@ -92,7 +95,7 @@
       </p>
     </div>
   </section>
-
+  }
 
   <section class="seat-legend">
     <span><i class="legend-normal"></i> Normal</span>
@@ -125,6 +128,7 @@
                 [class.seat-inactive]="!seat.is_active"
                 [title]="'Fila ' + seat.row_label + ', butaca ' + seat.seat_number"
                 (click)="openEditForm(seat)"
+                [disabled]="!puedeModificar"
               >
                 {{ seat.seat_number }}
               </button>
@@ -232,6 +236,7 @@
           </label>
 
           <div class="editor-actions">
+            @if (puedeEliminar) {
             <button
               type="button"
               class="btn-danger"
@@ -240,6 +245,7 @@
             >
               Eliminar
             </button>
+            }
 
             <div class="editor-actions-right">
               <button
@@ -251,6 +257,7 @@
                 Cancelar
               </button>
 
+              @if (editingSeatId ? puedeModificar : puedeCrear) {
               <button
                 type="submit"
                 class="btn-primary"
@@ -258,6 +265,7 @@
               >
                 {{ saving ? 'Guardando...' : 'Guardar' }}
               </button>
+              }
             </div>
           </div>
         </form>
