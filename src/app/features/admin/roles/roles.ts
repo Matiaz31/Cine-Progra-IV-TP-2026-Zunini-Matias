@@ -355,6 +355,10 @@ export class AdminRoles implements OnInit {
     return this.roles.find(role => role.id === roleId)?.name ?? 'Sin rol personalizado';
   }
 
+  contarPermisosRol(roleId: string): number {
+    return this.permisosRoles.filter(permission => permission.admin_role_id === roleId).length;
+  }
+
   async asignarRol(): Promise<void> {
     if (this.guardando) return;
 

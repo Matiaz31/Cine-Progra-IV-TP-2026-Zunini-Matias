@@ -31,7 +31,7 @@
                 <h3>{{ role.name }}</h3>
                 <p>{{ role.description || 'Sin descripción.' }}</p>
                 <small>
-                  {{ permisosRoles.filter(p => p.admin_role_id === role.id).length }} permisos configurados
+                  {{ contarPermisosRol(role.id) }} permisos configurados
                 </small>
               </div>
               <div class="role-actions">
