@@ -7,6 +7,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { supabase } from '../../../core/supabase';
 import { DatePipe } from '@angular/common';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 interface ProductCategory {
   id: string;
@@ -23,6 +24,11 @@ interface ProductCategory {
 })
 export class Categorias implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private permissionsService = inject(AdminPermissionsService);
+  permisos: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+  get puedeCrear(): boolean { return this.permisos.create; }
+  get puedeModificar(): boolean { return this.permisos.update; }
+  get puedeEliminar(): boolean { return this.permisos.delete; }
 
   categories: ProductCategory[] = [];
 
@@ -37,10 +43,13 @@ export class Categorias implements OnInit {
   nombreCategoria = '';
 
   async ngOnInit(): Promise<void> {
+    this.permisos = await this.permissionsService.obtenerPermisos('product_categories');
+    if (!this.permisos.view) { this.error = 'No tenés permisos para consultar las categorías.'; return; }
     await this.cargarCategorias();
   }
 
   async cargarCategorias(): Promise<void> {
+    if (!this.permisos.view) return;
     this.loading = true;
     this.error = '';
 
@@ -65,6 +74,7 @@ export class Categorias implements OnInit {
   }
 
   abrirFormulario(): void {
+    if (!this.puedeCrear) return;
     this.editando = false;
     this.categoriaEditandoId = null;
     this.nombreCategoria = '';
@@ -74,6 +84,7 @@ export class Categorias implements OnInit {
   }
 
   editarCategoria(category: ProductCategory): void {
+    if (!this.puedeModificar) return;
     this.editando = true;
     this.categoriaEditandoId = category.id;
     this.nombreCategoria = category.name;
@@ -99,6 +110,7 @@ export class Categorias implements OnInit {
       return;
     }
 
+    if (this.editando ? !this.puedeModificar : !this.puedeCrear) { this.error = 'No tenés permisos para realizar esta operación.'; return; }
     const nombre = this.nombreCategoria.trim();
 
     this.error = '';
@@ -166,6 +178,7 @@ export class Categorias implements OnInit {
   }
 
   async eliminarCategoria(category: ProductCategory): Promise<void> {
+    if (!this.puedeEliminar) { this.error = 'No tenés permisos para eliminar categorías.'; return; }
     const confirmar = window.confirm(
       `¿Querés eliminar la categoría "${category.name}"?`,
     );
