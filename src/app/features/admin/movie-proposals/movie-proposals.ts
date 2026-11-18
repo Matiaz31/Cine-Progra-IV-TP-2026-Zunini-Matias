@@ -38,7 +38,7 @@ export class MovieProposalsAdmin {
       this.permissionsService.obtenerPermisos('movies'),
     ]);
     this.permisos = propuestas;
-    this.puedeCrearPelicula = peliculas.create;
+    this.puedeCrearPelicula = peliculas.view && peliculas.create;
     if (!this.permisos.view) { this.error = 'No tenés permisos para consultar las propuestas.'; this.cargando = false; return; }
     await this.cargarPropuestas();
   }
