@@ -81,7 +81,7 @@ export class Butacas implements OnInit {
     this.permisos = butacas;
     this.permisosPrecio = precios;
     if (this.permisos.view) await this.loadRooms();
-    else this.errorMessage = 'No tenés permisos para consultar las butacas.';
+    else if (!this.permisosPrecio.view) this.errorMessage = 'No tenés permisos para consultar esta sección.';
     if (this.permisosPrecio.view) await this.loadTicketPrice();
   }
   
