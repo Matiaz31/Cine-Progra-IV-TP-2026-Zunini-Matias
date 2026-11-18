@@ -18,6 +18,7 @@
     }
   </header>
 
+  @if (puedeConsultar) {
   <div class="logs-summary">
     <div class="summary-card">
       <span class="summary-icon">📋</span>
@@ -35,6 +36,7 @@
       </div>
     </div>
   </div>
+  }
 
   @if (cargando) {
     <div class="state-message">Cargando historial de actividad...</div>
