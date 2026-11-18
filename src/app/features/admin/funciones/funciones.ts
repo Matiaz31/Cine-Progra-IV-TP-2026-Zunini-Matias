@@ -7,6 +7,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { supabase } from '../../../core/supabase';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 interface MovieOption {
   id: string;
@@ -40,6 +41,11 @@ interface Screening {
 })
 export class Funciones {
   private changeDetector = inject(ChangeDetectorRef);
+  private permissionsService = inject(AdminPermissionsService);
+  permisos: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+  get puedeCrear(): boolean { return this.permisos.create; }
+  get puedeModificar(): boolean { return this.permisos.update; }
+  get puedeEliminar(): boolean { return this.permisos.delete; }
 
   peliculas: MovieOption[] = [];
   salas: RoomOption[] = [];
@@ -66,10 +72,13 @@ export class Funciones {
   };
 
   async ngOnInit() {
+    this.permisos = await this.permissionsService.obtenerPermisos('screenings');
+    if (!this.permisos.view) { this.error = 'No tenés permisos para consultar las funciones.'; this.loading = false; return; }
     await this.cargarDatos();
   }
 
   async cargarDatos() {
+    if (!this.permisos.view) return;
     this.loading = true;
     this.error = '';
 
@@ -168,6 +177,7 @@ export class Funciones {
   }
 
   abrirFormulario() {
+    if (!this.puedeCrear) return;
     if (this.guardando) return;
 
     this.editando = false;
@@ -181,6 +191,7 @@ export class Funciones {
   }
 
   editarFuncion(funcion: Screening) {
+    if (!this.puedeModificar) return;
     if (this.guardando) return;
 
     const inicio = new Date(funcion.start_time);
@@ -217,6 +228,7 @@ export class Funciones {
   }
 
   async eliminarFuncion(funcion: Screening) {
+    if (!this.puedeEliminar) { this.error = 'No tenés permisos para eliminar funciones.'; return; }
     if (this.guardando) return;
 
     const confirmar = confirm(
@@ -278,6 +290,7 @@ export class Funciones {
   }
 
   async guardarFuncion() {
+    if (this.editando ? !this.puedeModificar : !this.puedeCrear) { this.error = 'No tenés permisos para realizar esta operación.'; return; }
     if (this.guardando) return;
 
     this.error = '';
