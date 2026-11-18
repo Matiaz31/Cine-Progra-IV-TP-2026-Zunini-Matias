@@ -1,0 +1,142 @@
+<section class="roles-page">
+  <header class="page-header">
+    <div>
+      <h1>Roles y permisos</h1>
+      <p>Creá roles personalizados y definí qué acciones puede realizar cada administrador.</p>
+    </div>
+    @if (!rolEditandoId) {
+      <button type="button" class="btn-primary" (click)="nuevoRol()">Nuevo rol</button>
+    }
+  </header>
+
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+  @if (mensaje) {
+    <div class="alert alert-success">{{ mensaje }}</div>
+  }
+
+  @if (cargando) {
+    <p class="empty-state">Cargando roles y usuarios...</p>
+  } @else {
+    <section class="roles-section">
+      <h2>Roles personalizados</h2>
+      @if (roles.length === 0) {
+        <p class="empty-state">Todavía no hay roles personalizados.</p>
+      } @else {
+        <div class="roles-list">
+          @for (role of roles; track role.id) {
+            <article class="role-card">
+              <div class="role-card-info">
+                <h3>{{ role.name }}</h3>
+                <p>{{ role.description || 'Sin descripción.' }}</p>
+                <small>
+                  {{ permisosRoles.filter(p => p.admin_role_id === role.id).length }} permisos configurados
+                </small>
+              </div>
+              <div class="role-actions">
+                <button type="button" class="btn-secondary" (click)="editarRol(role)" [disabled]="role.is_system || guardando">
+                  Modificar
+                </button>
+                <button type="button" class="btn-danger" (click)="eliminarRol(role)" [disabled]="role.is_system || guardando">
+                  Eliminar
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    @if (rolEditandoId !== null || nombreRol !== '' || descripcionRol !== '') {
+      <section class="role-editor">
+        <h2>{{ rolEditandoId ? 'Modificar rol' : 'Crear rol' }}</h2>
+        <form (ngSubmit)="guardarRol()">
+          <div class="form-grid">
+            <label>
+              Nombre del rol
+              <input name="nombreRol" [(ngModel)]="nombreRol" maxlength="60" required placeholder="Ej. Solo reportes" />
+            </label>
+            <label>
+              Descripción
+              <input name="descripcionRol" [(ngModel)]="descripcionRol" maxlength="180" placeholder="Describí el alcance del rol" />
+            </label>
+          </div>
+
+          <h3>Permisos por sección</h3>
+          <p class="helper-text">Marcá las acciones que podrá realizar este rol. Si no marcás una acción, quedará denegada.</p>
+          <div class="permissions-table-wrap">
+            <table class="permissions-table">
+              <thead>
+                <tr>
+                  <th>Sección</th>
+                  @for (action of actions; track action.key) {
+                    <th>{{ action.label }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (section of sections; track section.key) {
+                  <tr>
+                    <th>{{ section.label }}</th>
+                    @for (action of actions; track action.key) {
+                      <td>
+                        <input
+                          type="checkbox"
+                          [attr.aria-label]="section.label + ': ' + action.label"
+                          [checked]="tienePermiso(section.key, action.key)"
+                          (change)="cambiarPermiso(section.key, action.key, $any($event.target).checked)"
+                        />
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="editor-actions">
+            <button type="button" class="btn-secondary" (click)="cancelarEdicion()" [disabled]="guardando">Cancelar</button>
+            <button type="submit" class="btn-primary" [disabled]="guardando">
+              {{ guardando ? 'Guardando...' : 'Guardar rol' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <section class="roles-section">
+      <h2>Asignar rol a un usuario</h2>
+      <p class="helper-text">Al asignar un rol personalizado, el usuario pasa a tener perfil de administrador con los permisos seleccionados.</p>
+      @if (usuarios.length === 0) {
+        <p class="empty-state">No hay otros usuarios disponibles para asignar.</p>
+      } @else {
+        <div class="assignment-form">
+          <label>
+            Usuario
+            <select name="usuarioSeleccionadoId" [(ngModel)]="usuarioSeleccionadoId">
+              <option value="">Seleccioná un usuario</option>
+              @for (user of usuarios; track user.id) {
+                <option [value]="user.id" [disabled]="!puedeAsignar(user)">
+                  {{ nombreUsuario(user) }} — {{ user.email }} ({{ user.role === 'admin' ? nombreRolAsignado(user.admin_role_id) : user.role }})
+                </option>
+              }
+            </select>
+          </label>
+          <label>
+            Rol personalizado
+            <select name="rolSeleccionadoId" [(ngModel)]="rolSeleccionadoId">
+              <option value="">Seleccioná un rol</option>
+              @for (role of roles; track role.id) {
+                <option [value]="role.id">{{ role.name }}</option>
+              }
+            </select>
+          </label>
+          <button type="button" class="btn-primary" (click)="asignarRol()" [disabled]="guardando || !usuarioSeleccionadoId || !rolSeleccionadoId || roles.length === 0">
+            {{ guardando ? 'Asignando...' : 'Asignar rol' }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+</section>

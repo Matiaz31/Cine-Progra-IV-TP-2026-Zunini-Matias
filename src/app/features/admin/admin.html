@@ -231,6 +231,27 @@
           </div>
         </section>
       }
+
+      @if (esAdministradorPrincipal) {
+        <section class="admin-section">
+          <div class="section-title">
+            <span class="section-icon">🔐</span>
+            <div>
+              <h2>Seguridad y accesos</h2>
+              <p>Administrá los roles y permisos de otros usuarios.</p>
+            </div>
+          </div>
+
+          <div class="admin-grid">
+            <button type="button" class="admin-card"
+              (click)="navegar('/admin/roles')">
+              <span class="card-icon">👥</span>
+              <strong>Roles y permisos</strong>
+              <span>Crear roles personalizados y asignarlos a usuarios.</span>
+            </button>
+          </div>
+        </section>
+      }
     }
 
     <router-outlet></router-outlet>

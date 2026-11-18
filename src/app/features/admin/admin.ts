@@ -25,6 +25,7 @@ export class Admin implements OnInit {
   private changeDetector = inject(ChangeDetectorRef);
 
   esInicio = false;
+  esAdministradorPrincipal = false;
 
   permisos: Record<string, boolean> = {};
 
@@ -49,9 +50,7 @@ export class Admin implements OnInit {
     this.actualizarVista();
 
     this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd)
-      )
+      .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
         this.actualizarVista();
         this.changeDetector.detectChanges();
@@ -59,7 +58,21 @@ export class Admin implements OnInit {
   }
 
   async ngOnInit() {
-    await this.cargarPermisos();
+    await Promise.all([this.cargarPermisos(), this.cargarTipoAdministrador()]);
+  }
+
+  private async cargarTipoAdministrador() {
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) return;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('admin_role_id')
+      .eq('id', authData.user.id)
+      .single();
+
+    this.esAdministradorPrincipal = !error && data?.admin_role_id === null;
+    this.changeDetector.detectChanges();
   }
 
   private async cargarPermisos() {
@@ -73,17 +86,11 @@ export class Admin implements OnInit {
           }
         );
 
-        return [
-          section,
-          !error && data === true,
-        ] as const;
+        return [section, !error && data === true] as const;
       })
     );
 
     this.permisos = Object.fromEntries(resultados);
-
-    console.log('PERMISOS ADMIN:', this.permisos);
-
     this.changeDetector.detectChanges();
   }
 

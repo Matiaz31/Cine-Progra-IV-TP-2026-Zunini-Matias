@@ -83,7 +83,6 @@ export const routes: Routes = [
     canActivate: [
       authGuard,
       roleGuard(['admin']),
-      
     ],
     canActivateChild: [adminPermissionGuard],
     children: [
@@ -108,7 +107,7 @@ export const routes: Routes = [
         data: { permissionSection: 'product_categories' },
         loadComponent: () =>
           import('./features/admin/categorias/categorias').then(
-            (m) => m.Categorias,
+            m => m.Categorias
           ),
       },
       {
@@ -116,7 +115,7 @@ export const routes: Routes = [
         data: { permissionSection: 'products' },
         loadComponent: () =>
           import('./features/admin/productos/productos').then(
-            (m) => m.Productos,
+            m => m.Productos
           ),
       },
       {
@@ -124,7 +123,7 @@ export const routes: Routes = [
         data: { permissionSection: 'rooms' },
         loadComponent: () =>
           import('./features/admin/salas/salas').then(
-            (m) => m.Salas,
+            m => m.Salas
           ),
       },
       {
@@ -132,7 +131,7 @@ export const routes: Routes = [
         data: { permissionSection: 'screenings' },
         loadComponent: () =>
           import('./features/admin/funciones/funciones').then(
-            (m) => m.Funciones,
+            m => m.Funciones
           ),
       },
       {
@@ -140,7 +139,7 @@ export const routes: Routes = [
         data: { permissionSection: 'seats' },
         loadComponent: () =>
           import('./features/admin/butacas/butacas').then(
-            (m) => m.Butacas,
+            m => m.Butacas
           ),
       },
       {
@@ -148,7 +147,7 @@ export const routes: Routes = [
         data: { permissionSection: 'ticket_pricing' },
         loadComponent: () =>
           import('./features/admin/butacas/butacas').then(
-            (m) => m.Butacas,
+            m => m.Butacas
           ),
       },
       {
@@ -185,6 +184,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/movie-proposals/movie-proposals').then(
             m => m.MovieProposalsAdmin
+          ),
+      },
+      {
+        path: 'roles',
+        data: { permissionSection: 'admin_roles' },
+        loadComponent: () =>
+          import('./features/admin/roles/roles').then(
+            m => m.AdminRoles
           ),
       },
     ],
