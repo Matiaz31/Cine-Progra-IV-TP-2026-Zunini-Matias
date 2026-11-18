@@ -4,6 +4,11 @@
       <h1>Butacas</h1>
       <p>Administrá la distribución de asientos de cada sala.</p>
     </div>
+    @if (puedeCrear) {
+      <button type="button" class="btn-primary" (click)="openCreateForm()" [disabled]="!selectedRoomId || saving">
+        Nueva butaca
+      </button>
+    }
   </header>
 
   <p class="instruction">
@@ -141,7 +146,7 @@
     }
   </section>
 
-    @if (showForm) {
+    @if (showForm && (editingSeatId ? puedeModificar : puedeCrear)) {
     <div class="modal-backdrop" (click)="closeForm()">
       <section
         class="card seat-editor modal-content"
