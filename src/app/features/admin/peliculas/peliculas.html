@@ -5,6 +5,7 @@
       <p>Administración de películas del cine.</p>
     </div>
 
+    @if (puedeCrear) {
     <button
       type="button"
       class="primary-button"
@@ -12,6 +13,7 @@
     >
       Nueva película
     </button>
+  }
 
   </div>
 
@@ -194,15 +196,17 @@
             Cancelar
           </button>
 
-          <button
-            type="submit"
-            class="primary-button"
-            [disabled]="guardando"
-          >
-            {{ guardando
-              ? 'Guardando...'
-              : (editando ? 'Guardar cambios' : 'Crear película') }}
-          </button>
+          @if (editando ? puedeModificar : puedeCrear) {
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="guardando"
+            >
+              {{ guardando
+                ? 'Guardando...'
+                : (editando ? 'Guardar cambios' : 'Crear película') }}
+            </button>
+          }
 
         </div>
 
@@ -261,31 +265,34 @@
             </div>
 
             <div class="movie-actions">
+              @if (puedeModificar) {
+                <button
+                  type="button"
+                  class="edit-button"
+                  (click)="editarPelicula(movie)"
+                >
+                  Editar
+                </button>
 
-            <button
-              type="button"
-              class="edit-button"
-              (click)="editarPelicula(movie)"
-            >
-              Editar
-            </button>
+                <button
+                  type="button"
+                  [class.activate-button]="!movie.is_active"
+                  [class.deactivate-button]="movie.is_active"
+                  (click)="cambiarEstado(movie)"
+                >
+                  {{ movie.is_active ? 'Desactivar' : 'Activar' }}
+                </button>
+              }
 
-            <button
-              type="button"
-              [class.activate-button]="!movie.is_active"
-              [class.deactivate-button]="movie.is_active"
-              (click)="cambiarEstado(movie)"
-            >
-              {{ movie.is_active ? 'Desactivar' : 'Activar' }}
-            </button>
-
-            <button
-              type="button"
-              class="delete-button"
-              (click)="eliminarPelicula(movie)"
-            >
-              Eliminar
-            </button>
+              @if (puedeEliminar) {
+                <button
+                  type="button"
+                  class="delete-button"
+                  (click)="eliminarPelicula(movie)"
+                >
+                  Eliminar
+                </button>
+              }
 
             </div>
           </article>

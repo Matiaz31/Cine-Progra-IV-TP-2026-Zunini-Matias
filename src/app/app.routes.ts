@@ -16,6 +16,7 @@ import { Profile } from './features/profile/profile';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 import { homeGuard } from './guards/home-guard';
+import { adminPermissionGuard } from './guards/admin-permission-guard';
 
 export const routes: Routes = [
   {
@@ -82,10 +83,13 @@ export const routes: Routes = [
     canActivate: [
       authGuard,
       roleGuard(['admin']),
+      
     ],
+    canActivateChild: [adminPermissionGuard],
     children: [
       {
         path: 'peliculas',
+        data: { permissionSection: 'movies' },
         loadComponent: () =>
           import('./features/admin/peliculas/peliculas').then(
             m => m.Peliculas
@@ -93,6 +97,7 @@ export const routes: Routes = [
       },
       {
         path: 'generos',
+        data: { permissionSection: 'genres' },
         loadComponent: () =>
           import('./features/admin/generos/generos').then(
             m => m.Generos
@@ -100,6 +105,7 @@ export const routes: Routes = [
       },
       {
         path: 'categorias',
+        data: { permissionSection: 'product_categories' },
         loadComponent: () =>
           import('./features/admin/categorias/categorias').then(
             (m) => m.Categorias,
@@ -107,6 +113,7 @@ export const routes: Routes = [
       },
       {
         path: 'productos',
+        data: { permissionSection: 'products' },
         loadComponent: () =>
           import('./features/admin/productos/productos').then(
             (m) => m.Productos,
@@ -114,6 +121,7 @@ export const routes: Routes = [
       },
       {
         path: 'salas',
+        data: { permissionSection: 'rooms' },
         loadComponent: () =>
           import('./features/admin/salas/salas').then(
             (m) => m.Salas,
@@ -121,6 +129,7 @@ export const routes: Routes = [
       },
       {
         path: 'funciones',
+        data: { permissionSection: 'screenings' },
         loadComponent: () =>
           import('./features/admin/funciones/funciones').then(
             (m) => m.Funciones,
@@ -128,6 +137,7 @@ export const routes: Routes = [
       },
       {
         path: 'butacas',
+        data: { permissionSection: 'seats' },
         loadComponent: () =>
           import('./features/admin/butacas/butacas').then(
             (m) => m.Butacas,
@@ -135,16 +145,19 @@ export const routes: Routes = [
       },
       {
         path: 'combos',
+        data: { permissionSection: 'combos' },
         loadComponent: () =>
           import('./features/admin/combos/combos').then(m => m.Combos)
       },
       {
         path: 'cupones',
+        data: { permissionSection: 'coupons' },
         loadComponent: () =>
           import('./features/admin/cupones/cupones').then(m => m.Cupones)
       },
       {
         path: 'recompensas',
+        data: { permissionSection: 'rewards' },
         loadComponent: () =>
           import('./features/admin/recompensas/recompensas').then(
             m => m.Recompensas
@@ -152,6 +165,7 @@ export const routes: Routes = [
       },
       {
         path: 'logs',
+        data: { permissionSection: 'activity_logs' },
         loadComponent: () =>
           import('./features/admin/logs/logs').then(
             m => m.Logs
@@ -159,6 +173,7 @@ export const routes: Routes = [
       },
       {
         path: 'propuestas-peliculas',
+        data: { permissionSection: 'movie_proposals' },
         loadComponent: () =>
           import('./features/admin/movie-proposals/movie-proposals').then(
             m => m.MovieProposalsAdmin

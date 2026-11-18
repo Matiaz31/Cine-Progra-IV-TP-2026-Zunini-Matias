@@ -4,12 +4,15 @@ import {
   inject,
   OnInit,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+
 import { FormsModule } from '@angular/forms';
 
 import { MovieProposalService } from '../../movie-proposal/movie-proposal.service';
 import { AdminMovieService } from './admin-movie.service';
 import { Movie } from '../../movies/movie';
+import { supabase } from '../../../core/supabase';
+
+type MoviePermission = 'view' | 'create' | 'update' | 'delete';
 
 @Component({
   selector: 'app-peliculas',
@@ -17,14 +20,15 @@ import { Movie } from '../../movies/movie';
   templateUrl: './peliculas.html',
   styleUrl: './peliculas.scss',
 })
-export class Peliculas {
+export class Peliculas implements OnInit {
   private movieService = inject(AdminMovieService);
   private changeDetector = inject(ChangeDetectorRef);
-  private route = inject(ActivatedRoute);
   private proposalService = inject(MovieProposalService);
+
   private propuestaPendienteId: string | null = null;
 
   private propuestaAplicada = false;
+
   movies: Movie[] = [];
 
   loading = true;
@@ -34,6 +38,29 @@ export class Peliculas {
   guardando = false;
   editando = false;
   peliculaEditandoId: string | null = null;
+
+  permisos: Record<MoviePermission, boolean> = {
+    view: false,
+    create: false,
+    update: false,
+    delete: false,
+  };
+
+  get puedeConsultar(): boolean {
+    return this.permisos.view;
+  }
+
+  get puedeCrear(): boolean {
+    return this.permisos.create;
+  }
+
+  get puedeModificar(): boolean {
+    return this.permisos.update;
+  }
+
+  get puedeEliminar(): boolean {
+    return this.permisos.delete;
+  }
 
   nuevaPelicula = {
     title: '',
@@ -47,6 +74,15 @@ export class Peliculas {
   };
 
   async ngOnInit(): Promise<void> {
+    await this.cargarPermisos();
+
+    if (!this.puedeConsultar) {
+      this.loading = false;
+      this.error = 'No tenés permiso para consultar películas.';
+      this.changeDetector.detectChanges();
+      return;
+    }
+
     const state = history.state as {
       propuesta?: {
         id: string;
@@ -58,6 +94,15 @@ export class Peliculas {
     await this.cargarPeliculas();
 
     if (state.propuesta) {
+
+      if (!this.puedeCrear) {
+        this.error =
+          'No tenés permiso para crear películas. La propuesta no fue aceptada.';
+
+        this.changeDetector.detectChanges();
+        return;
+      }
+
       this.propuestaPendienteId = state.propuesta.id;
 
       this.editando = false;
@@ -74,36 +119,90 @@ export class Peliculas {
     }
   }
 
-  async cargarPeliculas() {
+  private async cargarPermisos(): Promise<void> {
+    const acciones: MoviePermission[] = [
+      'view',
+      'create',
+      'update',
+      'delete',
+    ];
+
+    try {
+      const resultados = await Promise.all(
+        acciones.map(async action => {
+          const { data, error } = await supabase.rpc(
+            'has_admin_permission',
+            {
+              p_section: 'movies',
+              p_action: action,
+            }
+          );
+
+          if (error) {
+            console.error(
+              `Error verificando permiso movies.${action}:`,
+              error
+            );
+
+            return [action, false] as const;
+          }
+
+          return [action, data === true] as const;
+        })
+      );
+
+      this.permisos = Object.fromEntries(
+        resultados
+      ) as Record<MoviePermission, boolean>;
+
+    } catch (error) {
+      console.error('ERROR AL CARGAR PERMISOS DE PELÍCULAS:', error);
+
+      this.permisos = {
+        view: false,
+        create: false,
+        update: false,
+        delete: false,
+      };
+    }
+
+    this.changeDetector.detectChanges();
+  }
+
+  async cargarPeliculas(): Promise<void> {
     this.loading = true;
     this.error = '';
 
     try {
       this.movies = await this.movieService.getMovies();
+
     } catch (error) {
       console.error('ERROR AL CARGAR PELÍCULAS:', error);
+
       this.error = 'No se pudieron cargar las películas.';
       this.movies = [];
+
     } finally {
       this.loading = false;
       this.changeDetector.detectChanges();
     }
   }
 
-  abrirFormulario() {
-    if (this.guardando) return;
+  abrirFormulario(): void {
+    if (this.guardando || !this.puedeCrear) return;
 
     this.editando = false;
     this.peliculaEditandoId = null;
     this.limpiarFormulario();
+
     this.error = '';
     this.mostrarFormulario = true;
 
     this.changeDetector.detectChanges();
   }
 
-  editarPelicula(movie: Movie) {
-    if (this.guardando) return;
+  editarPelicula(movie: Movie): void {
+    if (this.guardando || !this.puedeModificar) return;
 
     this.editando = true;
     this.peliculaEditandoId = movie.id;
@@ -125,19 +224,21 @@ export class Peliculas {
     this.changeDetector.detectChanges();
   }
 
-  cerrarFormulario() {
+  cerrarFormulario(): void {
     if (this.guardando) return;
 
     this.mostrarFormulario = false;
     this.editando = false;
     this.peliculaEditandoId = null;
+
     this.limpiarFormulario();
+
     this.error = '';
 
     this.changeDetector.detectChanges();
   }
 
-  private limpiarFormulario() {
+  private limpiarFormulario(): void {
     this.nuevaPelicula = {
       title: '',
       synopsis: '',
@@ -150,8 +251,17 @@ export class Peliculas {
     };
   }
 
-  async guardarPelicula() {
+  async guardarPelicula(): Promise<void> {
     if (this.guardando) return;
+
+    if (this.editando ? !this.puedeModificar : !this.puedeCrear) {
+      this.error = this.editando
+        ? 'No tenés permiso para modificar películas.'
+        : 'No tenés permiso para crear películas.';
+
+      this.changeDetector.detectChanges();
+      return;
+    }
 
     this.error = '';
 
@@ -214,6 +324,7 @@ export class Peliculas {
           this.peliculaEditandoId,
           datosPelicula
         );
+
       } else {
         pelicula = await this.movieService.createMovie(datosPelicula);
 
@@ -225,6 +336,7 @@ export class Peliculas {
             );
 
             this.propuestaPendienteId = null;
+
           } catch (error) {
             console.error(
               'La película se creó, pero no se pudo actualizar la propuesta:',
@@ -240,22 +352,45 @@ export class Peliculas {
       this.mostrarFormulario = false;
       this.editando = false;
       this.peliculaEditandoId = null;
+
       this.limpiarFormulario();
 
       await this.cargarPeliculas();
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('ERROR AL GUARDAR PELÍCULA:', error);
 
-      this.error = this.editando
-        ? 'No se pudieron guardar los cambios. Revisá la consola para conocer el error.'
-        : 'No se pudo crear la película. Revisá la consola para conocer el error.';
+      const mensajeTecnico = error?.message ?? '';
+
+      if (mensajeTecnico.includes('release_date')) {
+        this.error = 'La fecha de estreno es obligatoria. Por favor, completá ese campo.';
+
+      } else if (mensajeTecnico.includes('duplicate key')) {
+        this.error = 'Ya existe una película con esos datos. Revisá la información ingresada.';
+
+      } else if (mensajeTecnico.includes('row-level security')) {
+        this.error = 'No tenés permisos para realizar esta operación.';
+
+      } else if (mensajeTecnico.includes('23502')) {
+        this.error = 'Faltan completar algunos datos obligatorios. Revisá el formulario.';
+
+      } else if (mensajeTecnico.includes('23503')) {
+        this.error = 'No se puede realizar esta operación porque existen otros registros relacionados.';
+
+      } else {
+        this.error = this.editando
+          ? 'No se pudieron guardar los cambios. Intentá nuevamente.'
+          : 'No se pudo crear la película. Intentá nuevamente.';
+      }
     } finally {
       this.guardando = false;
       this.changeDetector.detectChanges();
     }
   }
 
-  async cambiarEstado(movie: Movie) {
+  async cambiarEstado(movie: Movie): Promise<void> {
+    if (!this.puedeModificar) return;
+
     this.error = '';
 
     try {
@@ -270,15 +405,20 @@ export class Peliculas {
       }
 
       await this.cargarPeliculas();
+
     } catch (error) {
       console.error('ERROR AL CAMBIAR ESTADO:', error);
+
       this.error = 'Ocurrió un error al cambiar el estado de la película.';
+
     } finally {
       this.changeDetector.detectChanges();
     }
   }
 
-  async eliminarPelicula(movie: Movie) {
+  async eliminarPelicula(movie: Movie): Promise<void> {
+    if (!this.puedeEliminar) return;
+
     const confirmar = window.confirm(
       `¿Seguro que querés eliminar definitivamente la película "${movie.title}"?`
     );
@@ -299,10 +439,13 @@ export class Peliculas {
       }
 
       await this.cargarPeliculas();
+
     } catch (error) {
       console.error('ERROR AL ELIMINAR PELÍCULA:', error);
+
       this.error =
         'Ocurrió un error al eliminar la película. Revisá si tiene registros asociados.';
+
     } finally {
       this.changeDetector.detectChanges();
     }
