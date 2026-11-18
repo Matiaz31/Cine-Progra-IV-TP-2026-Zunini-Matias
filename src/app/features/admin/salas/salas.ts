@@ -7,6 +7,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { supabase } from '../../../core/supabase';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 interface Room {
   id: string;
@@ -24,6 +25,10 @@ interface Room {
 })
 export class Salas implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private permissionsService = inject(AdminPermissionsService);
+  permisos: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+  get puedeCrear(): boolean { return this.permisos.create; }
+  get puedeModificar(): boolean { return this.permisos.update; }
 
   rooms: Room[] = [];
 
@@ -39,10 +44,13 @@ export class Salas implements OnInit {
   estadoSala = true;
 
   async ngOnInit(): Promise<void> {
+    this.permisos = await this.permissionsService.obtenerPermisos('rooms');
+    if (!this.permisos.view) { this.error = 'No tenés permisos para consultar las salas.'; return; }
     await this.cargarSalas();
   }
 
   async cargarSalas(): Promise<void> {
+    if (!this.permisos.view) return;
     this.loading = true;
     this.error = '';
 
@@ -67,6 +75,7 @@ export class Salas implements OnInit {
   }
 
   abrirFormulario(): void {
+    if (!this.puedeCrear) return;
     this.editando = false;
     this.salaEditandoId = null;
     this.nombreSala = '';
@@ -77,6 +86,7 @@ export class Salas implements OnInit {
   }
 
   editarSala(room: Room): void {
+    if (!this.puedeModificar) return;
     this.editando = true;
     this.salaEditandoId = room.id;
     this.nombreSala = room.name;
@@ -104,6 +114,7 @@ export class Salas implements OnInit {
       return;
     }
 
+    if (this.editando ? !this.puedeModificar : !this.puedeCrear) { this.error = 'No tenés permisos para realizar esta operación.'; return; }
     const nombre = this.nombreSala.trim();
 
     this.error = '';
@@ -176,6 +187,7 @@ export class Salas implements OnInit {
   }
 
   async cambiarEstadoSala(room: Room): Promise<void> {
+    if (!this.puedeModificar) { this.error = 'No tenés permisos para modificar salas.'; return; }
     this.error = '';
     this.success = '';
 
