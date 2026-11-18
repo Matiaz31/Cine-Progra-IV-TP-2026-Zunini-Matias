@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { supabase } from '../../../core/supabase';
 import { CurrencyPipe } from '@angular/common';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 
 type SeatType = 'normal' | 'accessible' | 'vip';
@@ -36,6 +37,13 @@ interface SeatRow {
 })
 export class Butacas implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private permissionsService = inject(AdminPermissionsService);
+  permisos: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+  permisosPrecio: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+  get puedeCrear(): boolean { return this.permisos.create; }
+  get puedeModificar(): boolean { return this.permisos.update; }
+  get puedeEliminar(): boolean { return this.permisos.delete; }
+  get puedeModificarPrecio(): boolean { return this.permisosPrecio.update; }
 
   rooms: Room[] = [];
   seats: Seat[] = [];
@@ -65,12 +73,20 @@ export class Butacas implements OnInit {
     is_active: true,
   };
 
-  ngOnInit(): void {
-    void this.loadRooms();
-    void this.loadTicketPrice();
+  async ngOnInit(): Promise<void> {
+    const [butacas, precios] = await Promise.all([
+      this.permissionsService.obtenerPermisos('seats'),
+      this.permissionsService.obtenerPermisos('ticket_pricing'),
+    ]);
+    this.permisos = butacas;
+    this.permisosPrecio = precios;
+    if (this.permisos.view) await this.loadRooms();
+    else this.errorMessage = 'No tenés permisos para consultar las butacas.';
+    if (this.permisosPrecio.view) await this.loadTicketPrice();
   }
   
   async loadTicketPrice(): Promise<void> {
+    if (!this.permisosPrecio.view) return;
     this.loadingTicketPrice = true;
 
     try {
@@ -94,6 +110,7 @@ export class Butacas implements OnInit {
   }
 
   startEditingTicketPrice(): void {
+    if (!this.puedeModificarPrecio) return;
     this.priceDraft = this.baseTicketPrice;
     this.editingTicketPrice = true;
     this.errorMessage = '';
@@ -106,6 +123,7 @@ export class Butacas implements OnInit {
   }
 
   async saveTicketPrice(): Promise<void> {
+    if (!this.puedeModificarPrecio) { this.errorMessage = 'No tenés permisos para modificar el precio de las entradas.'; return; }
     const price = Number(this.priceDraft);
 
     if (!Number.isFinite(price) || price < 0) {
@@ -144,6 +162,7 @@ export class Butacas implements OnInit {
 
 
   async loadRooms(): Promise<void> {
+    if (!this.permisos.view) return;
     this.loading = true;
     this.errorMessage = '';
 
@@ -193,6 +212,7 @@ export class Butacas implements OnInit {
   }
 
   async loadSeats(): Promise<void> {
+    if (!this.permisos.view) return;
     if (!this.selectedRoomId) {
       this.seats = [];
       return;
@@ -245,6 +265,7 @@ export class Butacas implements OnInit {
   }
 
   openCreateForm(): void {
+    if (!this.puedeCrear) return;
     if (!this.selectedRoomId) {
       this.errorMessage = 'Primero seleccioná una sala.';
       return;
@@ -258,6 +279,7 @@ export class Butacas implements OnInit {
   }
 
   openEditForm(seat: Seat): void {
+    if (!this.puedeModificar) return;
     this.editingSeatId = seat.id;
 
     this.form = {
@@ -290,6 +312,7 @@ export class Butacas implements OnInit {
   }
 
   async saveSeat(): Promise<void> {
+    if (this.editingSeatId ? !this.puedeModificar : !this.puedeCrear) { this.errorMessage = 'No tenés permisos para realizar esta operación.'; return; }
     this.errorMessage = '';
     this.successMessage = '';
 
@@ -366,6 +389,7 @@ export class Butacas implements OnInit {
   }
 
   async deleteSeat(): Promise<void> {
+    if (!this.puedeEliminar) { this.errorMessage = 'No tenés permisos para eliminar butacas.'; return; }
     if (!this.editingSeatId || this.saving) {
       return;
     }
@@ -406,6 +430,7 @@ export class Butacas implements OnInit {
   }
 
   async toggleSeatStatus(seat: Seat): Promise<void> {
+    if (!this.puedeModificar) { this.errorMessage = 'No tenés permisos para modificar butacas.'; return; }
     if (this.saving) {
       return;
     }
