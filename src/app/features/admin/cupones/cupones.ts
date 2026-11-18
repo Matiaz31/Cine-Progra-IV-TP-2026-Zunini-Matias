@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { supabase } from '../../../core/supabase';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 type CouponDiscountType = 'percentage' | 'fixed';
 
@@ -38,6 +39,11 @@ interface CouponForm {
 })
 export class Cupones {
   private cdr = inject(ChangeDetectorRef);
+  private permissionsService = inject(AdminPermissionsService);
+  permisos: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+  get puedeCrear(): boolean { return this.permisos.create; }
+  get puedeModificar(): boolean { return this.permisos.update; }
+  get puedeEliminar(): boolean { return this.permisos.delete; }
 
   cupones: Coupon[] = [];
 
@@ -64,10 +70,13 @@ export class Cupones {
   }
 
   async ngOnInit(): Promise<void> {
+    this.permisos = await this.permissionsService.obtenerPermisos('coupons');
+    if (!this.permisos.view) { this.error = 'No tenés permisos para consultar los cupones.'; return; }
     await this.cargarCupones();
   }
 
   async cargarCupones(): Promise<void> {
+    if (!this.permisos.view) return;
     this.cargando = true;
     this.error = '';
 
@@ -94,6 +103,7 @@ export class Cupones {
       return;
     }
 
+    if (this.editandoId ? !this.puedeModificar : !this.puedeCrear) { this.error = 'No tenés permisos para realizar esta operación.'; return; }
     this.mensaje = '';
     this.error = '';
 
@@ -209,6 +219,7 @@ export class Cupones {
   }
 
   editarCupon(cupon: Coupon): void {
+    if (!this.puedeModificar) return;
     this.editandoId = cupon.id;
     this.mensaje = '';
     this.error = '';
@@ -228,6 +239,7 @@ export class Cupones {
   }
 
   async cambiarEstado(cupon: Coupon): Promise<void> {
+    if (!this.puedeModificar) { this.error = 'No tenés permisos para modificar cupones.'; return; }
     this.mensaje = '';
     this.error = '';
 
@@ -266,6 +278,7 @@ export class Cupones {
 
   
     async eliminarCupon(cupon: Coupon): Promise<void> {
+        if (!this.puedeEliminar) { this.error = 'No tenés permisos para eliminar cupones.'; return; }
         const confirmar = window.confirm(
             `¿Estás seguro de que querés eliminar el cupón "${cupon.code}"?`,
         );
