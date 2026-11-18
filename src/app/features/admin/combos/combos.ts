@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { supabase } from '../../../core/supabase';
+import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
 interface Producto {
 	id: string;
@@ -40,6 +41,11 @@ interface Combo {
 })
 export class Combos implements OnInit {
 	private cdr = inject(ChangeDetectorRef);
+	private permissionsService = inject(AdminPermissionsService);
+	permisos: AdminPermissionSet = { view: false, create: false, update: false, delete: false };
+	get puedeCrear(): boolean { return this.permisos.create; }
+	get puedeModificar(): boolean { return this.permisos.update; }
+	get puedeEliminar(): boolean { return this.permisos.delete; }
 
 	combos: Combo[] = [];
 	productos: Producto[] = [];
@@ -55,8 +61,10 @@ export class Combos implements OnInit {
 
 	formulario = this.formularioVacio();
 
-	ngOnInit(): void {
-		void this.cargarDatos();
+	async ngOnInit(): Promise<void> {
+		this.permisos = await this.permissionsService.obtenerPermisos('combos');
+		if (!this.permisos.view) { this.error = 'No tenés permisos para consultar los combos.'; return; }
+		await this.cargarDatos();
 	}
 
 	private formularioVacio() {
@@ -70,6 +78,7 @@ export class Combos implements OnInit {
 	}
 
 	async cargarDatos(): Promise<void> {
+		if (!this.permisos.view) return;
 		this.cargando = true;
 		this.cdr.detectChanges();
 
@@ -152,6 +161,7 @@ export class Combos implements OnInit {
 	}
 
 	nuevoCombo(): void {
+		if (!this.puedeCrear) return;
 		this.editandoId = null;
 		this.formulario = this.formularioVacio();
 		this.error = '';
@@ -160,6 +170,7 @@ export class Combos implements OnInit {
 	}
 
 	async editarCombo(combo: Combo): Promise<void> {
+		if (!this.puedeModificar) return;
 		this.error = '';
 		this.mensaje = '';
 
@@ -252,6 +263,7 @@ export class Combos implements OnInit {
 	}
 
 	async guardarCombo(): Promise<void> {
+		if (this.editandoId ? !this.puedeModificar : !this.puedeCrear) { this.error = 'No tenés permisos para realizar esta operación.'; return; }
 		if (this.guardando) {
 			return;
 		}
@@ -372,6 +384,7 @@ export class Combos implements OnInit {
 	}
 
 	async cambiarEstado(combo: Combo): Promise<void> {
+		if (!this.puedeModificar) { this.error = 'No tenés permisos para modificar combos.'; return; }
 		if (this.guardando || this.borrandoId) {
 			return;
 		}
@@ -430,6 +443,7 @@ export class Combos implements OnInit {
 	}
 
 	async borrarCombo(combo: Combo): Promise<void> {
+		if (!this.puedeEliminar) { this.error = 'No tenés permisos para eliminar combos.'; return; }
 		if (this.guardando || this.borrandoId) {
 			return;
 		}
