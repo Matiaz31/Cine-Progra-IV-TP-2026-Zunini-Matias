@@ -19,6 +19,13 @@
   }
 
   @if (!loading && movie) {
+    @if (!isOnline) {
+      <div class="offline-notice" role="status">
+        <strong>Sin conexión a Internet.</strong>
+        Las funciones, calificaciones y reseñas no están disponibles mientras estés sin conexión. Volvé a conectarte para consultar esos datos.
+      </div>
+    }
+
     <article class="card movie-detail">
 
       @if (movie.poster_url) {
@@ -107,7 +114,7 @@
         Seleccioná una función para continuar con la elección de tus butacas.
       </p>
 
-      @if (screenings.length === 0) {
+      @if (screenings.length === 0 && isOnline) {
         <p>No hay funciones disponibles para esta película.</p>
       }
 
@@ -176,7 +183,7 @@
         <p>Cargando reseñas...</p>
       } @else {
 
-        @if (reviews.length === 0) {
+        @if (reviews.length === 0 && isOnline) {
           <div class="card empty-reviews">
             <p>Todavía no hay reseñas para esta película.</p>
             <p>¡Sé el primero en compartir tu opinión!</p>
@@ -225,6 +232,7 @@
 
       }
 
+      @if (isOnline) {
       <div class="card review-form-card">
 
         <h3>
@@ -306,6 +314,9 @@
         }
 
       </div>
+      } @else {
+        <p class="offline-section-note">El formulario de reseñas estará disponible cuando recuperes la conexión a Internet.</p>
+      }
 
     </section>
   }
