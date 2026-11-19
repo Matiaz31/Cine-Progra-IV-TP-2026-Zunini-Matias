@@ -71,24 +71,37 @@ export class MovieDetail {
       return;
     }
 
-    const [movie, screenings, userResult] = await Promise.all([
-      this.movieService.getMovieById(movieId),
+    // Primero mostramos la película desde la caché local, sin esperar
+    // consultas secundarias que pueden quedar pendientes sin conexión.
+    const movie = await this.movieService.getMovieById(movieId);
+
+    if (!movie) {
+      this.error = 'No se encontró la película.';
+      this.loading = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.movie = movie;
+    this.loading = false;
+    this.cdr.detectChanges();
+
+    // La cartelera y el detalle son públicos y pueden consultarse offline.
+    // Funciones, sesión y reseñas requieren conexión.
+    if (!navigator.onLine) {
+      this.reviewLoading = false;
+      return;
+    }
+
+    const [screenings, userResult] = await Promise.all([
       this.screeningService.getScreeningsByMovieId(movieId),
       supabase.auth.getUser(),
     ]);
 
+    this.screenings = screenings;
     this.currentUserId = userResult.data.user?.id ?? null;
 
-    if (!movie) {
-      this.error = 'No se encontró la película.';
-    } else {
-      this.movie = movie;
-      this.screenings = screenings;
-
-      await this.loadReviews(movieId);
-    }
-
-    this.loading = false;
+    await this.loadReviews(movieId);
     this.cdr.detectChanges();
   }
 
