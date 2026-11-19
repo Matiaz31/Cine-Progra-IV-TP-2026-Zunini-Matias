@@ -1,3 +1,28 @@
+.offline-notice {
+  margin-bottom: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: rgb(118 103 168 / 12%);
+  border: 1px solid var(--color-primary);
+  border-left-width: 4px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.offline-notice strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--color-text);
+}
+
+.offline-section-note {
+  padding: var(--space-md);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
 .movie-detail {
   display: grid;
   grid-template-columns: 300px 1fr;

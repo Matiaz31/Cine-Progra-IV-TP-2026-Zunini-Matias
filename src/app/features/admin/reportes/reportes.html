@@ -1,0 +1,193 @@
+<section class="reportes-page">
+  <header class="reportes-header">
+    <div>
+      <h2>Reportes del cine</h2>
+      <p>Estadísticas de facturación, entradas y rendimiento de ventas.</p>
+    </div>
+
+    <div class="reportes-actions">
+      <button type="button" class="btn-export btn-excel" (click)="exportarExcel()"
+        [disabled]="cargando || facturacionDiaria.length === 0">
+        <span aria-hidden="true">📊</span> Exportar Excel
+      </button>
+      <button type="button" class="btn-export btn-pdf" (click)="exportarPdf()" [disabled]="cargando">
+        <span aria-hidden="true">📄</span> Exportar PDF
+      </button>
+      <button type="button" class="btn-refresh" (click)="cargarReportes()" [disabled]="cargando">
+        {{ cargando ? 'Actualizando...' : '↻ Actualizar' }}
+      </button>
+    </div>
+  </header>
+
+  @if (cargando) {
+    <div class="report-state">Cargando reportes...</div>
+  } @else if (error) {
+    <div class="report-error">
+      <strong>No se pudieron cargar los reportes</strong>
+      <p>{{ error }}</p>
+      <button type="button" class="btn-refresh" (click)="cargarReportes()">Reintentar</button>
+    </div>
+  } @else {
+    <div class="report-summary">
+      <article class="metric-card">
+        <span class="metric-icon">💰</span>
+        <div>
+          <span class="metric-label">Recaudación total</span>
+          <strong>{{ totalRecaudado | currency:'ARS':'symbol-narrow':'1.0-0':'es-AR' }}</strong>
+          <small>Compras pagadas</small>
+        </div>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-icon">🎟️</span>
+        <div>
+          <span class="metric-label">Entradas vendidas</span>
+          <strong>{{ entradasVendidas | number:'1.0-0':'es-AR' }}</strong>
+          <small>Butacas incluidas en compras pagadas</small>
+        </div>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-icon">🧾</span>
+        <div>
+          <span class="metric-label">Compras pagadas</span>
+          <strong>{{ comprasPagadas | number:'1.0-0':'es-AR' }}</strong>
+          <small>Operaciones confirmadas</small>
+        </div>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-icon">🍿</span>
+        <div>
+          <span class="metric-label">Producto más vendido</span>
+          <strong class="metric-product">{{ productoMasVendido }}</strong>
+          <small>Incluye productos de combos</small>
+        </div>
+      </article>
+    </div>
+
+    <section class="report-section">
+      <div class="section-heading">
+        <div>
+          <h3>Facturación diaria</h3>
+          <p>Importes agrupados por fecha de compra, considerando únicamente órdenes pagadas.</p>
+        </div>
+      </div>
+
+      @if (facturacionDiaria.length === 0) {
+        <div class="empty-state">Todavía no hay compras pagadas para mostrar.</div>
+      } @else {
+        <div class="table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Compras</th>
+                <th>Entradas</th>
+                <th class="numeric">Recaudación</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (day of facturacionDiaria; track day.date) {
+                <tr>
+                  <td>{{ day.label }}</td>
+                  <td>{{ day.orders }}</td>
+                  <td>{{ day.tickets }}</td>
+                  <td class="numeric">{{ day.revenue | currency:'ARS':'symbol-narrow':'1.0-0':'es-AR' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="3">Total</th>
+                <th class="numeric">{{ totalRecaudado | currency:'ARS':'symbol-narrow':'1.0-0':'es-AR' }}</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </section>
+
+    <div class="ranking-grid">
+      <section class="report-section">
+        <div class="section-heading">
+          <div>
+            <h3>Películas más vistas de la semana</h3>
+            <p>Entradas vendidas para funciones de la semana actual.</p>
+          </div>
+        </div>
+        @if (peliculasSemana.length === 0) {
+          <div class="empty-state compact">No hay entradas vendidas esta semana.</div>
+        } @else {
+          <ol class="ranking-list">
+            @for (item of peliculasSemana; track item.id; let i = $index) {
+              <li class="ranking-item">
+                <div class="ranking-topline">
+                  <span class="ranking-position">{{ i + 1 }}</span>
+                  <strong>{{ item.name }}</strong>
+                  <span class="ranking-value">{{ item.quantity }} entradas</span>
+                </div>
+                <div class="ranking-track"><span [style.width.%]="item.percentage"></span></div>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+
+      <section class="report-section">
+        <div class="section-heading">
+          <div>
+            <h3>Películas más vistas del mes</h3>
+            <p>Entradas vendidas para funciones del mes actual.</p>
+          </div>
+        </div>
+        @if (peliculasMes.length === 0) {
+          <div class="empty-state compact">No hay entradas vendidas este mes.</div>
+        } @else {
+          <ol class="ranking-list">
+            @for (item of peliculasMes; track item.id; let i = $index) {
+              <li class="ranking-item">
+                <div class="ranking-topline">
+                  <span class="ranking-position">{{ i + 1 }}</span>
+                  <strong>{{ item.name }}</strong>
+                  <span class="ranking-value">{{ item.quantity }} entradas</span>
+                </div>
+                <div class="ranking-track"><span [style.width.%]="item.percentage"></span></div>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+    </div>
+
+    <section class="report-section">
+      <div class="section-heading">
+        <div>
+          <h3>Productos más vendidos del Candy Bar</h3>
+          <p>Se cuentan las unidades individuales y las incluidas en combos vendidos.</p>
+        </div>
+      </div>
+      @if (productosMasVendidos.length === 0) {
+        <div class="empty-state">Todavía no hay productos vendidos para mostrar.</div>
+      } @else {
+        <ol class="ranking-list product-ranking">
+          @for (item of productosMasVendidos; track item.id; let i = $index) {
+            <li class="ranking-item">
+              <div class="ranking-topline">
+                <span class="ranking-position">{{ i + 1 }}</span>
+                <strong>{{ item.name }}</strong>
+                <span class="ranking-value">{{ item.quantity }} unidades</span>
+              </div>
+              <div class="ranking-track"><span [style.width.%]="item.percentage"></span></div>
+            </li>
+          }
+        </ol>
+      }
+    </section>
+
+    <p class="report-note">
+      Los importes corresponden al total final de cada compra pagada. Las entradas se cuentan por butaca,
+      no por código QR. Los rankings consideran las fechas de las funciones.
+    </p>
+  }
+</section>

@@ -435,3 +435,25 @@ p {
     width: min(100% - 1rem, 1200px);
   }
 }
+
+/* Impresión de reportes: evita incluir la navegación del panel en el PDF. */
+@media print {
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .admin-header,
+  .back-button {
+    display: none !important;
+  }
+
+  .admin-page,
+  .admin-content {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+}
