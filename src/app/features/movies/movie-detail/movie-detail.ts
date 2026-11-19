@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MovieService } from '../movie.service';
@@ -47,6 +47,17 @@ export class MovieDetail {
 
   loading = true;
   error = '';
+  isOnline = typeof navigator === 'undefined' ? true : navigator.onLine;
+
+  @HostListener('window:online')
+  onOnline() {
+    this.isOnline = true;
+  }
+
+  @HostListener('window:offline')
+  onOffline() {
+    this.isOnline = false;
+  }
 
   get averageRating(): number {
     if (this.reviews.length === 0) {
@@ -88,7 +99,7 @@ export class MovieDetail {
 
     // La cartelera y el detalle son públicos y pueden consultarse offline.
     // Funciones, sesión y reseñas requieren conexión.
-    if (!navigator.onLine) {
+    if (!this.isOnline) {
       this.reviewLoading = false;
       return;
     }
