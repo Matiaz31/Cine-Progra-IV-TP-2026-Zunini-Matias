@@ -179,6 +179,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'reportes',
+        data: { permissionSection: 'reports' },
+        loadComponent: () =>
+          import('./features/admin/reportes/reportes').then(
+            m => m.Reportes
+          ),
+      },
+      {
         path: 'propuestas-peliculas',
         data: { permissionSection: 'movie_proposals' },
         loadComponent: () =>
