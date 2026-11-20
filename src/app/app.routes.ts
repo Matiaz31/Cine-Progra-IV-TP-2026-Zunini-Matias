@@ -10,7 +10,6 @@ import { PurchaseSummary } from './features/purchase/purchase-summary/purchase-s
 import { PurchaseSuccess } from './features/purchase/purchase-success/purchase-success';
 import { MisEntradas } from './features/mis-entradas/mis-entradas';
 import { CandyBar } from './features/candy-bar/candy-bar/candy-bar';
-import { Admin } from './features/admin/admin';
 import { Profile } from './features/profile/profile';
 
 import { authGuard } from './guards/auth-guard';
@@ -79,7 +78,8 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    component: Admin,
+    loadComponent: () =>
+      import('./features/admin/admin').then(m => m.Admin),
     canActivate: [
       authGuard,
       roleGuard(['admin']),
