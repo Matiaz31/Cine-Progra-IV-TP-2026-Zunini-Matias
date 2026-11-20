@@ -700,6 +700,25 @@ Las credenciales, claves y configuraciones sensibles no deberán almacenarse dir
 Las variables de entorno deberán mantenerse fuera del repositorio.
 La configuración necesaria para ejecutar y desplegar la aplicación deberá documentarse sin exponer secretos.
 
+#### Configuración local
+
+1. Crear un archivo `.env` en la raíz del proyecto copiando el archivo `.env.example`.
+2. Completar `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` con los valores del proyecto Supabase.
+3. Instalar dependencias con `npm install`.
+4. Ejecutar `npm start` para iniciar el servidor de desarrollo o `npm run build` para compilar.
+
+El script `scripts/generate-env.mjs` lee las variables del entorno del proceso (con prioridad) o del archivo local `.env` y genera `src/environments/environment.ts`. Este archivo generado está excluido de Git. Si falta alguna variable, el proceso se detiene e informa cuál debe configurarse.
+
+#### Configuración del despliegue en Vercel
+
+En el proyecto de Vercel, configurar las variables de entorno `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` para los entornos correspondientes (Production, Preview y/o Development). Configurar el comando de compilación como `npm run build` para que se genere la configuración antes de compilar.
+
+No configurar ni incluir una clave `service_role` en el frontend. La publishable key es pública por diseño; la protección de los datos debe seguir dependiendo de las políticas RLS y de las validaciones del servidor.
+
+Las credenciales, claves y configuraciones sensibles no deberán almacenarse directamente en el código fuente.
+Las variables de entorno deberán mantenerse fuera del repositorio.
+La configuración necesaria para ejecutar y desplegar la aplicación deberá documentarse sin exponer secretos.
+
 RNF-09 — Despliegue
 La aplicación deberá estar:
 Desplegada.
