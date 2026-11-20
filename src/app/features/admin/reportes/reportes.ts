@@ -69,7 +69,7 @@ interface RankingItem {
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, DecimalPipe],
+  imports: [CurrencyPipe, DecimalPipe],
   templateUrl: './reportes.html',
   styleUrl: './reportes.scss',
 })
