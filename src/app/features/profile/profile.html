@@ -175,6 +175,41 @@
           </button>
         }
       </form>
+
+      <section class="notifications-section" aria-labelledby="notifications-title">
+        <header class="notifications-header">
+          <h2 id="notifications-title">Notificaciones</h2>
+          <p>Actualizaciones sobre tus propuestas de películas.</p>
+        </header>
+
+        @if (notificationsLoading) {
+          <p class="status-message">Cargando notificaciones...</p>
+        } @else if (notificationsError) {
+          <p class="message error">{{ notificationsError }}</p>
+        } @else if (notifications.length === 0) {
+          <p class="empty-notifications">Todavía no tenés notificaciones sobre propuestas.</p>
+        } @else {
+          <ul class="notifications-list">
+            @for (notification of notifications; track notification.id) {
+              <li class="notification-item">
+                <div class="notification-content">
+                  <span
+                    class="notification-status"
+                    [class.accepted]="notification.type === 'movie_proposal_accepted'"
+                    [class.rejected]="notification.type === 'movie_proposal_rejected'"
+                  >
+                    {{ notification.type === 'movie_proposal_accepted' ? 'Propuesta aceptada' : 'Propuesta rechazada' }}
+                  </span>
+                  <p>{{ notification.message }}</p>
+                  <time [attr.datetime]="notification.created_at">
+                    {{ notification.created_at | date:'dd/MM/yyyy HH:mm' }}
+                  </time>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
     }
   </div>
 </section>
