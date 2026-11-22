@@ -70,6 +70,28 @@ begin
       where proposal_id is not null
         and type in ('movie_proposal_accepted', 'movie_proposal_rejected')
       do nothing;
+
+    insert into public.activity_logs (
+      user_id,
+      action,
+      entity_type,
+      entity_id,
+      details,
+      created_at
+    )
+    values (
+      new.reviewed_by,
+      'update',
+      'movie_proposal',
+      new.id,
+      jsonb_build_object(
+        'title', new.title,
+        'previous_status', old.status,
+        'new_status', new.status,
+        'review_comment', new.review_comment
+      ),
+      coalesce(new.reviewed_at, now())
+    );
   end if;
 
   return new;
