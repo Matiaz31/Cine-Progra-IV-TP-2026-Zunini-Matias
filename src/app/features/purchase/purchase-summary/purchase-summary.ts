@@ -563,7 +563,7 @@ export class PurchaseSummary implements OnInit {
 
       const userId = user?.id ?? null;
 
-            if (this.useTicketReward) {
+      if (this.useTicketReward) {
         if (
           !userId ||
           !this.rewardId ||
@@ -575,154 +575,51 @@ export class PurchaseSummary implements OnInit {
         }
       }
 
+      // Toda la compra se procesa en una única transacción.
       const {
-        data: order,
-        error: orderError,
-      } = await supabase.rpc('create_order', {
-        p_user_id: userId,
-        p_total: this.getTotal(),
-        p_discount: 0,
-        p_payment_method: 'test',
-      });
-      
-      if (this.couponApplied && this.couponCode.trim()) {
-        const { data: couponOrder, error: couponError } =
-          await supabase.rpc('set_order_coupon', {
-            p_order_id: order.id,
-            p_coupon_code: this.couponCode.trim(),
-          });
-
-        if (couponError) {
-          throw couponError;
-        }
-
-        if (!couponOrder) {
-          throw new Error('No se pudo asociar el cupón a la orden.');
-        }
-
-      }
-
-      if (orderError) {
-        throw orderError;
-      }
-
-      if (!order) {
-        throw new Error('No se pudo crear la orden.');
-      }
-
-      for (const seat of this.selectedSeats) {
-        const seatPrice =
-          this.getSeatPrice(seat);
-
-        const {
-          error: itemError,
-        } = await supabase.rpc(
-          'add_order_item',
-          {
-            p_order_id: order.id,
-            p_item_type: 'ticket',
-            p_product_id: null,
-            p_quantity: 1,
-            p_unit_price: seatPrice,
-          }
-        );
-
-        if (itemError) {
-          throw itemError;
-        }
-      }
-
-      for (const product of this.candyBar.products) {
-        const { error: productError } = await supabase.rpc(
-          'add_order_item',
-          {
-            p_order_id: order.id,
-            p_item_type: 'product',
-            p_product_id: product.id,
-            p_quantity: product.quantity,
-            p_unit_price: product.price,
-          }
-        );
-
-        if (productError) {
-          throw productError;
-        }
-      }
-
-      for (const combo of this.candyBar.combos) {
-        const { error: comboError } = await supabase.rpc(
-          'add_order_item',
-          {
-            p_order_id: order.id,
-            p_item_type: 'combo',
-            p_product_id: null,
-            p_quantity: combo.quantity,
-            p_unit_price: combo.price,
-            p_combo_id: combo.id,
-          }
-        );
-
-        if (comboError) {
-          throw comboError;
-        }
-      }
-
-      const qrCode =
-        `TICKET-${crypto.randomUUID()}`;
-      
-      const {
-        data: ticket,
-        error: ticketError,
-      } = await supabase.rpc('create_ticket', {
-        p_order_id: order.id,
+        data: checkout,
+        error: checkoutError,
+      } = await supabase.rpc('checkout_purchase', {
         p_screening_id: this.screeningId,
-        p_qr_code: qrCode,
         p_seat_ids: this.selectedSeats.map((seat) => seat.id),
+
+        p_products: this.candyBar.products.map((product) => ({
+          id: product.id,
+          quantity: product.quantity,
+        })),
+
+        p_combos: this.candyBar.combos.map((combo) => ({
+          id: combo.id,
+          quantity: combo.quantity,
+        })),
+
+        p_coupon_code:
+          this.couponApplied && this.couponCode.trim()
+            ? this.couponCode.trim()
+            : null,
+
+        p_reward_id: this.useTicketReward
+          ? this.rewardId
+          : null,
+
+        p_reward_seat_id: this.useTicketReward
+          ? this.selectedRewardSeatId
+          : null,
       });
 
-      if (ticketError) {
-        throw ticketError;
+      if (checkoutError) {
+        throw checkoutError;
       }
 
-      if (!ticket) {
-        throw new Error('No se pudo crear el ticket.');
-      }
-
-
-      if (this.useTicketReward) {
-        const { error: rewardError } = await supabase.rpc(
-          'apply_ticket_reward',
-          {
-            p_order_id: order.id,
-            p_reward_id: this.rewardId,
-            p_seat_id: this.selectedRewardSeatId,
-          }
-        );
-
-        if (rewardError) {
-          throw rewardError;
-        }
-      }
-
-      const {
-        data: paidOrder,
-        error: paymentError,
-      } = await supabase.rpc(
-        'confirm_test_order_paid',
-        {
-          p_order_id: order.id,
-        }
-      );
-
-      if (paymentError) {
-        throw paymentError;
-      }
-
-      if (!paidOrder) {
+      if (!checkout?.order || !checkout?.ticket) {
         throw new Error(
-          'No se pudo confirmar el pago de prueba.'
+          'No se pudo completar la compra.'
         );
       }
+
+      const order = checkout.order;
+      const ticket = checkout.ticket;
+      const qrCode = checkout.qr_code ?? ticket.qr_code;
 
       const purchaseData = {
         orderId: order.id,
@@ -744,28 +641,28 @@ export class PurchaseSummary implements OnInit {
             }
           ),
 
-        seats:
-          this.selectedSeats.map((seat) => ({
-            id: seat.id,
-            row_label: seat.row_label,
-            seat_number:
-              seat.seat_number,
-            seat_type:
-              seat.seat_type,
-            price:
-              this.useTicketReward &&
-              seat.id === this.selectedRewardSeatId
-                ? 0
-                : this.getSeatPrice(seat),
-          })
-          ),
+        seats: this.selectedSeats.map((seat) => ({
+          id: seat.id,
+          row_label: seat.row_label,
+          seat_number: seat.seat_number,
+          seat_type: seat.seat_type,
+          price:
+            this.useTicketReward &&
+            seat.id === this.selectedRewardSeatId
+              ? 0
+              : this.getSeatPrice(seat),
+        })),
+
         total: Number(
-          paidOrder.total ?? this.getFinalTotal()
+          checkout.total ??
+          order.total ??
+          this.getFinalTotal()
         ),
+
         couponApplied: this.couponApplied,
         candyBar: this.candyBar,
       };
-      
+
       if (!userId) {
         try {
           const storageKey = 'guest-purchases';
@@ -797,7 +694,6 @@ export class PurchaseSummary implements OnInit {
             storageKey,
             JSON.stringify(updatedPurchases)
           );
-
         } catch (storageError) {
           console.error(
             'No se pudieron guardar las entradas del invitado:',
@@ -805,34 +701,24 @@ export class PurchaseSummary implements OnInit {
           );
         }
       }
-      
+
       sessionStorage.setItem(
         'purchase-success',
-        
         JSON.stringify(purchaseData)
       );
 
       sessionStorage.removeItem('purchase-selection');
       sessionStorage.removeItem('candy-bar-selection');
 
-      this.router.navigate(
-        ['/compra-exitosa'],
-        {
-          state: {
-            purchase: purchaseData,
-          },
-        }
-      );
+      this.router.navigate(['/compra-exitosa'], {
+        state: { purchase: purchaseData },
+      });
 
     } catch (error: any) {
-      console.error(
-        'ERROR EN LA COMPRA:',
-        error
-      );
-
+      console.error('ERROR EN LA COMPRA:', error);
       this.error =
-        error?.message ??
-        'No se pudo completar la compra.';
+        error?.message ?? 'No se pudo completar la compra.';
+
     } finally {
       this.purchasing = false;
       this.cdr.detectChanges();
