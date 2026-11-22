@@ -1,11 +1,20 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { supabase } from '../../core/supabase';
+
+interface ProfileNotification {
+  id: string;
+  type: string;
+  message: string;
+  proposal_id: string | null;
+  created_at: string;
+}
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
@@ -19,6 +28,9 @@ export class Profile implements OnInit {
   eyeColor = '';
   email = '';
   vacationDays = 0;
+  notifications: ProfileNotification[] = [];
+  notificationsLoading = false;
+  notificationsError = '';
 
   loading = true;
   saving = false;
@@ -85,12 +97,41 @@ export class Profile implements OnInit {
       this.bloodType = data.blood_type ?? '';
       this.eyeColor = data.eye_color ?? '';
       this.vacationDays = data.vacation_days ?? 0;
+      await this.loadNotifications();
     } catch (error) {
       console.error('Error cargando el perfil:', error);
       this.errorMessage =
         'No se pudo cargar el perfil. Revisá la consola para ver el error.';
     } finally {
       this.loading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  private async loadNotifications(): Promise<void> {
+    this.notificationsLoading = true;
+    this.notificationsError = '';
+
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('id, type, message, proposal_id, created_at')
+        .eq('user_id', this.userId)
+        .in('type', [
+          'movie_proposal_accepted',
+          'movie_proposal_rejected',
+        ])
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      this.notifications = (data ?? []) as ProfileNotification[];
+    } catch (error) {
+      console.error('Error cargando notificaciones:', error);
+      this.notificationsError =
+        'No se pudieron cargar las notificaciones.';
+    } finally {
+      this.notificationsLoading = false;
       this.cdr.detectChanges();
     }
   }
