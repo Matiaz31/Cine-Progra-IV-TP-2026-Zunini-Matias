@@ -138,4 +138,35 @@ on conflict (proposal_id)
     and type in ('movie_proposal_accepted', 'movie_proposal_rejected')
   do nothing;
 
+-- Registra también las resoluciones previas que todavía no tengan auditoría.
+insert into public.activity_logs (
+  user_id,
+  action,
+  entity_type,
+  entity_id,
+  details,
+  created_at
+)
+select
+  p.reviewed_by,
+  'update',
+  'movie_proposal',
+  p.id,
+  jsonb_build_object(
+    'title', p.title,
+    'previous_status', 'pending',
+    'new_status', p.status,
+    'review_comment', p.review_comment
+  ),
+  coalesce(p.reviewed_at, p.updated_at, p.created_at)
+from public.movie_proposals p
+where p.status in ('accepted', 'rejected')
+  and not exists (
+    select 1
+    from public.activity_logs l
+    where l.entity_type = 'movie_proposal'
+      and l.entity_id = p.id
+      and l.action = 'update'
+  );
+
 commit;
