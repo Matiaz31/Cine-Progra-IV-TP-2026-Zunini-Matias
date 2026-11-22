@@ -33,7 +33,10 @@ create unique index if not exists idx_notifications_proposal_resolution
   where proposal_id is not null
     and type in ('movie_proposal_accepted', 'movie_proposal_rejected');
 
-create or replace function public.notify_movie_proposal_resolution()
+create schema if not exists private authorization postgres;
+revoke all on schema private from public, anon, authenticated;
+
+create or replace function private.notify_movie_proposal_resolution()
 returns trigger
 language plpgsql
 security definer
@@ -73,7 +76,7 @@ begin
 end;
 $$;
 
-revoke all on function public.notify_movie_proposal_resolution()
+revoke all on function private.notify_movie_proposal_resolution()
   from public, anon, authenticated;
 
 drop trigger if exists trg_notify_movie_proposal_resolution
@@ -83,7 +86,7 @@ create trigger trg_notify_movie_proposal_resolution
 after update of status on public.movie_proposals
 for each row
 when (old.status is distinct from new.status)
-execute function public.notify_movie_proposal_resolution();
+execute function private.notify_movie_proposal_resolution();
 
 -- Recupera también las propuestas que ya estaban resueltas antes de instalar el trigger.
 insert into public.notifications (
