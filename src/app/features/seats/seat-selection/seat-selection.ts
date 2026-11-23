@@ -78,7 +78,8 @@ export class SeatSelection implements OnInit, OnDestroy {
           this.selectedSeats = this.seats.filter(
             seat =>
               selection.seatIds.includes(seat.id) &&
-              !this.occupiedSeatIds.has(seat.id)
+              !this.occupiedSeatIds.has(seat.id) &&
+              this.canSelectSeat(seat)
           );
         }
       } catch (error) {
