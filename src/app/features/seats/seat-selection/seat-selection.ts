@@ -8,6 +8,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { supabase } from '../../../core/supabase';
 import { Seat } from '../seat';
+import { WaitlistService, WaitlistEntry } from '../waitlist.service';
 
 @Component({
   selector: 'app-seat-selection',
@@ -19,6 +20,7 @@ export class SeatSelection implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private waitlistService = inject(WaitlistService);
   private realtimeChannel:
     ReturnType<typeof supabase.channel> | null = null;
 
@@ -33,6 +35,14 @@ export class SeatSelection implements OnInit, OnDestroy {
   loading = true;
   error = '';
   selectionError = '';
+
+  waitlistLoading = false;
+  waitlistMessage = '';
+  waitlistStatus: WaitlistEntry['status'] | null = null;
+  waitlistEntryId = '';
+  waitlistPosition: number | null = null;
+  offeredSeatIds = new Set<string>();
+  offerExpiresAt: string | null = null;
 
   mostrarCandyBar = false;
 
@@ -55,6 +65,7 @@ export class SeatSelection implements OnInit, OnDestroy {
     }
 
     await this.loadSeats();
+    await this.loadWaitlistState();
 
     const savedSelection = sessionStorage.getItem('purchase-selection');
 
@@ -200,6 +211,71 @@ export class SeatSelection implements OnInit, OnDestroy {
     }
   }
 
+
+  private async loadWaitlistState(): Promise<void> {
+    this.waitlistLoading = true;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const entries = await this.waitlistService.getMine();
+      const activeEntry = entries.find(
+        entry =>
+          entry.screening_id === this.screeningId &&
+          (entry.status === 'waiting' || entry.status === 'offered')
+      );
+
+      this.waitlistStatus = activeEntry?.status ?? null;
+      this.waitlistEntryId = activeEntry?.waitlist_id ?? '';
+      this.waitlistPosition = activeEntry?.waitlist_position ?? null;
+      this.offeredSeatIds = new Set(activeEntry?.offered_seat_ids ?? []);
+      this.offerExpiresAt = activeEntry?.offer_expires_at ?? null;
+
+      if (this.offeredSeatIds.size > 0) {
+        this.selectedSeats = this.selectedSeats.filter(
+          seat => this.offeredSeatIds.has(seat.id)
+        );
+      }
+    } catch (error) {
+      console.error('Error consultando la lista de espera:', error);
+    } finally {
+      this.waitlistLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  get canJoinWaitlist(): boolean {
+    return !this.loading &&
+      !this.waitlistLoading &&
+      this.seats.length > 0 &&
+      this.seats.every(seat => this.isOccupied(seat)) &&
+      !this.waitlistStatus;
+  }
+
+  canSelectSeat(seat: Seat): boolean {
+    return this.offeredSeatIds.size === 0 || this.offeredSeatIds.has(seat.id);
+  }
+
+  async joinWaitlist(): Promise<void> {
+    if (!this.canJoinWaitlist) return;
+
+    this.waitlistLoading = true;
+    this.waitlistMessage = '';
+    try {
+      const result = await this.waitlistService.join(this.screeningId);
+      this.waitlistStatus = 'waiting';
+      this.waitlistEntryId = result.waitlist_id;
+      this.waitlistPosition = Number(result.waitlist_position);
+      this.waitlistMessage = `Te anotaste correctamente. Tu posición actual es ${this.waitlistPosition}.`;
+    } catch (error: any) {
+      console.error('Error al anotarse en la lista de espera:', error);
+      this.waitlistMessage = error?.message ?? 'No se pudo completar la inscripción.';
+    } finally {
+      this.waitlistLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
   getSeatsForRow(row: string): Seat[] {
     return this.seats.filter(
       (seat) => seat.row_label === row
@@ -295,7 +371,7 @@ export class SeatSelection implements OnInit, OnDestroy {
   }
 
   toggleSeat(seat: Seat) {
-    if (this.isOccupied(seat)) return;
+    if (this.isOccupied(seat) || !this.canSelectSeat(seat)) return;
 
     const index = this.selectedSeats.findIndex(
       (selected) => selected.id === seat.id
@@ -367,6 +443,7 @@ export class SeatSelection implements OnInit, OnDestroy {
 
   continuar() {
     if (this.selectedSeats.length === 0) return;
+    if (this.offeredSeatIds.size > 0 && this.selectedSeats.some(seat => !this.offeredSeatIds.has(seat.id))) return;
 
     if (!this.validarButacasContiguas()) {
       this.cdr.detectChanges();
