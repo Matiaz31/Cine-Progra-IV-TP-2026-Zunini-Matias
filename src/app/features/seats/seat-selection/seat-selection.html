@@ -82,7 +82,7 @@
                             [class.seat-accessible]="seat.seat_type === 'accessible'"
                             [class.selected]="isSelected(seat)"
                             [class.occupied]="isOccupied(seat)"
-                            [disabled]="isOccupied(seat)"
+                            [disabled]="isOccupied(seat) || !canSelectSeat(seat)"
                             [title]="
                             seat.row_label +
                             seat.seat_number +
@@ -250,6 +250,34 @@
         </div>
 
       </div>
+      @if (waitlistStatus === 'offered' && offeredSeatIds.size > 0) {
+        <div class="alert alert-success" role="status">
+          <strong>Tenés una oferta de butacas.</strong>
+          Elegí únicamente las butacas reservadas para vos.
+          @if (offerExpiresAt) {
+            <p>La oferta vence el {{ offerExpiresAt | date:'dd/MM/yyyy HH:mm:ss' }}.</p>
+          }
+        </div>
+      } @else if (waitlistStatus === 'waiting') {
+        <div class="alert alert-info" role="status">
+          Ya estás anotado en la lista de espera.
+          @if (waitlistPosition) { Tu posición actual es {{ waitlistPosition }}. }
+        </div>
+      }
+
+      @if (waitlistMessage) {
+        <div class="alert alert-info" role="status">{{ waitlistMessage }}</div>
+      }
+
+      @if (canJoinWaitlist) {
+        <div class="waitlist-join">
+          <p>Esta función está completa. Podés anotarte para recibir una oferta si se liberan butacas.</p>
+          <button type="button" class="btn btn-primary" [disabled]="waitlistLoading" (click)="joinWaitlist()">
+            {{ waitlistLoading ? 'Anotando...' : 'Anotarme en la lista de espera' }}
+          </button>
+        </div>
+      }
+
       @if (selectionError) {
         <div class="alert alert-danger" role="alert">
           {{ selectionError }}
