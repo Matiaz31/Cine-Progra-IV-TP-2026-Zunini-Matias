@@ -198,7 +198,12 @@
                     [class.accepted]="notification.type === 'movie_proposal_accepted'"
                     [class.rejected]="notification.type === 'movie_proposal_rejected'"
                   >
-                    {{ notification.type === 'movie_proposal_accepted' ? 'Propuesta aceptada' : 'Propuesta rechazada' }}
+                    @switch (notification.type) {
+                      @case ('movie_proposal_accepted') { Propuesta aceptada }
+                      @case ('movie_proposal_rejected') { Propuesta rechazada }
+                      @case ('waitlist_offer') { Oferta de butacas disponible }
+                      @case ('waitlist_offer_expired') { Oferta de butacas vencida }
+                    }
                   </span>
                   <p>{{ notification.message }}</p>
                   <time [attr.datetime]="notification.created_at">
