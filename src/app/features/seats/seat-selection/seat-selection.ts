@@ -199,6 +199,7 @@ export class SeatSelection implements OnInit, OnDestroy {
   private async refreshOccupiedSeats(): Promise<void> {
     try {
       await this.loadOccupiedSeats();
+      await this.loadWaitlistState();
     } catch (error) {
       console.error(
         'Error actualizando butacas ocupadas:',
