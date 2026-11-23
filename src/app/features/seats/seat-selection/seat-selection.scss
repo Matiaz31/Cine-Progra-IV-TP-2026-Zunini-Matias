@@ -461,3 +461,53 @@
     font-size: 1.4rem;
   }
 }
+
+.waitlist-join {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: var(--space-lg);
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.waitlist-join p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.seat-container .alert {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  line-height: 1.5;
+}
+
+.seat-container .alert p {
+  margin: 8px 0 0;
+}
+
+.seat-container .alert-success {
+  border-color: var(--color-secondary);
+  background: rgba(91, 157, 163, 0.12);
+}
+
+.seat-container .alert-info {
+  background: var(--color-surface);
+}
+
+@media (max-width: 600px) {
+  .waitlist-join {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .waitlist-join .btn {
+    width: 100%;
+  }
+}
