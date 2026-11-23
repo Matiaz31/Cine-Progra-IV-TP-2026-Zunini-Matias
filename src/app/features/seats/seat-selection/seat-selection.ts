@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
@@ -12,7 +13,7 @@ import { WaitlistService, WaitlistEntry } from '../waitlist.service';
 
 @Component({
   selector: 'app-seat-selection',
-  imports: [],
+  imports: [DatePipe],
   templateUrl: './seat-selection.html',
   styleUrl: './seat-selection.scss',
 })
@@ -37,6 +38,7 @@ export class SeatSelection implements OnInit, OnDestroy {
   selectionError = '';
 
   waitlistLoading = false;
+  isCustomer = false;
   waitlistMessage = '';
   waitlistStatus: WaitlistEntry['status'] | null = null;
   waitlistEntryId = '';
@@ -219,6 +221,14 @@ export class SeatSelection implements OnInit, OnDestroy {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+      this.isCustomer = profile?.role === 'customer';
+      if (!this.isCustomer) return;
+
       const entries = await this.waitlistService.getMine();
       const activeEntry = entries.find(
         entry =>
@@ -246,7 +256,8 @@ export class SeatSelection implements OnInit, OnDestroy {
   }
 
   get canJoinWaitlist(): boolean {
-    return !this.loading &&
+    return this.isCustomer &&
+      !this.loading &&
       !this.waitlistLoading &&
       this.seats.length > 0 &&
       this.seats.every(seat => this.isOccupied(seat)) &&
