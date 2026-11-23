@@ -2,12 +2,15 @@ import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { supabase } from '../../core/supabase';
+import { Router } from '@angular/router';
+import { WaitlistService, WaitlistEntry } from '../seats/waitlist.service';
 
 interface ProfileNotification {
   id: string;
   type: string;
   message: string;
   proposal_id: string | null;
+  waitlist_id?: string | null;
   created_at: string;
 }
 
@@ -20,6 +23,8 @@ interface ProfileNotification {
 })
 export class Profile implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
+  private waitlistService = inject(WaitlistService);
 
   firstName = '';
   lastName = '';
@@ -31,6 +36,10 @@ export class Profile implements OnInit {
   notifications: ProfileNotification[] = [];
   notificationsLoading = false;
   notificationsError = '';
+  waitlistEntries: WaitlistEntry[] = [];
+  waitlistLoading = false;
+  waitlistError = '';
+  waitlistActionId = '';
 
   loading = true;
   saving = false;
@@ -97,7 +106,7 @@ export class Profile implements OnInit {
       this.bloodType = data.blood_type ?? '';
       this.eyeColor = data.eye_color ?? '';
       this.vacationDays = data.vacation_days ?? 0;
-      await this.loadNotifications();
+      await Promise.all([this.loadNotifications(), this.loadWaitlist()]);
     } catch (error) {
       console.error('Error cargando el perfil:', error);
       this.errorMessage =
@@ -120,6 +129,8 @@ export class Profile implements OnInit {
         .in('type', [
           'movie_proposal_accepted',
           'movie_proposal_rejected',
+          'waitlist_offer',
+          'waitlist_offer_expired',
         ])
         .order('created_at', { ascending: false })
         .limit(20);
@@ -134,6 +145,44 @@ export class Profile implements OnInit {
       this.notificationsLoading = false;
       this.cdr.detectChanges();
     }
+  }
+
+
+  private async loadWaitlist(): Promise<void> {
+    this.waitlistLoading = true;
+    this.waitlistError = '';
+
+    try {
+      this.waitlistEntries = await this.waitlistService.getMine();
+    } catch (error) {
+      console.error('Error cargando lista de espera:', error);
+      this.waitlistError = 'No se pudo cargar tu lista de espera.';
+    } finally {
+      this.waitlistLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async leaveWaitlist(entry: WaitlistEntry): Promise<void> {
+    if (this.waitlistActionId) return;
+    this.waitlistActionId = entry.waitlist_id;
+    this.waitlistError = '';
+
+    try {
+      await this.waitlistService.leave(entry.waitlist_id);
+      await this.loadWaitlist();
+      await this.loadNotifications();
+    } catch (error: any) {
+      console.error('Error saliendo de la lista de espera:', error);
+      this.waitlistError = error?.message ?? 'No se pudo cancelar la inscripción.';
+    } finally {
+      this.waitlistActionId = '';
+      this.cdr.detectChanges();
+    }
+  }
+
+  buyOfferedSeats(entry: WaitlistEntry): void {
+    this.router.navigate(['/seleccion-butacas', entry.screening_id]);
   }
 
   async saveProfile(): Promise<void> {
