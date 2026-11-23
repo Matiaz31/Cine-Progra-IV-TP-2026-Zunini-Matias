@@ -262,6 +262,23 @@ button[type='submit'] {
   line-height: 1.5;
 }
 
+.waitlist-section .notification-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.waitlist-section .edit-button {
+  width: auto;
+  min-width: 150px;
+  min-height: 36px;
+  height: auto;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 .notification-content time {
   color: var(--text-secondary, #a4aab5);
   font-size: 0.82rem;
