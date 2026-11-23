@@ -81,7 +81,7 @@
                             [class.seat-vip]="seat.seat_type === 'vip'"
                             [class.seat-accessible]="seat.seat_type === 'accessible'"
                             [class.selected]="isSelected(seat)"
-                            [class.occupied]="isOccupied(seat)"
+                            [class.occupied]="isOccupied(seat) || !canSelectSeat(seat)"
                             [disabled]="isOccupied(seat) || !canSelectSeat(seat)"
                             [title]="
                             seat.row_label +
@@ -92,7 +92,9 @@
                             getSeatPrice(seat) +
                             (isOccupied(seat)
                                 ? ' · Ocupada'
-                                : ' · Disponible')
+                                : !canSelectSeat(seat)
+                                  ? ' · No incluida en tu oferta'
+                                  : ' · Disponible')
                             "
                             (click)="toggleSeat(seat)"
                             [attr.aria-label]="
