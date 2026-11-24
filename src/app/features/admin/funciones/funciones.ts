@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { supabase } from '../../../core/supabase';
 import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
@@ -49,7 +49,7 @@ interface Screening {
 
 @Component({
   selector: 'app-funciones',
-  imports: [FormsModule, DatePipe, CurrencyPipe],
+  imports: [FormsModule, DatePipe],
   templateUrl: './funciones.html',
   styleUrl: './funciones.scss',
 })
@@ -282,6 +282,13 @@ export class Funciones {
       currency: 'ARS',
       maximumFractionDigits: 2,
     }).format(Number(valor) || 0);
+  }
+
+  obtenerEstadoVisual(funcion: Screening): string {
+    if (funcion.status === 'cancelled') return 'Cancelada';
+    if (new Date(funcion.end_time).getTime() <= Date.now()) return 'Finalizada';
+    if (new Date(funcion.start_time).getTime() <= Date.now()) return 'En curso';
+    return 'Programada';
   }
 
   async abrirCancelacion(funcion: Screening) {
