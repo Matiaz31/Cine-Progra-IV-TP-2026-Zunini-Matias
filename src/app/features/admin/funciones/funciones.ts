@@ -20,6 +20,19 @@ interface RoomOption {
   name: string;
 }
 
+interface ScreeningCancellationPreview {
+  screening_id: string;
+  movie_title: string | null;
+  room_name: string | null;
+  start_time: string;
+  affected_orders: number;
+  affected_tickets: number;
+  total_paid: number;
+  anonymous_orders: number;
+  anonymous_orders_without_email: number;
+  orders_with_multiple_screenings: number;
+}
+
 interface Screening {
   id: string;
   movie_id: string;
@@ -29,6 +42,7 @@ interface Screening {
   format: '2D' | '3D' | '4D' | '5D';
   language: 'castellano' | 'subtitulada';
   price: number;
+  status: 'scheduled' | 'cancelled';
   movie: { title: string }[] | null;
   room: { name: string }[] | null;
 }
@@ -58,6 +72,10 @@ export class Funciones {
   mensaje = '';
 
   mostrarFormulario = false;
+  mostrarModalCancelacion = false;
+  funcionACancelar: Screening | null = null;
+  vistaPreviaCancelacion: ScreeningCancellationPreview | null = null;
+  motivoCancelacion = '';
   editando = false;
   funcionEditandoId: string | null = null;
 
@@ -108,6 +126,7 @@ export class Funciones {
               format,
               language,
               price,
+              status,
               movie:movies!screenings_movie_id_fkey(title),
               room:rooms!screenings_room_id_fkey(name)
             `)
@@ -191,7 +210,7 @@ export class Funciones {
   }
 
   editarFuncion(funcion: Screening) {
-    if (!this.puedeModificar) return;
+    if (!this.puedeModificar || funcion.status !== 'scheduled' || !this.esFutura(funcion)) return;
     if (this.guardando) return;
 
     const inicio = new Date(funcion.start_time);
@@ -227,15 +246,78 @@ export class Funciones {
     this.changeDetector.detectChanges();
   }
 
-  async eliminarFuncion(funcion: Screening) {
-    if (!this.puedeEliminar) { this.error = 'No tenés permisos para eliminar funciones.'; return; }
+  esFutura(funcion: Screening): boolean {
+    return new Date(funcion.start_time).getTime() > Date.now();
+  }
+
+  puedeEditarFuncion(funcion: Screening): boolean {
+    return this.puedeModificar && funcion.status === 'scheduled' && this.esFutura(funcion);
+  }
+
+  puedeCancelarFuncion(funcion: Screening): boolean {
+    return this.puedeEliminar && funcion.status === 'scheduled' && this.esFutura(funcion);
+  }
+
+  formatearImporte(valor: number): string {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      maximumFractionDigits: 2,
+    }).format(Number(valor) || 0);
+  }
+
+  async abrirCancelacion(funcion: Screening) {
+    if (!this.puedeCancelarFuncion(funcion) || this.guardando) return;
+
+    this.error = '';
+    this.mensaje = '';
+    this.guardando = true;
+    this.funcionACancelar = funcion;
+    this.vistaPreviaCancelacion = null;
+    this.motivoCancelacion = '';
+    this.changeDetector.detectChanges();
+
+    try {
+      const { data, error } = await supabase.rpc(
+        'get_screening_cancellation_preview',
+        { p_screening_id: funcion.id },
+      );
+
+      if (error) throw error;
+
+      this.vistaPreviaCancelacion = data as ScreeningCancellationPreview;
+      this.mostrarModalCancelacion = true;
+    } catch (error: any) {
+      console.error('ERROR AL PREVISUALIZAR CANCELACIÓN:', error);
+      this.error = error?.message ?? 'No se pudo consultar el resumen de la cancelación.';
+      this.funcionACancelar = null;
+    } finally {
+      this.guardando = false;
+      this.changeDetector.detectChanges();
+    }
+  }
+
+  cerrarModalCancelacion() {
     if (this.guardando) return;
+    this.mostrarModalCancelacion = false;
+    this.funcionACancelar = null;
+    this.vistaPreviaCancelacion = null;
+    this.motivoCancelacion = '';
+    this.changeDetector.detectChanges();
+  }
 
-    const confirmar = confirm(
-      `¿Seguro que querés eliminar la función de "${funcion.movie?.[0]?.title ?? 'esta película'}"?`,
-    );
+  async confirmarCancelacion() {
+    if (!this.puedeEliminar) {
+      this.error = 'No tenés permisos para cancelar funciones.';
+      return;
+    }
+    if (this.guardando || !this.funcionACancelar || !this.vistaPreviaCancelacion) return;
 
-    if (!confirmar) return;
+    const motivo = this.motivoCancelacion.trim();
+    if (!motivo) {
+      this.error = 'Ingresá el motivo de la cancelación.';
+      return;
+    }
 
     this.error = '';
     this.mensaje = '';
@@ -243,27 +325,28 @@ export class Funciones {
     this.changeDetector.detectChanges();
 
     try {
-      const { error } = await supabase
-        .from('screenings')
-        .delete()
-        .eq('id', funcion.id);
+      const { data, error } = await supabase.rpc('cancel_screening', {
+        p_screening_id: this.funcionACancelar.id,
+        p_reason: motivo,
+      });
 
       if (error) throw error;
 
-      this.mensaje = 'Función eliminada correctamente.';
+      const resultado = data as { affected_orders?: number; credits_created?: number };
+      this.mostrarModalCancelacion = false;
+      this.funcionACancelar = null;
+      this.vistaPreviaCancelacion = null;
+      this.motivoCancelacion = '';
+      this.mensaje = `Función cancelada correctamente. Compras afectadas: ${resultado?.affected_orders ?? 0}. Créditos generados: ${resultado?.credits_created ?? 0}.`;
       await this.cargarDatos();
     } catch (error: any) {
-      console.error('ERROR AL ELIMINAR FUNCIÓN:', error);
-
-      this.error =
-        error?.message ??
-        'No se pudo eliminar la función.';
+      console.error('ERROR AL CANCELAR FUNCIÓN:', error);
+      this.error = error?.message ?? 'No se pudo cancelar la función.';
     } finally {
       this.guardando = false;
       this.changeDetector.detectChanges();
     }
   }
-
 
   cerrarFormulario() {
     if (this.guardando) return;
