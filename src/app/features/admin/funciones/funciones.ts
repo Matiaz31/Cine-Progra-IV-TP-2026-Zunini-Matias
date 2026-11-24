@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { supabase } from '../../../core/supabase';
 import { AdminPermissionSet, AdminPermissionsService } from '../../../core/admin-permissions.service';
 
@@ -49,7 +49,7 @@ interface Screening {
 
 @Component({
   selector: 'app-funciones',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, CurrencyPipe],
   templateUrl: './funciones.html',
   styleUrl: './funciones.scss',
 })
