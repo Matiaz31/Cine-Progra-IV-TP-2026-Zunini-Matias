@@ -11,6 +11,8 @@ export class ScreeningService {
       .from('screenings')
       .select('*')
       .eq('movie_id', movieId)
+      .eq('status', 'scheduled')
+      .gt('start_time', new Date().toISOString())
       .order('start_time', { ascending: true });
 
     if (error) {
