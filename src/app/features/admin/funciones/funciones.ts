@@ -61,6 +61,18 @@ export class Funciones {
   get puedeModificar(): boolean { return this.permisos.update; }
   get puedeEliminar(): boolean { return this.permisos.delete; }
 
+  get funcionesProximas(): Screening[] {
+    return this.funciones.filter(
+      (funcion) => funcion.status === 'scheduled' && this.esFutura(funcion),
+    );
+  }
+
+  get funcionesHistorial(): Screening[] {
+    return this.funciones.filter(
+      (funcion) => funcion.status === 'cancelled' || !this.esFutura(funcion),
+    );
+  }
+
   peliculas: MovieOption[] = [];
   salas: RoomOption[] = [];
   funciones: Screening[] = [];
