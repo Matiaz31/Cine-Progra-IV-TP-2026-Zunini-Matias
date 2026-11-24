@@ -173,6 +173,7 @@
               <th>Formato</th>
               <th>Idioma</th>
               <th>Precio</th>
+              <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -186,30 +187,37 @@
                 <td>{{ funcion.end_time | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td>{{ funcion.format }}</td>
                 <td>{{ funcion.language }}</td>
-                <td>{{ funcion.price }}</td>
+                <td>{{ funcion.price | currency:'ARS':'symbol':'1.0-2':'es-AR' }}</td>
                 <td>
-                  @if (puedeModificar) {
-                  <button
-                    type="button"
-                    class="btn-secondary"
-                    (click)="editarFuncion(funcion)"
-                    [disabled]="guardando"
-                  >
-                    Editar
-                  </button>
+                  <span class="status-badge" [class.status-cancelled]="funcion.status === 'cancelled'">
+                    {{ funcion.status === 'cancelled' ? 'Cancelada' : 'Programada' }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  @if (puedeEditarFuncion(funcion)) {
+                    <button
+                      type="button"
+                      class="btn-secondary"
+                      (click)="editarFuncion(funcion)"
+                      [disabled]="guardando"
+                    >
+                      Editar
+                    </button>
                   }
 
-                  @if (puedeEliminar) {
-                  <button
-                    type="button"
-                    class="btn-danger"
-                    (click)="eliminarFuncion(funcion)"
-                    [disabled]="guardando"
-                  >
-                    Eliminar
-                  </button>
+                  @if (puedeCancelarFuncion(funcion)) {
+                    <button
+                      type="button"
+                      class="btn-danger"
+                      (click)="abrirCancelacion(funcion)"
+                      [disabled]="guardando"
+                    >
+                      Cancelar función
+                    </button>
                   }
-                
+                  @if (funcion.status === 'cancelled') {
+                    <span class="preserved-label">Registro conservado</span>
+                  }
                 </td>
               </tr>
             }
@@ -218,4 +226,74 @@
       </div>
     }
   </section>
+
+  @if (mostrarModalCancelacion && vistaPreviaCancelacion) {
+    <div class="modal-backdrop" role="presentation">
+      <section class="cancellation-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-title">
+        <header class="modal-header">
+          <div>
+            <h2 id="cancel-title">Confirmar cancelación</h2>
+            <p>Revisá las compras afectadas antes de confirmar.</p>
+          </div>
+          <button type="button" class="btn-secondary" (click)="cerrarModalCancelacion()" [disabled]="guardando">
+            Cerrar
+          </button>
+        </header>
+
+        <div class="screening-summary">
+          <p><strong>Película:</strong> {{ vistaPreviaCancelacion.movie_title ?? 'No disponible' }}</p>
+          <p><strong>Sala:</strong> {{ vistaPreviaCancelacion.room_name ?? 'No disponible' }}</p>
+          <p><strong>Inicio:</strong> {{ vistaPreviaCancelacion.start_time | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <div class="cancellation-stats">
+          <div><span>Compras afectadas</span><strong>{{ vistaPreviaCancelacion.affected_orders }}</strong></div>
+          <div><span>Entradas</span><strong>{{ vistaPreviaCancelacion.affected_tickets }}</strong></div>
+          <div><span>Importe registrado</span><strong>{{ formatearImporte(vistaPreviaCancelacion.total_paid) }}</strong></div>
+        </div>
+
+        @if (vistaPreviaCancelacion.anonymous_orders > 0) {
+          <div class="alert alert-warning">
+            Hay {{ vistaPreviaCancelacion.anonymous_orders }} compra(s) anónima(s).
+            @if (vistaPreviaCancelacion.anonymous_orders_without_email > 0) {
+              {{ vistaPreviaCancelacion.anonymous_orders_without_email }} no tienen correo registrado y deben resolverse antes de cancelar.
+            }
+          </div>
+        }
+
+        @if (vistaPreviaCancelacion.orders_with_multiple_screenings > 0) {
+          <div class="alert alert-warning">
+            Hay compras asociadas a más de una función. La operación será rechazada para evitar acreditar importes incorrectos.
+          </div>
+        }
+
+        <label class="reason-field">
+          Motivo de cancelación
+          <textarea
+            name="motivoCancelacion"
+            [(ngModel)]="motivoCancelacion"
+            rows="3"
+            maxlength="1000"
+            placeholder="Indicá por qué se cancela esta función..."
+            [disabled]="guardando"
+            required
+          ></textarea>
+        </label>
+
+        <footer class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="cerrarModalCancelacion()" [disabled]="guardando">
+            Volver
+          </button>
+          <button
+            type="button"
+            class="btn-danger"
+            (click)="confirmarCancelacion()"
+            [disabled]="guardando || !motivoCancelacion.trim() || vistaPreviaCancelacion.anonymous_orders_without_email > 0 || vistaPreviaCancelacion.orders_with_multiple_screenings > 0"
+          >
+            {{ guardando ? 'Procesando...' : 'Confirmar cancelación' }}
+          </button>
+        </footer>
+      </section>
+    </div>
+  }
 </section>
