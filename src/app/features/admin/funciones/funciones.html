@@ -149,83 +149,139 @@
     </section>
   }
 
-  <section class="list-card">
-    <div class="list-header">
-      <div>
-        <h2>Funciones programadas</h2>
-        <p>{{ funciones.length }} función(es) registrada(s)</p>
-      </div>
-    </div>
-
-    @if (loading) {
+  @if (loading) {
+    <section class="list-card">
       <p class="empty-state">Cargando funciones...</p>
-    } @else if (funciones.length === 0) {
-      <p class="empty-state">Todavía no hay funciones registradas.</p>
-    } @else {
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Película</th>
-              <th>Sala</th>
-              <th>Inicio</th>
-              <th>Fin</th>
-              <th>Formato</th>
-              <th>Idioma</th>
-              <th>Precio</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            @for (funcion of funciones; track funcion.id) {
-              <tr>
-                <td>{{ funcion.movie?.[0]?.title ?? 'Película no disponible' }}</td>
-                <td>{{ funcion.room?.[0]?.name ?? 'Sala no disponible' }}</td>
-                <td>{{ funcion.start_time | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td>{{ funcion.end_time | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td>{{ funcion.format }}</td>
-                <td>{{ funcion.language }}</td>
-                <td>{{ funcion.price | currency:'ARS':'symbol':'1.0-2':'es-AR' }}</td>
-                <td>
-                  <span class="status-badge" [class.status-cancelled]="funcion.status === 'cancelled'">
-                    {{ funcion.status === 'cancelled' ? 'Cancelada' : 'Programada' }}
-                  </span>
-                </td>
-                <td class="actions-cell">
-                  @if (puedeEditarFuncion(funcion)) {
-                    <button
-                      type="button"
-                      class="btn-secondary"
-                      (click)="editarFuncion(funcion)"
-                      [disabled]="guardando"
-                    >
-                      Editar
-                    </button>
-                  }
-
-                  @if (puedeCancelarFuncion(funcion)) {
-                    <button
-                      type="button"
-                      class="btn-danger"
-                      (click)="abrirCancelacion(funcion)"
-                      [disabled]="guardando"
-                    >
-                      Cancelar función
-                    </button>
-                  }
-                  @if (funcion.status === 'cancelled') {
-                    <span class="preserved-label">Registro conservado</span>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+    </section>
+  } @else {
+    <section class="list-card">
+      <div class="list-header">
+        <div>
+          <h2>Próximas funciones</h2>
+          <p>{{ funcionesProximas.length }} función(es) próximas</p>
+        </div>
       </div>
-    }
-  </section>
+
+      @if (funcionesProximas.length === 0) {
+        <p class="empty-state">No hay próximas funciones programadas.</p>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Película</th>
+                <th>Sala</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Formato</th>
+                <th>Idioma</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (funcion of funcionesProximas; track funcion.id) {
+                <tr>
+                  <td>{{ funcion.movie?.[0]?.title ?? 'Película no disponible' }}</td>
+                  <td>{{ funcion.room?.[0]?.name ?? 'Sala no disponible' }}</td>
+                  <td>{{ funcion.start_time | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ funcion.end_time | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ funcion.format }}</td>
+                  <td>{{ funcion.language }}</td>
+                  <td>{{ funcion.price | currency:'ARS':'symbol':'1.0-2':'es-AR' }}</td>
+                  <td>
+                    <span class="status-badge" [class.status-cancelled]="funcion.status === 'cancelled'">
+                      {{ funcion.status === 'cancelled' ? 'Cancelada' : 'Programada' }}
+                    </span>
+                  </td>
+                  <td class="actions-cell">
+                    @if (puedeEditarFuncion(funcion)) {
+                      <button type="button" class="btn-secondary" (click)="editarFuncion(funcion)" [disabled]="guardando">
+                        Editar
+                      </button>
+                    }
+                    @if (puedeCancelarFuncion(funcion)) {
+                      <button type="button" class="btn-danger" (click)="abrirCancelacion(funcion)" [disabled]="guardando">
+                        Cancelar función
+                      </button>
+                    }
+                    @if (funcion.status === 'cancelled') {
+                      <span class="preserved-label">Registro conservado</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <section class="list-card">
+      <div class="list-header">
+        <div>
+          <h2>Historial de funciones</h2>
+          <p>{{ funcionesHistorial.length }} función(es) en el historial</p>
+        </div>
+      </div>
+
+      @if (funcionesHistorial.length === 0) {
+        <p class="empty-state">Todavía no hay funciones en el historial.</p>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Película</th>
+                <th>Sala</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Formato</th>
+                <th>Idioma</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (funcion of funcionesHistorial; track funcion.id) {
+                <tr>
+                  <td>{{ funcion.movie?.[0]?.title ?? 'Película no disponible' }}</td>
+                  <td>{{ funcion.room?.[0]?.name ?? 'Sala no disponible' }}</td>
+                  <td>{{ funcion.start_time | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ funcion.end_time | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ funcion.format }}</td>
+                  <td>{{ funcion.language }}</td>
+                  <td>{{ funcion.price | currency:'ARS':'symbol':'1.0-2':'es-AR' }}</td>
+                  <td>
+                    <span class="status-badge" [class.status-cancelled]="funcion.status === 'cancelled'">
+                      {{ funcion.status === 'cancelled' ? 'Cancelada' : 'Programada' }}
+                    </span>
+                  </td>
+                  <td class="actions-cell">
+                    @if (puedeEditarFuncion(funcion)) {
+                      <button type="button" class="btn-secondary" (click)="editarFuncion(funcion)" [disabled]="guardando">
+                        Editar
+                      </button>
+                    }
+                    @if (puedeCancelarFuncion(funcion)) {
+                      <button type="button" class="btn-danger" (click)="abrirCancelacion(funcion)" [disabled]="guardando">
+                        Cancelar función
+                      </button>
+                    }
+                    @if (funcion.status === 'cancelled') {
+                      <span class="preserved-label">Registro conservado</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
 
   @if (mostrarModalCancelacion && vistaPreviaCancelacion) {
     <div class="modal-backdrop" role="presentation">
