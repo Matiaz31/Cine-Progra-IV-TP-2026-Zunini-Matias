@@ -176,6 +176,29 @@
         }
       </form>
 
+      <section class="notifications-section cancellation-credits-section" aria-labelledby="cancellation-credits-title">
+        <header class="notifications-header">
+          <h2 id="cancellation-credits-title">Créditos por cancelación</h2>
+          <p>Si compraste como invitado y tenés créditos pendientes, iniciá sesión con el mismo correo de la compra para reclamarlos.</p>
+        </header>
+
+        @if (cancellationCreditsMessage) {
+          <p class="message success" role="status">{{ cancellationCreditsMessage }}</p>
+        }
+
+        @if (cancellationCreditsError) {
+          <p class="message error" role="alert">{{ cancellationCreditsError }}</p>
+        }
+
+        <button
+          type="button"
+          class="claim-credits-button"
+          [disabled]="cancellationCreditsLoading"
+          (click)="claimCancellationCredits()">
+          {{ cancellationCreditsLoading ? 'Reclamando créditos...' : 'Reclamar créditos pendientes' }}
+        </button>
+      </section>
+
       <section class="notifications-section" aria-labelledby="notifications-title">
         <header class="notifications-header">
           <h2 id="notifications-title">Notificaciones</h2>
