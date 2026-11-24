@@ -62,14 +62,20 @@ export class Funciones {
   get puedeEliminar(): boolean { return this.permisos.delete; }
 
   get funcionesProximas(): Screening[] {
+    const ahora = Date.now();
     return this.funciones.filter(
-      (funcion) => funcion.status === 'scheduled' && this.esFutura(funcion),
+      (funcion) =>
+        funcion.status === 'scheduled' &&
+        new Date(funcion.end_time).getTime() > ahora,
     );
   }
 
   get funcionesHistorial(): Screening[] {
+    const ahora = Date.now();
     return this.funciones.filter(
-      (funcion) => funcion.status === 'cancelled' || !this.esFutura(funcion),
+      (funcion) =>
+        funcion.status === 'cancelled' ||
+        new Date(funcion.end_time).getTime() <= ahora,
     );
   }
 
