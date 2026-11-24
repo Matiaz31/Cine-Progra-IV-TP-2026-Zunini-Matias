@@ -316,7 +316,7 @@
           <div class="alert alert-warning">
             Hay {{ vistaPreviaCancelacion.anonymous_orders }} compra(s) anónima(s).
             @if (vistaPreviaCancelacion.anonymous_orders_without_email > 0) {
-              {{ vistaPreviaCancelacion.anonymous_orders_without_email }} no tienen correo registrado y deben resolverse antes de cancelar.
+              {{ vistaPreviaCancelacion.anonymous_orders_without_email }} no tienen cuenta ni correo asociado, por lo que no recibirán crédito. Esto no impide cancelar la función.
             }
           </div>
         }
@@ -348,7 +348,7 @@
             type="button"
             class="btn-danger"
             (click)="confirmarCancelacion()"
-            [disabled]="guardando || !motivoCancelacion.trim() || vistaPreviaCancelacion.anonymous_orders_without_email > 0 || vistaPreviaCancelacion.orders_with_multiple_screenings > 0"
+            [disabled]="guardando || !motivoCancelacion.trim() || vistaPreviaCancelacion.orders_with_multiple_screenings > 0"
           >
             {{ guardando ? 'Procesando...' : 'Confirmar cancelación' }}
           </button>
