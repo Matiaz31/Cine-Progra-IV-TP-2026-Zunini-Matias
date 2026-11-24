@@ -359,6 +359,49 @@
         }
       </section>
 
+      <section class="loyalty-section cancellation-credit-section">
+        <div class="section-heading">
+          <h2>Crédito por cancelación</h2>
+        </div>
+
+        @if (cancellationCreditLoading) {
+          <p class="loyalty-description">Consultando tu crédito disponible...</p>
+        } @else if (userId && cancellationCreditAvailable > 0) {
+          <div class="loyalty-balance">
+            <span>Crédito disponible para {{ movieTitle }}</span>
+            <strong>{{ formatPrice(cancellationCreditAvailable) }}</strong>
+          </div>
+
+          <label class="loyalty-option">
+            <input
+              type="checkbox"
+              [checked]="useCancellationCredit"
+              (change)="useCancellationCredit = $any($event.target).checked"
+            />
+            <span>
+              Utilizar crédito en esta compra
+              <small>Se aplicará hasta cubrir el total. El saldo restante seguirá disponible.</small>
+            </span>
+          </label>
+
+          @if (useCancellationCredit) {
+            <p class="loyalty-description">
+              Crédito a utilizar: {{ formatPrice(getCancellationCreditToApply()) }}.
+            </p>
+          }
+        } @else if (cancellationCreditMessage) {
+          <p class="loyalty-description">{{ cancellationCreditMessage }}</p>
+        } @else if (userId) {
+          <p class="loyalty-description">
+            No tenés crédito disponible por cancelaciones para esta película.
+          </p>
+        } @else {
+          <p class="loyalty-description">
+            Iniciá sesión para consultar y utilizar créditos por cancelación.
+          </p>
+        }
+      </section>
+
       <section class="coupon-section">
         <h3>¿Tenés un cupón de descuento?</h3>
 
