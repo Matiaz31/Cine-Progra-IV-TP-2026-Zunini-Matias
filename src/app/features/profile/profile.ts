@@ -5,6 +5,12 @@ import { supabase } from '../../core/supabase';
 import { Router } from '@angular/router';
 import { WaitlistService, WaitlistEntry } from '../seats/waitlist.service';
 
+interface CancellationCreditBalance {
+  movie_id: string;
+  movie_title: string;
+  amount: number;
+}
+
 interface ProfileNotification {
   id: string;
   type: string;
@@ -37,6 +43,7 @@ export class Profile implements OnInit {
   cancellationCreditsLoading = false;
   cancellationCreditsMessage = '';
   cancellationCreditsError = '';
+  cancellationCreditBalances: CancellationCreditBalance[] = [];
   notificationsLoading = false;
   notificationsError = '';
   waitlistEntries: WaitlistEntry[] = [];
@@ -109,7 +116,11 @@ export class Profile implements OnInit {
       this.bloodType = data.blood_type ?? '';
       this.eyeColor = data.eye_color ?? '';
       this.vacationDays = data.vacation_days ?? 0;
-      await Promise.all([this.loadNotifications(), this.loadWaitlist()]);
+      await Promise.all([
+        this.loadNotifications(),
+        this.loadWaitlist(),
+        this.loadCancellationCreditBalances(),
+      ]);
     } catch (error) {
       console.error('Error cargando el perfil:', error);
       this.errorMessage =
@@ -151,6 +162,8 @@ export class Profile implements OnInit {
         count > 0
           ? `Se reclamaron ${count} crédito(s) por un total de ${formattedAmount}.`
           : 'No se encontraron créditos pendientes para reclamar.';
+
+      await this.loadCancellationCreditBalances();
     } catch (error: any) {
       console.error('Error reclamando créditos por cancelación:', error);
       this.cancellationCreditsError =
@@ -159,6 +172,33 @@ export class Profile implements OnInit {
       this.cancellationCreditsLoading = false;
       this.cdr.detectChanges();
     }
+  }
+
+  private async loadCancellationCreditBalances(): Promise<void> {
+    try {
+      const { data, error } = await supabase.rpc(
+        'get_my_cancellation_credit_balances',
+      );
+
+      if (error) throw error;
+      this.cancellationCreditBalances = Array.isArray(data)
+        ? data as CancellationCreditBalance[]
+        : [];
+    } catch (error) {
+      console.error('Error cargando créditos por cancelación:', error);
+      this.cancellationCreditsError =
+        'No se pudo consultar el saldo de créditos.';
+    } finally {
+      this.cdr.detectChanges();
+    }
+  }
+
+  formatCreditAmount(amount: number): string {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      maximumFractionDigits: 2,
+    }).format(amount);
   }
 
   private async loadNotifications(): Promise<void> {
