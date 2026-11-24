@@ -196,6 +196,32 @@ button[type='submit'] {
   color: var(--text-secondary, #a4aab5);
 }
 
+.claim-credits-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid #7667a8;
+  border-radius: 6px;
+  background: #7667a8;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease, opacity 150ms ease;
+
+  &:hover:not(:disabled) {
+    background: #8979bd;
+    border-color: #8979bd;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 .notifications-section {
   margin-top: 36px;
   padding-top: 26px;
