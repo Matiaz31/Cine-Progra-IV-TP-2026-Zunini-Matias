@@ -47,6 +47,10 @@ export class PurchaseSummary implements OnInit {
 
   userId: string | null = null;
   pointsBalance = 0;
+  cancellationCreditAvailable = 0;
+  useCancellationCredit = false;
+  cancellationCreditLoading = false;
+  cancellationCreditMessage = '';
 
   rewardId: string | null = null;
   rewardCost = 0;
@@ -103,6 +107,7 @@ export class PurchaseSummary implements OnInit {
     await this.loadSummary();
 
     await this.loadLoyaltyInfo();
+    await this.loadCancellationCreditInfo();
 
     if (this.selectedSeats.length > 0) {
       this.selectedRewardSeatId = this.rewardEligibleSeats[0]?.id ?? '';
@@ -300,11 +305,55 @@ export class PurchaseSummary implements OnInit {
       this.useTicketReward && this.canRedeemTicketReward()
         ? this.getSelectedRewardSeatPrice()
         : 0;
+    const cancellationCredit = this.useCancellationCredit
+      ? this.getCancellationCreditToApply()
+      : 0;
 
     return Math.max(
       0,
+      this.getTotal() - this.couponDiscount - rewardDiscount - cancellationCredit,
+    );
+  }
+
+  getCancellationCreditToApply(): number {
+    const rewardDiscount =
+      this.useTicketReward && this.canRedeemTicketReward()
+        ? this.getSelectedRewardSeatPrice()
+        : 0;
+    const amountDue = Math.max(
+      0,
       this.getTotal() - this.couponDiscount - rewardDiscount,
     );
+
+    return Math.min(this.cancellationCreditAvailable, amountDue);
+  }
+
+  async loadCancellationCreditInfo(): Promise<void> {
+    this.cancellationCreditLoading = true;
+    this.cancellationCreditMessage = '';
+
+    try {
+      if (!this.userId) {
+        this.cancellationCreditAvailable = 0;
+        return;
+      }
+
+      const { data, error } = await supabase.rpc(
+        'get_available_screening_cancellation_credit',
+        { p_screening_id: this.screeningId },
+      );
+
+      if (error) throw error;
+      this.cancellationCreditAvailable = Number(data ?? 0);
+    } catch (error: any) {
+      console.error('Error consultando créditos por cancelación:', error);
+      this.cancellationCreditMessage =
+        error?.message ?? 'No se pudo consultar el crédito disponible.';
+      this.cancellationCreditAvailable = 0;
+    } finally {
+      this.cancellationCreditLoading = false;
+      this.cdr.detectChanges();
+    }
   }
 
   getCandyBarItemsCount(): number {
@@ -605,6 +654,8 @@ export class PurchaseSummary implements OnInit {
         p_reward_seat_id: this.useTicketReward
           ? this.selectedRewardSeatId
           : null,
+
+        p_use_cancellation_credit: this.useCancellationCredit,
       });
 
       if (checkoutError) {
@@ -658,6 +709,7 @@ export class PurchaseSummary implements OnInit {
           order.total ??
           this.getFinalTotal()
         ),
+        creditUsed: Number(order.credit_used ?? 0),
 
         couponApplied: this.couponApplied,
         candyBar: this.candyBar,

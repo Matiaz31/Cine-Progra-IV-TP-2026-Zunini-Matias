@@ -5,6 +5,12 @@ import { supabase } from '../../core/supabase';
 import { Router } from '@angular/router';
 import { WaitlistService, WaitlistEntry } from '../seats/waitlist.service';
 
+interface CancellationCreditBalance {
+  movie_id: string;
+  movie_title: string;
+  amount: number;
+}
+
 interface ProfileNotification {
   id: string;
   type: string;
@@ -34,6 +40,10 @@ export class Profile implements OnInit {
   email = '';
   vacationDays = 0;
   notifications: ProfileNotification[] = [];
+  cancellationCreditsLoading = false;
+  cancellationCreditsMessage = '';
+  cancellationCreditsError = '';
+  cancellationCreditBalances: CancellationCreditBalance[] = [];
   notificationsLoading = false;
   notificationsError = '';
   waitlistEntries: WaitlistEntry[] = [];
@@ -106,7 +116,11 @@ export class Profile implements OnInit {
       this.bloodType = data.blood_type ?? '';
       this.eyeColor = data.eye_color ?? '';
       this.vacationDays = data.vacation_days ?? 0;
-      await Promise.all([this.loadNotifications(), this.loadWaitlist()]);
+      await Promise.all([
+        this.loadNotifications(),
+        this.loadWaitlist(),
+        this.loadCancellationCreditBalances(),
+      ]);
     } catch (error) {
       console.error('Error cargando el perfil:', error);
       this.errorMessage =
@@ -115,6 +129,76 @@ export class Profile implements OnInit {
       this.loading = false;
       this.cdr.detectChanges();
     }
+  }
+
+  async claimCancellationCredits(): Promise<void> {
+    if (this.cancellationCreditsLoading) return;
+
+    this.cancellationCreditsLoading = true;
+    this.cancellationCreditsMessage = '';
+    this.cancellationCreditsError = '';
+
+    try {
+      const { data, error } = await supabase.rpc(
+        'claim_screening_cancellation_credits',
+      );
+
+      if (error) throw error;
+
+      const result = data as {
+        claimed_count?: number;
+        total_amount?: number;
+      };
+
+      const count = Number(result?.claimed_count ?? 0);
+      const amount = Number(result?.total_amount ?? 0);
+      const formattedAmount = new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        maximumFractionDigits: 2,
+      }).format(amount);
+
+      this.cancellationCreditsMessage =
+        count > 0
+          ? `Se reclamaron ${count} crédito(s) por un total de ${formattedAmount}.`
+          : 'No se encontraron créditos pendientes para reclamar.';
+
+      await this.loadCancellationCreditBalances();
+    } catch (error: any) {
+      console.error('Error reclamando créditos por cancelación:', error);
+      this.cancellationCreditsError =
+        error?.message ?? 'No se pudieron reclamar los créditos.';
+    } finally {
+      this.cancellationCreditsLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  private async loadCancellationCreditBalances(): Promise<void> {
+    try {
+      const { data, error } = await supabase.rpc(
+        'get_my_cancellation_credit_balances',
+      );
+
+      if (error) throw error;
+      this.cancellationCreditBalances = Array.isArray(data)
+        ? data as CancellationCreditBalance[]
+        : [];
+    } catch (error) {
+      console.error('Error cargando créditos por cancelación:', error);
+      this.cancellationCreditsError =
+        'No se pudo consultar el saldo de créditos.';
+    } finally {
+      this.cdr.detectChanges();
+    }
+  }
+
+  formatCreditAmount(amount: number): string {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      maximumFractionDigits: 2,
+    }).format(amount);
   }
 
   private async loadNotifications(): Promise<void> {
