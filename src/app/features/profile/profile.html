@@ -175,6 +175,103 @@
           </button>
         }
       </form>
+
+      <section class="notifications-section" aria-labelledby="notifications-title">
+        <header class="notifications-header">
+          <h2 id="notifications-title">Notificaciones</h2>
+          <p>Actualizaciones sobre tus propuestas y la lista de espera.</p>
+        </header>
+
+        @if (notificationsLoading) {
+          <p class="status-message">Cargando notificaciones...</p>
+        } @else if (notificationsError) {
+          <p class="message error">{{ notificationsError }}</p>
+        } @else if (notifications.length === 0) {
+          <p class="empty-notifications">Todavía no tenés notificaciones.</p>
+        } @else {
+          <ul class="notifications-list">
+            @for (notification of notifications; track notification.id) {
+              <li class="notification-item">
+                <div class="notification-content">
+                  <span
+                    class="notification-status"
+                    [class.accepted]="notification.type === 'movie_proposal_accepted'"
+                    [class.rejected]="notification.type === 'movie_proposal_rejected'"
+                  >
+                    @switch (notification.type) {
+                      @case ('movie_proposal_accepted') { Propuesta aceptada }
+                      @case ('movie_proposal_rejected') { Propuesta rechazada }
+                      @case ('waitlist_offer') { Oferta de butacas disponible }
+                      @case ('waitlist_offer_expired') { Oferta de butacas vencida }
+                    }
+                  </span>
+                  <p>{{ notification.message }}</p>
+                  <time [attr.datetime]="notification.created_at">
+                    {{ notification.created_at | date:'dd/MM/yyyy HH:mm' }}
+                  </time>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="notifications-section waitlist-section" aria-labelledby="waitlist-title">
+        <header class="notifications-header">
+          <h2 id="waitlist-title">Lista de espera</h2>
+          <p>Consultá tus inscripciones y las ofertas de butacas disponibles.</p>
+        </header>
+
+        @if (waitlistLoading) {
+          <p class="status-message">Cargando lista de espera...</p>
+        } @else if (waitlistError) {
+          <p class="message error">{{ waitlistError }}</p>
+        } @else if (waitlistEntries.length === 0) {
+          <p class="empty-notifications">Todavía no estás anotado en ninguna lista de espera.</p>
+        } @else {
+          <ul class="notifications-list">
+            @for (entry of waitlistEntries; track entry.waitlist_id) {
+              <li class="notification-item">
+                <div class="notification-content">
+                  <span class="notification-status"
+                    [class.accepted]="entry.status === 'offered' || entry.status === 'accepted'"
+                    [class.rejected]="entry.status === 'expired' || entry.status === 'cancelled'">
+                    @switch (entry.status) {
+                      @case ('waiting') { En espera · Puesto {{ entry.waitlist_position ?? '—' }} }
+                      @case ('offered') { ¡Tenés una oferta de butacas! }
+                      @case ('accepted') { Oferta aceptada }
+                      @case ('expired') { Oferta vencida }
+                      @case ('cancelled') { Inscripción cancelada }
+                    }
+                  </span>
+                  <p><strong>{{ entry.movie_title }}</strong></p>
+                  <time [attr.datetime]="entry.screening_start">
+                    Función: {{ entry.screening_start | date:'dd/MM/yyyy HH:mm' }}
+                  </time>
+
+                  @if (entry.status === 'offered') {
+                    <p>Tenés {{ entry.offered_seat_ids?.length ?? 0 }} butaca(s) reservada(s) para vos. La oferta vence:</p>
+                    <strong>{{ entry.offer_expires_at | date:'dd/MM/yyyy HH:mm:ss' }}</strong>
+                    <button type="button" class="edit-button" (click)="buyOfferedSeats(entry)">
+                      Elegir butacas y comprar
+                    </button>
+                  }
+
+                  @if (entry.status === 'waiting' || entry.status === 'offered') {
+                    <button
+                      type="button"
+                      class="edit-button"
+                      [disabled]="waitlistActionId === entry.waitlist_id"
+                      (click)="leaveWaitlist(entry)">
+                      {{ waitlistActionId === entry.waitlist_id ? 'Cancelando...' : 'Salir de la lista' }}
+                    </button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
     }
   </div>
 </section>

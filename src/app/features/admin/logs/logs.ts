@@ -133,6 +133,7 @@ export class Logs implements OnInit {
       seat: 'Butaca',
       order: 'Compra',
       profile: 'Perfil',
+      movie_proposal: 'Propuesta de película',
     };
 
     return entidades[entity] ?? entity;
@@ -258,7 +259,16 @@ export class Logs implements OnInit {
   }
 
   private formatearDetalle(clave: string, valor: unknown): string {
-    if (clave === 'previous_status' || clave === 'new_status' || clave === 'is_active') {
+    if (clave === 'previous_status' || clave === 'new_status') {
+      const estados: Record<string, string> = {
+        pending: 'Pendiente',
+        accepted: 'Aceptada',
+        rejected: 'Rechazada',
+      };
+      return estados[String(valor)] ?? String(valor);
+    }
+
+    if (clave === 'is_active') {
       return valor === true ? 'Activo' : valor === false ? 'Inactivo' : String(valor);
     }
 
