@@ -464,20 +464,26 @@ export class Funciones {
     };
 
     try {
-      const resultado = this.editando && this.funcionEditandoId
-        ? await supabase
-            .from('screenings')
-            .update(datos)
-            .eq('id', this.funcionEditandoId)
-            .select('id')
-            .single()
-        : await supabase
-            .from('screenings')
-            .insert(datos)
-            .select('id')
-            .single();
-
-      if (resultado.error) throw resultado.error;
+      if (this.editando && this.funcionEditandoId) {
+        const { error } = await supabase.rpc('update_screening_with_seat_migration', {
+          p_screening_id: this.funcionEditandoId,
+          p_movie_id: datos.movie_id,
+          p_room_id: datos.room_id,
+          p_start_time: datos.start_time,
+          p_end_time: datos.end_time,
+          p_format: datos.format,
+          p_language: datos.language,
+          p_price: datos.price,
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('screenings')
+          .insert(datos)
+          .select('id')
+          .single();
+        if (error) throw error;
+      }
 
       this.mostrarFormulario = false;
       this.editando = false;
