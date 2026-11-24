@@ -182,6 +182,21 @@
           <p>Si compraste como invitado y tenés créditos pendientes, iniciá sesión con el mismo correo de la compra para reclamarlos.</p>
         </header>
 
+        @if (cancellationCreditBalances.length > 0) {
+          <ul class="notifications-list">
+            @for (credit of cancellationCreditBalances; track credit.movie_id) {
+              <li class="notification-item">
+                <div class="notification-content">
+                  <strong>{{ credit.movie_title }}</strong>
+                  <p>Saldo disponible: {{ formatCreditAmount(credit.amount) }}</p>
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty-notifications">No tenés créditos disponibles por cancelación.</p>
+        }
+
         @if (cancellationCreditsMessage) {
           <p class="message success" role="status">{{ cancellationCreditsMessage }}</p>
         }
