@@ -1,15 +1,22 @@
-import { TestBed } from '@angular/core/testing';
 import { Movie } from './movie';
 
-describe('Movie', () => {
-  let service: Movie;
+describe('Movie model', () => {
+  it('should represent a movie with the expected fields', () => {
+    const movie: Movie = {
+      id: 'movie-1',
+      title: 'Película de prueba',
+      synopsis: null,
+      duration_minutes: 120,
+      poster_url: null,
+      release_date: null,
+      age_rating: 13,
+      is_active: true,
+      pre_sale_enabled: false,
+      pre_sale_price: null,
+    };
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Movie);
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+    expect(movie.id).toBe('movie-1');
+    expect(movie.title).toBe('Película de prueba');
+    expect(movie.duration_minutes).toBe(120);
   });
 });
