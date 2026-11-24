@@ -189,10 +189,10 @@
                   <td>{{ funcion.end_time | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td>{{ funcion.format }}</td>
                   <td>{{ funcion.language }}</td>
-                  <td>{{ funcion.price | currency:'ARS':'symbol':'1.0-2':'es-AR' }}</td>
+                  <td>{{ formatearImporte(funcion.price) }}</td>
                   <td>
                     <span class="status-badge" [class.status-cancelled]="funcion.status === 'cancelled'">
-                      {{ funcion.status === 'cancelled' ? 'Cancelada' : 'Programada' }}
+                      {{ obtenerEstadoVisual(funcion) }}
                     </span>
                   </td>
                   <td class="actions-cell">
@@ -208,6 +208,8 @@
                     }
                     @if (funcion.status === 'cancelled') {
                       <span class="preserved-label">Registro conservado</span>
+                    } @else if (!puedeEditarFuncion(funcion) && !puedeCancelarFuncion(funcion)) {
+                      <span class="preserved-label">Sin acciones disponibles</span>
                     }
                   </td>
                 </tr>
@@ -253,10 +255,10 @@
                   <td>{{ funcion.end_time | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td>{{ funcion.format }}</td>
                   <td>{{ funcion.language }}</td>
-                  <td>{{ funcion.price | currency:'ARS':'symbol':'1.0-2':'es-AR' }}</td>
+                  <td>{{ formatearImporte(funcion.price) }}</td>
                   <td>
                     <span class="status-badge" [class.status-cancelled]="funcion.status === 'cancelled'">
-                      {{ funcion.status === 'cancelled' ? 'Cancelada' : 'Programada' }}
+                      {{ obtenerEstadoVisual(funcion) }}
                     </span>
                   </td>
                   <td class="actions-cell">
@@ -272,6 +274,8 @@
                     }
                     @if (funcion.status === 'cancelled') {
                       <span class="preserved-label">Registro conservado</span>
+                    } @else if (!puedeEditarFuncion(funcion) && !puedeCancelarFuncion(funcion)) {
+                      <span class="preserved-label">Sin acciones disponibles</span>
                     }
                   </td>
                 </tr>
