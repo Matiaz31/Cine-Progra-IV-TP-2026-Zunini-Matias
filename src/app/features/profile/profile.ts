@@ -34,6 +34,9 @@ export class Profile implements OnInit {
   email = '';
   vacationDays = 0;
   notifications: ProfileNotification[] = [];
+  cancellationCreditsLoading = false;
+  cancellationCreditsMessage = '';
+  cancellationCreditsError = '';
   notificationsLoading = false;
   notificationsError = '';
   waitlistEntries: WaitlistEntry[] = [];
@@ -113,6 +116,47 @@ export class Profile implements OnInit {
         'No se pudo cargar el perfil. Revisá la consola para ver el error.';
     } finally {
       this.loading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async claimCancellationCredits(): Promise<void> {
+    if (this.cancellationCreditsLoading) return;
+
+    this.cancellationCreditsLoading = true;
+    this.cancellationCreditsMessage = '';
+    this.cancellationCreditsError = '';
+
+    try {
+      const { data, error } = await supabase.rpc(
+        'claim_screening_cancellation_credits',
+      );
+
+      if (error) throw error;
+
+      const result = data as {
+        claimed_count?: number;
+        total_amount?: number;
+      };
+
+      const count = Number(result?.claimed_count ?? 0);
+      const amount = Number(result?.total_amount ?? 0);
+      const formattedAmount = new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        maximumFractionDigits: 2,
+      }).format(amount);
+
+      this.cancellationCreditsMessage =
+        count > 0
+          ? `Se reclamaron ${count} crédito(s) por un total de ${formattedAmount}.`
+          : 'No se encontraron créditos pendientes para reclamar.';
+    } catch (error: any) {
+      console.error('Error reclamando créditos por cancelación:', error);
+      this.cancellationCreditsError =
+        error?.message ?? 'No se pudieron reclamar los créditos.';
+    } finally {
+      this.cancellationCreditsLoading = false;
       this.cdr.detectChanges();
     }
   }
