@@ -614,7 +614,7 @@ export class PurchaseSummary implements OnInit {
       const userId = user?.id ?? null;
       const buyerEmail = this.guestEmail.trim().toLowerCase();
 
-      if (!userId && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(buyerEmail)) {
+      if (!userId && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail)) {
         throw new Error('Ingresá un correo electrónico válido para recibir el crédito si se cancela la función.');
       }
 
