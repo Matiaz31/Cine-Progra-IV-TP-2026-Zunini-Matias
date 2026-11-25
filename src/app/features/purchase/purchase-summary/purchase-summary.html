@@ -402,6 +402,25 @@
         }
       </section>
 
+      @if (!userId) {
+        <section class="guest-email-section" aria-labelledby="guest-email-title">
+          <h3 id="guest-email-title">Datos del comprador</h3>
+          <p>Como comprás sin registrarte, necesitamos tu correo para poder asociarte un crédito si se cancela la función.</p>
+          <label for="guest-buyer-email">Correo electrónico</label>
+          <input
+            id="guest-buyer-email"
+            type="email"
+            name="guestBuyerEmail"
+            autocomplete="email"
+            inputmode="email"
+            placeholder="tu@email.com"
+            required
+            [value]="guestEmail"
+            (input)="guestEmail = $any($event.target).value"
+          />
+        </section>
+      }
+
       <section class="coupon-section">
         <h3>¿Tenés un cupón de descuento?</h3>
 
