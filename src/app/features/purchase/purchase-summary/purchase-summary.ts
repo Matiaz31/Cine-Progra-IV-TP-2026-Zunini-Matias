@@ -38,6 +38,7 @@ export class PurchaseSummary implements OnInit {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
+  guestEmail = '';
   couponCode = '';
   couponMessage = '';
   couponMessageType: 'success' | 'error' | '' = '';
@@ -611,6 +612,11 @@ export class PurchaseSummary implements OnInit {
       }
 
       const userId = user?.id ?? null;
+      const buyerEmail = this.guestEmail.trim().toLowerCase();
+
+      if (!userId && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(buyerEmail)) {
+        throw new Error('Ingresá un correo electrónico válido para recibir el crédito si se cancela la función.');
+      }
 
       if (this.useTicketReward) {
         if (
@@ -656,6 +662,7 @@ export class PurchaseSummary implements OnInit {
           : null,
 
         p_use_cancellation_credit: this.useCancellationCredit,
+        p_buyer_email: userId ? null : buyerEmail,
       });
 
       if (checkoutError) {
