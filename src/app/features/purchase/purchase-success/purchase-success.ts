@@ -205,7 +205,7 @@ export class PurchaseSuccess implements OnInit {
     }
   }
 
-  volverAlInicio() {
+  descargarPdf() {\n    window.print();\n  }\n\n  volverAlInicio() {
     sessionStorage.removeItem('purchase-success');
     this.router.navigate(['/home']);
   }
