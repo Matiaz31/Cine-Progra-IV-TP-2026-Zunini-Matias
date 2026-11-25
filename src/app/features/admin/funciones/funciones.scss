@@ -450,3 +450,12 @@ td:last-child .btn-danger {
 @media (max-width: 900px) {
   .table-wrapper table { min-width: 980px; }
 }
+
+
+.waitlist-toggle { margin-left: 8px; padding: 6px 9px; font-size: .78rem; }
+.waitlist-detail-row > td { padding: 0; background: var(--bg-secondary, #11151d); }
+.waitlist-detail { padding: 18px; }
+.waitlist-detail h3 { margin: 0 0 12px; color: var(--text, #e4e7ec); font-size: 1rem; }
+.waitlist-detail p { color: var(--text-secondary, #a4aab5); }
+.waitlist-table-wrapper { overflow-x: auto; }
+.waitlist-table-wrapper table { min-width: 640px; }
