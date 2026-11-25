@@ -57,19 +57,22 @@
             </select>
           </label>
 
-          <label>
-            Sala
-            <select
-              name="room_id"
-              [(ngModel)]="nuevaFuncion.room_id"
-              required
-            >
-              <option value="" disabled>Seleccioná una sala</option>
-              @for (sala of salas; track sala.id) {
-                <option [value]="sala.id">{{ sala.name }}</option>
-              }
-            </select>
-          </label>
+          @if (editando) {
+            <label>
+              Sala
+              <select name="room_id" [(ngModel)]="nuevaFuncion.room_id" required>
+                <option value="" disabled>Seleccioná una sala</option>
+                @for (sala of salas; track sala.id) {
+                  <option [value]="sala.id">{{ sala.name }}</option>
+                }
+              </select>
+            </label>
+          } @else {
+            <div class="calculated-field">
+              <span>Asignación de sala</span>
+              <strong>Se asignará automáticamente una sala disponible al guardar</strong>
+            </div>
+          }
 
           <label>
             Fecha
@@ -176,6 +179,7 @@
                 <th>Formato</th>
                 <th>Idioma</th>
                 <th>Precio</th>
+                <th>Lista de espera</th>
                 <th>Estado</th>
                 <th>Acciones</th>
               </tr>
@@ -190,6 +194,7 @@
                   <td>{{ funcion.format }}</td>
                   <td>{{ funcion.language }}</td>
                   <td>{{ formatearImporte(funcion.price) }}</td>
+                  <td>{{ waitlistCounts[funcion.id] ?? 0 }} inscripto(s)</td>
                   <td>
                     <span class="status-badge" [class.status-cancelled]="funcion.status === 'cancelled'">
                       {{ obtenerEstadoVisual(funcion) }}
