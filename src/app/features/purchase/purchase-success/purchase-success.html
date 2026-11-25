@@ -96,7 +96,7 @@
              ENTRADA
              ========================= -->
 
-        <section class="ticket-section">
+        <section class="ticket-section printable-ticket">
 
           <h2>
             Tu entrada
@@ -281,7 +281,7 @@
 
         </section>
 
-        <section class="qr-section">
+        <section class="qr-section printable-ticket">
 
           <h2>
             Presentá este código al ingresar
@@ -316,7 +316,8 @@
              BOTÓN
              ========================= -->
 
-        <div class="actions">
+        <div class="actions no-print">
+          <button type="button" class="secondary-button" (click)="descargarPdf()">Descargar entrada PDF</button>
 
           <button
             type="button"

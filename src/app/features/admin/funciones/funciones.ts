@@ -20,6 +20,17 @@ interface RoomOption {
   name: string;
 }
 
+interface WaitlistAdminEntry {
+  waitlist_id: string;
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  status: string;
+  created_at: string;
+  offer_expires_at: string | null;
+}
+
 interface ScreeningCancellationPreview {
   screening_id: string;
   movie_title: string | null;
@@ -83,6 +94,10 @@ export class Funciones {
   salas: RoomOption[] = [];
   funciones: Screening[] = [];
   baseTicketPrice = 0;
+  waitlistCounts: Record<string, number> = {};
+  waitlistDetails: WaitlistAdminEntry[] = [];
+  expandedWaitlistScreeningId: string | null = null;
+  loadingWaitlist = false;
 
   loading = true;
   guardando = false;
@@ -162,6 +177,17 @@ export class Funciones {
       if (funcionesResult.error) throw funcionesResult.error;
       if (precioResult.error) throw precioResult.error;
 
+      const { data: waitlistRows, error: waitlistError } = await supabase
+        .from('screening_waitlist')
+        .select('screening_id, status')
+        .in('status', ['waiting', 'offered']);
+      if (waitlistError) throw waitlistError;
+      this.waitlistCounts = {};
+      for (const entry of waitlistRows ?? []) {
+        this.waitlistCounts[entry.screening_id] =
+          (this.waitlistCounts[entry.screening_id] ?? 0) + 1;
+      }
+
       this.peliculas = (peliculasResult.data ?? []) as MovieOption[];
       this.baseTicketPrice = Number(precioResult.data.base_price);
       this.salas = (salasResult.data ?? []) as RoomOption[];
@@ -185,6 +211,41 @@ export class Funciones {
       this.loading = false;
       this.changeDetector.detectChanges();
     }
+  }
+
+  async toggleWaitlist(funcion: Screening) {
+    if (this.expandedWaitlistScreeningId === funcion.id) {
+      this.expandedWaitlistScreeningId = null;
+      this.waitlistDetails = [];
+      return;
+    }
+    this.expandedWaitlistScreeningId = funcion.id;
+    this.waitlistDetails = [];
+    this.loadingWaitlist = true;
+    try {
+      const { data, error } = await supabase.rpc('get_screening_waitlist_admin', {
+        p_screening_id: funcion.id,
+      });
+      if (error) throw error;
+      this.waitlistDetails = (data ?? []) as WaitlistAdminEntry[];
+    } catch (error: any) {
+      this.error = error?.message ?? 'No se pudo cargar el detalle de la lista de espera.';
+      this.expandedWaitlistScreeningId = null;
+    } finally {
+      this.loadingWaitlist = false;
+      this.changeDetector.detectChanges();
+    }
+  }
+
+  nombreEstadoEspera(status: string): string {
+    const estados: Record<string, string> = {
+      waiting: 'En espera',
+      offered: 'Oferta enviada',
+      accepted: 'Aceptada',
+      expired: 'Vencida',
+      cancelled: 'Cancelada',
+    };
+    return estados[status] ?? status;
   }
 
   get horaFinCalculada(): string {
@@ -413,8 +474,8 @@ export class Funciones {
       return;
     }
 
-    if (!this.salas.some((s) => s.id === this.nuevaFuncion.room_id)) {
-      this.error = 'Seleccioná una sala activa.';
+    if (this.editando && !this.salas.some((s) => s.id === this.nuevaFuncion.room_id)) {
+      this.error = 'Seleccioná una sala activa para la función.';
       return;
     }
 
@@ -449,13 +510,14 @@ export class Funciones {
     }
 
     const estabaEditando = this.editando;
+    const roomId = this.nuevaFuncion.room_id;
 
     this.guardando = true;
     this.changeDetector.detectChanges();
 
     const datos = {
       movie_id: pelicula.id,
-      room_id: this.nuevaFuncion.room_id,
+      room_id: roomId,
       start_time: inicio.toISOString(),
       end_time: fin.toISOString(),
       format: this.nuevaFuncion.format,
@@ -464,6 +526,7 @@ export class Funciones {
     };
 
     try {
+      let salaAsignada = '';
       if (this.editando && this.funcionEditandoId) {
         const { error } = await supabase.rpc('update_screening_with_seat_migration', {
           p_screening_id: this.funcionEditandoId,
@@ -477,12 +540,17 @@ export class Funciones {
         });
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('screenings')
-          .insert(datos)
-          .select('id')
-          .single();
+        const { data, error } = await supabase.rpc('create_screening_auto_room', {
+          p_movie_id: datos.movie_id,
+          p_start_time: datos.start_time,
+          p_end_time: datos.end_time,
+          p_format: datos.format,
+          p_language: datos.language,
+          p_price: datos.price,
+        });
         if (error) throw error;
+        const asignacion = Array.isArray(data) ? data[0] : data;
+        salaAsignada = asignacion?.room_name ?? '';
       }
 
       this.mostrarFormulario = false;
@@ -492,7 +560,7 @@ export class Funciones {
 
       this.mensaje = estabaEditando
         ? 'Función actualizada correctamente.'
-        : 'Función creada correctamente.';
+        : `Función creada correctamente${salaAsignada ? ` en ${salaAsignada}` : ''}.`;
 
       await this.cargarDatos();
     } catch (error: any) {

@@ -57,19 +57,22 @@
             </select>
           </label>
 
-          <label>
-            Sala
-            <select
-              name="room_id"
-              [(ngModel)]="nuevaFuncion.room_id"
-              required
-            >
-              <option value="" disabled>Seleccioná una sala</option>
-              @for (sala of salas; track sala.id) {
-                <option [value]="sala.id">{{ sala.name }}</option>
-              }
-            </select>
-          </label>
+          @if (editando) {
+            <label>
+              Sala
+              <select name="room_id" [(ngModel)]="nuevaFuncion.room_id" required>
+                <option value="" disabled>Seleccioná una sala</option>
+                @for (sala of salas; track sala.id) {
+                  <option [value]="sala.id">{{ sala.name }}</option>
+                }
+              </select>
+            </label>
+          } @else {
+            <div class="calculated-field">
+              <span>Asignación de sala</span>
+              <strong>Se asignará automáticamente una sala disponible al guardar</strong>
+            </div>
+          }
 
           <label>
             Fecha
@@ -176,6 +179,7 @@
                 <th>Formato</th>
                 <th>Idioma</th>
                 <th>Precio</th>
+                <th>Lista de espera</th>
                 <th>Estado</th>
                 <th>Acciones</th>
               </tr>
@@ -190,6 +194,12 @@
                   <td>{{ funcion.format }}</td>
                   <td>{{ funcion.language }}</td>
                   <td>{{ formatearImporte(funcion.price) }}</td>
+                  <td>
+                    <strong>{{ waitlistCounts[funcion.id] ?? 0 }}</strong> activa(s)
+                    <button type="button" class="btn-secondary waitlist-toggle" (click)="toggleWaitlist(funcion)" [disabled]="loadingWaitlist">
+                      {{ expandedWaitlistScreeningId === funcion.id ? 'Ocultar' : 'Ver inscriptos' }}
+                    </button>
+                  </td>
                   <td>
                     <span class="status-badge" [class.status-cancelled]="funcion.status === 'cancelled'">
                       {{ obtenerEstadoVisual(funcion) }}
@@ -213,6 +223,37 @@
                     }
                   </td>
                 </tr>
+                @if (expandedWaitlistScreeningId === funcion.id) {
+                  <tr class="waitlist-detail-row">
+                    <td colspan="10">
+                      <section class="waitlist-detail">
+                        <h3>Lista de espera · {{ funcion.movie?.[0]?.title ?? 'Función' }}</h3>
+                        @if (loadingWaitlist) {
+                          <p>Cargando inscriptos...</p>
+                        } @else if (waitlistDetails.length === 0) {
+                          <p>No hay personas anotadas en esta función.</p>
+                        } @else {
+                          <div class="waitlist-table-wrapper">
+                            <table>
+                              <thead><tr><th>Cliente</th><th>Correo</th><th>Estado</th><th>Fecha de inscripción</th><th>Vencimiento de oferta</th></tr></thead>
+                              <tbody>
+                                @for (entry of waitlistDetails; track entry.waitlist_id) {
+                                  <tr>
+                                    <td>{{ entry.first_name ?? '' }} {{ entry.last_name ?? '' }}</td>
+                                    <td>{{ entry.email ?? 'Sin correo' }}</td>
+                                    <td>{{ nombreEstadoEspera(entry.status) }}</td>
+                                    <td>{{ entry.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                                    <td>{{ entry.offer_expires_at ? (entry.offer_expires_at | date:'dd/MM/yyyy HH:mm') : '—' }}</td>
+                                  </tr>
+                                }
+                              </tbody>
+                            </table>
+                          </div>
+                        }
+                      </section>
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>
