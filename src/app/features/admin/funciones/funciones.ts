@@ -83,6 +83,7 @@ export class Funciones {
   salas: RoomOption[] = [];
   funciones: Screening[] = [];
   baseTicketPrice = 0;
+  waitlistCounts: Record<string, number> = {};
 
   loading = true;
   guardando = false;
@@ -161,6 +162,17 @@ export class Funciones {
       if (salasResult.error) throw salasResult.error;
       if (funcionesResult.error) throw funcionesResult.error;
       if (precioResult.error) throw precioResult.error;
+
+      const { data: waitlistRows, error: waitlistError } = await supabase
+        .from('screening_waitlist')
+        .select('screening_id, status')
+        .in('status', ['waiting', 'offered']);
+      if (waitlistError) throw waitlistError;
+      this.waitlistCounts = {};
+      for (const entry of waitlistRows ?? []) {
+        this.waitlistCounts[entry.screening_id] =
+          (this.waitlistCounts[entry.screening_id] ?? 0) + 1;
+      }
 
       this.peliculas = (peliculasResult.data ?? []) as MovieOption[];
       this.baseTicketPrice = Number(precioResult.data.base_price);
@@ -413,8 +425,8 @@ export class Funciones {
       return;
     }
 
-    if (!this.salas.some((s) => s.id === this.nuevaFuncion.room_id)) {
-      this.error = 'Seleccioná una sala activa.';
+    if (this.editando && !this.salas.some((s) => s.id === this.nuevaFuncion.room_id)) {
+      this.error = 'Seleccioná una sala activa para la función.';
       return;
     }
 
@@ -449,13 +461,31 @@ export class Funciones {
     }
 
     const estabaEditando = this.editando;
+    let roomId = this.nuevaFuncion.room_id;
+
+    if (!estabaEditando) {
+      const margen = 30 * 60_000;
+      const ocupaciones = this.funciones.filter(
+        f => f.status === 'scheduled' &&
+          new Date(f.end_time).getTime() > inicio.getTime() - margen &&
+          new Date(f.start_time).getTime() < fin.getTime() + margen
+      );
+      const salaDisponible = this.salas.find(
+        sala => !ocupaciones.some(f => f.room_id === sala.id)
+      );
+      if (!salaDisponible) {
+        this.error = 'No hay una sala disponible para ese horario. Probá otra fecha u hora.';
+        return;
+      }
+      roomId = salaDisponible.id;
+    }
 
     this.guardando = true;
     this.changeDetector.detectChanges();
 
     const datos = {
       movie_id: pelicula.id,
-      room_id: this.nuevaFuncion.room_id,
+      room_id: roomId,
       start_time: inicio.toISOString(),
       end_time: fin.toISOString(),
       format: this.nuevaFuncion.format,
