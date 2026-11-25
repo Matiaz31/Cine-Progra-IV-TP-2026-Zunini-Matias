@@ -6,6 +6,8 @@ begin;
 
 revoke all on function public.checkout_purchase(uuid, uuid[], jsonb, jsonb, text, uuid, uuid)
   from public, anon, authenticated;
+revoke all on function public.checkout_purchase(uuid, uuid[], jsonb, jsonb, text, uuid, uuid, boolean)
+  from public, anon, authenticated;
 grant execute on function public.checkout_purchase(uuid, uuid[], jsonb, jsonb, text, uuid, uuid, boolean)
   to anon, authenticated;
 
