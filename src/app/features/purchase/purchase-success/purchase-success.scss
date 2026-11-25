@@ -653,3 +653,19 @@ h1 {
   font-weight: 500;
   text-align: right;
 }
+
+.secondary-button {
+  width: 100%; min-height: 46px; margin-bottom: 12px; padding: .8rem 1.2rem;
+  border: 1px solid var(--color-secondary); border-radius: var(--radius-md);
+  background: transparent; color: var(--color-text); font: inherit; font-weight: 600; cursor: pointer;
+}
+@media print {
+  @page { size: A4; margin: 12mm; }
+  body, .success-page { background: #fff !important; color: #111 !important; min-height: auto; padding: 0 !important; }
+  .success-card { max-width: none; padding: 0 !important; border: 0 !important; box-shadow: none !important; background: #fff !important; color: #111 !important; }
+  .no-print, .success-icon, .success-description, .actions { display: none !important; }
+  .purchase-content section { break-inside: avoid; background: #fff !important; color: #111 !important; border-color: #bbb !important; }
+  .purchase-content h2, .purchase-content h3, .data-row strong, .seat-name, .seat-price, .candy-bar-item strong, .final-total-row strong { color: #111 !important; }
+  .qr-image { print-color-adjust: exact; }
+  .qr-code { color: #333 !important; }
+}
