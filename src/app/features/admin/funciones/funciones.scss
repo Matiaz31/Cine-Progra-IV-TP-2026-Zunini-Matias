@@ -445,3 +445,8 @@ td:last-child .btn-danger {
     flex-direction: column;
   }
 }
+
+
+@media (max-width: 900px) {
+  .table-wrapper table { min-width: 980px; }
+}
