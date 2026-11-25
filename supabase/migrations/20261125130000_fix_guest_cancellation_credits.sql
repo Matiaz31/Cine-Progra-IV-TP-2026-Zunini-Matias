@@ -204,8 +204,7 @@ begin
     'status', 'cancelled'
   );
 end;
-$function$
-
+$function$;
 
 create or replace function public.checkout_purchase(
   p_screening_id uuid,
