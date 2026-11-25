@@ -20,6 +20,17 @@ interface RoomOption {
   name: string;
 }
 
+interface WaitlistAdminEntry {
+  waitlist_id: string;
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  status: string;
+  created_at: string;
+  offer_expires_at: string | null;
+}
+
 interface ScreeningCancellationPreview {
   screening_id: string;
   movie_title: string | null;
@@ -83,7 +94,7 @@ export class Funciones {
   salas: RoomOption[] = [];
   funciones: Screening[] = [];
   baseTicketPrice = 0;
-  waitlistCounts: Record<string, number> = {};
+  waitlistCounts: Record<string, number> = {};\n  waitlistDetails: WaitlistAdminEntry[] = [];\n  expandedWaitlistScreeningId: string | null = null;\n  loadingWaitlist = false;
 
   loading = true;
   guardando = false;
@@ -197,6 +208,41 @@ export class Funciones {
       this.loading = false;
       this.changeDetector.detectChanges();
     }
+  }
+
+  async toggleWaitlist(funcion: Screening) {
+    if (this.expandedWaitlistScreeningId === funcion.id) {
+      this.expandedWaitlistScreeningId = null;
+      this.waitlistDetails = [];
+      return;
+    }
+    this.expandedWaitlistScreeningId = funcion.id;
+    this.waitlistDetails = [];
+    this.loadingWaitlist = true;
+    try {
+      const { data, error } = await supabase.rpc('get_screening_waitlist_admin', {
+        p_screening_id: funcion.id,
+      });
+      if (error) throw error;
+      this.waitlistDetails = (data ?? []) as WaitlistAdminEntry[];
+    } catch (error: any) {
+      this.error = error?.message ?? 'No se pudo cargar el detalle de la lista de espera.';
+      this.expandedWaitlistScreeningId = null;
+    } finally {
+      this.loadingWaitlist = false;
+      this.changeDetector.detectChanges();
+    }
+  }
+
+  nombreEstadoEspera(status: string): string {
+    const estados: Record<string, string> = {
+      waiting: 'En espera',
+      offered: 'Oferta enviada',
+      accepted: 'Aceptada',
+      expired: 'Vencida',
+      cancelled: 'Cancelada',
+    };
+    return estados[status] ?? status;
   }
 
   get horaFinCalculada(): string {
@@ -461,24 +507,7 @@ export class Funciones {
     }
 
     const estabaEditando = this.editando;
-    let roomId = this.nuevaFuncion.room_id;
-
-    if (!estabaEditando) {
-      const margen = 30 * 60_000;
-      const ocupaciones = this.funciones.filter(
-        f => f.status === 'scheduled' &&
-          new Date(f.end_time).getTime() > inicio.getTime() - margen &&
-          new Date(f.start_time).getTime() < fin.getTime() + margen
-      );
-      const salaDisponible = this.salas.find(
-        sala => !ocupaciones.some(f => f.room_id === sala.id)
-      );
-      if (!salaDisponible) {
-        this.error = 'No hay una sala disponible para ese horario. Probá otra fecha u hora.';
-        return;
-      }
-      roomId = salaDisponible.id;
-    }
+    const roomId = this.nuevaFuncion.room_id;
 
     this.guardando = true;
     this.changeDetector.detectChanges();
@@ -494,6 +523,7 @@ export class Funciones {
     };
 
     try {
+      let salaAsignada = '';
       if (this.editando && this.funcionEditandoId) {
         const { error } = await supabase.rpc('update_screening_with_seat_migration', {
           p_screening_id: this.funcionEditandoId,
@@ -507,12 +537,17 @@ export class Funciones {
         });
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('screenings')
-          .insert(datos)
-          .select('id')
-          .single();
+        const { data, error } = await supabase.rpc('create_screening_auto_room', {
+          p_movie_id: datos.movie_id,
+          p_start_time: datos.start_time,
+          p_end_time: datos.end_time,
+          p_format: datos.format,
+          p_language: datos.language,
+          p_price: datos.price,
+        });
         if (error) throw error;
+        const asignacion = Array.isArray(data) ? data[0] : data;
+        salaAsignada = asignacion?.room_name ?? '';
       }
 
       this.mostrarFormulario = false;
@@ -522,7 +557,7 @@ export class Funciones {
 
       this.mensaje = estabaEditando
         ? 'Función actualizada correctamente.'
-        : 'Función creada correctamente.';
+        : `Función creada correctamente${salaAsignada ? ` en ${salaAsignada}` : ''}.`;
 
       await this.cargarDatos();
     } catch (error: any) {
