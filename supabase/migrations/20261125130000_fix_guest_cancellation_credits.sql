@@ -278,6 +278,8 @@ end;
 $function$;
 
 -- Anonymous clients must use the email-aware checkout overload.
+revoke all on function public.checkout_purchase(uuid, uuid[], jsonb, jsonb, text, uuid, uuid)
+  from public, anon;
 revoke all on function public.checkout_purchase(uuid, uuid[], jsonb, jsonb, text, uuid, uuid, boolean)
   from public, anon;
 revoke all on function public.checkout_purchase(uuid, uuid[], jsonb, jsonb, text, uuid, uuid, boolean, text)
