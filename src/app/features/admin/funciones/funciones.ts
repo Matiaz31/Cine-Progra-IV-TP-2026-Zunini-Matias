@@ -94,7 +94,10 @@ export class Funciones {
   salas: RoomOption[] = [];
   funciones: Screening[] = [];
   baseTicketPrice = 0;
-  waitlistCounts: Record<string, number> = {};\n  waitlistDetails: WaitlistAdminEntry[] = [];\n  expandedWaitlistScreeningId: string | null = null;\n  loadingWaitlist = false;
+  waitlistCounts: Record<string, number> = {};
+  waitlistDetails: WaitlistAdminEntry[] = [];
+  expandedWaitlistScreeningId: string | null = null;
+  loadingWaitlist = false;
 
   loading = true;
   guardando = false;
